@@ -372,9 +372,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Render the grid
-        // We need to render by rows (days of week) to match CSS grid
-        for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-            for (let weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
+        // CSS grid uses grid-auto-flow: column, so we render week by week
+        for (let weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
+            for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
                 const day = weeks[weekIndex][dayOfWeek];
 
                 const cell = document.createElement('div');
