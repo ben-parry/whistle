@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Whistle</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Our stylesheet -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- ============================================ -->
+    <!-- MAIN CONTAINER -->
+    <!-- ============================================ -->
+    <div class="container app-container">
+
+        <!-- ============================================ -->
+        <!-- HEADER WITH NAVIGATION -->
+        <!-- ============================================ -->
+        <header class="app-header">
+            <h1 class="logo">Whistle</h1>
+            <nav class="app-nav">
+                <a href="/app.html" class="nav-link">Punch Clock</a>
+                <button id="logout-button" class="nav-link button-link">Sign Out</button>
+            </nav>
+        </header>
+
+        <!-- ============================================ -->
+        <!-- PROFILE SECTION -->
+        <!-- ============================================ -->
+        <section class="profile-section">
+            <h2 class="section-title">Your Profile</h2>
+
+            <div class="card profile-card">
+                <div class="profile-info">
+                    <label>Email</label>
+                    <p id="user-email" class="user-email">Loading...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- EXPORT SECTION -->
+        <!-- ============================================ -->
+        <section class="export-section">
+            <h2 class="section-title">Export Data</h2>
+
+            <div class="card export-card">
+                <p class="export-description">
+                    Download all your time entries as a CSV file.
+                    This includes every session from all years.
+                </p>
+
+                <button id="export-button" class="button button-primary">
+                    Export to CSV
+                </button>
+            </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- DANGER ZONE -->
+        <!-- ============================================ -->
+        <section class="danger-section">
+            <h2 class="section-title danger-title">Danger Zone</h2>
+
+            <div class="card danger-card">
+                <p class="danger-description">
+                    Permanently delete your account and all your data.
+                    This action cannot be undone.
+                </p>
+
+                <button id="delete-button" class="button button-danger">
+                    Delete Account
+                </button>
+            </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- DELETE CONFIRMATION MODAL -->
+        <!-- ============================================ -->
+        <div id="delete-modal" class="modal" hidden>
+            <div class="modal-content">
+                <h3 class="modal-title">Delete Account?</h3>
+                <p class="modal-text">
+                    Are you sure you want to delete your account?
+                    All your time entries will be permanently lost.
+                </p>
+                <div class="modal-buttons">
+                    <button id="cancel-delete" class="button button-secondary">
+                        Cancel
+                    </button>
+                    <button id="confirm-delete" class="button button-danger">
+                        Yes, Delete My Account
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- DECORATIVE FOOTER -->
+        <!-- ============================================ -->
+        <footer class="app-footer">
+            <div class="ornament">&#10022;</div>
+        </footer>
+
+    </div>
+
+    <!-- Our JavaScript -->
+    <script src="/js/profile.js"></script>
+</body>
+</html>

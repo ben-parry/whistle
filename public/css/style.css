@@ -1,0 +1,762 @@
+/* ============================================
+   WHISTLE - STYLESHEET
+   ============================================
+   A punch clock app with subtle Art Nouveau accents.
+
+   Color Palette:
+   - Background: #F5F0E6 (aged cream)
+   - Primary text: #2C2416 (deep brown)
+   - Accent: #8B4513 (saddle brown / brick)
+   - Secondary: #D4A574 (warm ochre)
+   - Button: #5C4033 (dark earth)
+   - Success: #4A5D23 (muted olive)
+   ============================================ */
+
+
+/* ============================================
+   CSS RESET & BASE STYLES
+   ============================================ */
+
+/* Box-sizing: makes width/height include padding and border */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* Remove default margins */
+* {
+    margin: 0;
+    padding: 0;
+}
+
+/* Base body styles */
+body {
+    /* Use system fonts for body text (fast loading, readable) */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+                 Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+
+    /* Colors */
+    background-color: #F5F0E6;
+    color: #2C2416;
+
+    /* Subtle texture effect using a CSS gradient */
+    background-image:
+        radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(212, 165, 116, 0.03) 0%, transparent 50%);
+
+    min-height: 100vh;
+}
+
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+/* Headings use Playfair Display (Art Nouveau feel) */
+h1, h2, h3, .logo {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    color: #2C2416;
+}
+
+/* Links */
+a {
+    color: #8B4513;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+
+/* ============================================
+   LAYOUT - CONTAINER
+   ============================================ */
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+
+/* ============================================
+   CARDS
+   ============================================ */
+
+.card {
+    background-color: #FFFDF8;
+    border: 1px solid #E8E0D0;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.button {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.button:hover {
+    transform: translateY(-1px);
+}
+
+.button:active {
+    transform: translateY(0);
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Primary button (main actions) */
+.button-primary {
+    background-color: #5C4033;
+    color: #FFFDF8;
+}
+
+.button-primary:hover:not(:disabled) {
+    background-color: #4A3429;
+}
+
+/* Secondary button (cancel, back) */
+.button-secondary {
+    background-color: #E8E0D0;
+    color: #2C2416;
+}
+
+.button-secondary:hover:not(:disabled) {
+    background-color: #DDD4C4;
+}
+
+/* Danger button (delete) */
+.button-danger {
+    background-color: #8B3A3A;
+    color: #FFFDF8;
+}
+
+.button-danger:hover:not(:disabled) {
+    background-color: #722F2F;
+}
+
+/* Link-styled button */
+.button-link {
+    background: none;
+    border: none;
+    color: #8B4513;
+    padding: 0;
+    font-size: inherit;
+    cursor: pointer;
+}
+
+.button-link:hover {
+    text-decoration: underline;
+}
+
+
+/* ============================================
+   FORMS
+   ============================================ */
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #5C4033;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #D4A574;
+    background-color: #FFFDF8;
+    color: #2C2416;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #8B4513;
+    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+}
+
+.form-group input::placeholder {
+    color: #A89880;
+}
+
+
+/* ============================================
+   MESSAGES (Error / Success)
+   ============================================ */
+
+.error-message {
+    background-color: #FDF2F2;
+    border: 1px solid #E8B4B4;
+    color: #8B3A3A;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+}
+
+.success-message {
+    background-color: #F2F7EE;
+    border: 1px solid #B4C9A8;
+    color: #4A5D23;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+}
+
+
+/* ============================================
+   AUTH PAGE STYLES
+   ============================================ */
+
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.auth-header .logo {
+    font-size: 48px;
+    margin-bottom: 8px;
+    color: #5C4033;
+}
+
+.auth-header .tagline {
+    font-size: 18px;
+    color: #8B4513;
+    font-style: italic;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Tab buttons */
+.auth-tabs {
+    display: flex;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #E8E0D0;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    color: #A89880;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.tab-button:hover {
+    color: #5C4033;
+}
+
+.tab-button.active {
+    color: #5C4033;
+    border-bottom-color: #8B4513;
+}
+
+.auth-form .button {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.forgot-password {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+    color: #8B7355;
+}
+
+.auth-footer {
+    margin-top: 40px;
+}
+
+.ornament {
+    text-align: center;
+    font-size: 24px;
+    color: #D4A574;
+}
+
+
+/* ============================================
+   APP PAGE STYLES
+   ============================================ */
+
+.app-container {
+    padding-top: 20px;
+    padding-bottom: 40px;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #E8E0D0;
+}
+
+.app-header .logo {
+    font-size: 28px;
+    color: #5C4033;
+}
+
+.app-nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.nav-link {
+    color: #8B4513;
+    font-weight: 500;
+}
+
+
+/* ============================================
+   PUNCH CLOCK SECTION
+   ============================================ */
+
+.punch-section {
+    text-align: center;
+    padding: 40px 20px;
+    margin-bottom: 40px;
+}
+
+.status-display {
+    margin-bottom: 32px;
+}
+
+.status-text {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.status-text.working {
+    color: #4A5D23;
+}
+
+.status-text.not-working {
+    color: #8B7355;
+}
+
+.elapsed-time {
+    font-size: 48px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    color: #5C4033;
+    letter-spacing: 2px;
+}
+
+/* The main punch button */
+.punch-button {
+    display: inline-block;
+    padding: 24px 64px;
+    font-size: 20px;
+    font-weight: 600;
+    font-family: 'Playfair Display', Georgia, serif;
+    cursor: pointer;
+    border: 2px solid;
+    transition: all 0.2s;
+}
+
+.punch-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.punch-button.not-working {
+    background-color: #4A5D23;
+    border-color: #3D4D1C;
+    color: #FFFDF8;
+}
+
+.punch-button.not-working:hover:not(:disabled) {
+    background-color: #3D4D1C;
+}
+
+.punch-button.working {
+    background-color: #8B3A3A;
+    border-color: #722F2F;
+    color: #FFFDF8;
+}
+
+.punch-button.working:hover:not(:disabled) {
+    background-color: #722F2F;
+}
+
+
+/* ============================================
+   STATS SECTION
+   ============================================ */
+
+.stats-section {
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background-color: #FFFDF8;
+    border: 1px solid #E8E0D0;
+    padding: 24px;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #8B7355;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: #5C4033;
+}
+
+
+/* ============================================
+   HEATMAP SECTION
+   ============================================ */
+
+.heatmap-section {
+    margin-bottom: 40px;
+}
+
+.section-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #5C4033;
+}
+
+.heatmap-container {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+}
+
+.heatmap-days {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 10px;
+    color: #8B7355;
+    padding-top: 2px;
+}
+
+.heatmap-days span {
+    height: 12px;
+    line-height: 12px;
+}
+
+.heatmap-months {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 12px;
+    gap: 2px;
+    margin-left: 28px;
+    margin-bottom: 4px;
+    font-size: 10px;
+    color: #8B7355;
+}
+
+.month-label {
+    white-space: nowrap;
+}
+
+.heatmap-grid {
+    display: grid;
+    grid-template-rows: repeat(7, 12px);
+    grid-auto-flow: column;
+    grid-auto-columns: 12px;
+    gap: 2px;
+}
+
+.heatmap-cell {
+    width: 12px;
+    height: 12px;
+    background-color: #E8E0D0;
+}
+
+.heatmap-cell.empty {
+    background-color: transparent;
+}
+
+.heatmap-cell.future {
+    background-color: #F0EBE0;
+    opacity: 0.5;
+}
+
+/* Heatmap color levels (0-4) */
+.heatmap-cell.level-0,
+.legend-box.level-0 {
+    background-color: #E8E0D0;
+}
+
+.heatmap-cell.level-1,
+.legend-box.level-1 {
+    background-color: #D4C4A8;
+}
+
+.heatmap-cell.level-2,
+.legend-box.level-2 {
+    background-color: #C4A882;
+}
+
+.heatmap-cell.level-3,
+.legend-box.level-3 {
+    background-color: #A07850;
+}
+
+.heatmap-cell.level-4,
+.legend-box.level-4 {
+    background-color: #6B4423;
+}
+
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 12px;
+    font-size: 11px;
+    color: #8B7355;
+}
+
+.legend-box {
+    width: 12px;
+    height: 12px;
+}
+
+.legend-label {
+    margin: 0 4px;
+}
+
+
+/* ============================================
+   PROFILE PAGE STYLES
+   ============================================ */
+
+.profile-section,
+.export-section,
+.danger-section {
+    margin-bottom: 32px;
+}
+
+.profile-card,
+.export-card,
+.danger-card {
+    background-color: #FFFDF8;
+    border: 1px solid #E8E0D0;
+    padding: 24px;
+}
+
+.profile-info label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #8B7355;
+    margin-bottom: 4px;
+}
+
+.user-email {
+    font-size: 18px;
+    color: #2C2416;
+}
+
+.export-description,
+.danger-description {
+    margin-bottom: 16px;
+    color: #5C4033;
+}
+
+.danger-title {
+    color: #8B3A3A;
+}
+
+.danger-card {
+    border-color: #E8B4B4;
+}
+
+
+/* ============================================
+   MODAL
+   ============================================ */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(44, 36, 22, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #FFFDF8;
+    padding: 32px;
+    max-width: 400px;
+    width: 100%;
+    border: 1px solid #E8E0D0;
+}
+
+.modal-title {
+    font-size: 24px;
+    margin-bottom: 16px;
+    color: #8B3A3A;
+}
+
+.modal-text {
+    margin-bottom: 24px;
+    color: #5C4033;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+
+/* ============================================
+   APP FOOTER
+   ============================================ */
+
+.app-footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid #E8E0D0;
+}
+
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 600px) {
+    .auth-header .logo {
+        font-size: 36px;
+    }
+
+    .elapsed-time {
+        font-size: 36px;
+    }
+
+    .punch-button {
+        padding: 20px 48px;
+        font-size: 18px;
+    }
+
+    .stat-value {
+        font-size: 36px;
+    }
+
+    .app-header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+    }
+
+    .modal-buttons .button {
+        width: 100%;
+    }
+}
+
+
+/* ============================================
+   ART NOUVEAU DECORATIVE TOUCHES
+   ============================================
+   These are subtle ornamental elements that add
+   character without overwhelming the simple design.
+   ============================================ */
+
+/* Decorative border for auth card */
+.auth-card::before {
+    content: '';
+    display: block;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        #D4A574 15%,
+        #8B4513 50%,
+        #D4A574 85%,
+        transparent 100%
+    );
+    margin-bottom: 24px;
+}
+
+/* Decorative element after stats */
+.stat-card::after {
+    content: '\2766'; /* Floral heart / rotated floral bullet */
+    display: block;
+    text-align: center;
+    font-size: 20px;
+    color: #D4A574;
+    margin-top: 16px;
+}
+
+/* Subtle corner flourish on cards */
+.profile-card,
+.export-card {
+    position: relative;
+}
+
+.profile-card::before,
+.export-card::before {
+    content: '\2619'; /* Reversed rotated floral heart bullet */
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 16px;
+    color: #E8E0D0;
+}
