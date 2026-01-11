@@ -8,10 +8,10 @@
 // Response: { success: true, user: { id, email } }
 // ============================================
 
-const { sql } = require('@vercel/postgres');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const {
+    sql,
     createSessionCookie,
     sendJson,
     sendError

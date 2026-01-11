@@ -7,8 +7,8 @@
 // Response: { success: true }
 // ============================================
 
-const { sql } = require('@vercel/postgres');
 const {
+    sql,
     getCurrentUser,
     createLogoutCookie,
     sendJson,

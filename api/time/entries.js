@@ -12,8 +12,7 @@
 // }
 // ============================================
 
-const { sql } = require('@vercel/postgres');
-const { getCurrentUser, sendJson, sendError } = require('../_helpers');
+const { sql, getCurrentUser, sendJson, sendError } = require('../_helpers');
 
 // Day names for the day_of_week field
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

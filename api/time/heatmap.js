@@ -14,8 +14,7 @@
 // }
 // ============================================
 
-const { sql } = require('@vercel/postgres');
-const { getCurrentUser, sendJson, sendError } = require('../_helpers');
+const { sql, getCurrentUser, sendJson, sendError } = require('../_helpers');
 
 // ============================================
 // MAIN HANDLER FUNCTION

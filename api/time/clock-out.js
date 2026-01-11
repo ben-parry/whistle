@@ -7,8 +7,7 @@
 // Response: { success: true, entry: { id, start_time, end_time, duration_hours } }
 // ============================================
 
-const { sql } = require('@vercel/postgres');
-const { getCurrentUser, sendJson, sendError } = require('../_helpers');
+const { sql, getCurrentUser, sendJson, sendError } = require('../_helpers');
 
 // Maximum shift length in hours
 const MAX_SHIFT_HOURS = 15;

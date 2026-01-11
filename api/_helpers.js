@@ -5,8 +5,40 @@
 // The underscore prefix (_helpers.js) tells Vercel this is NOT an API route.
 // ============================================
 
-const { sql } = require('@vercel/postgres');
+const { Pool } = require('pg');
 const cookie = require('cookie');
+
+// ============================================
+// DATABASE CONNECTION
+// ============================================
+// Create a connection pool using the POSTGRES_URL environment variable
+
+const pool = new Pool({
+    connectionString: process.env.POSTGRES_URL,
+    ssl: { rejectUnauthorized: false }
+});
+
+// ============================================
+// SQL TAGGED TEMPLATE FUNCTION
+// ============================================
+// This mimics the @vercel/postgres sql`` syntax so we don't have to change all queries
+
+async function sql(strings, ...values) {
+    // Convert tagged template to parameterized query
+    // sql`SELECT * FROM users WHERE id = ${id}` becomes
+    // query('SELECT * FROM users WHERE id = $1', [id])
+
+    let query = '';
+    for (let i = 0; i < strings.length; i++) {
+        query += strings[i];
+        if (i < values.length) {
+            query += `$${i + 1}`;
+        }
+    }
+
+    const result = await pool.query(query, values);
+    return result;
+}
 
 // ============================================
 // PARSE COOKIES FROM REQUEST
@@ -121,6 +153,7 @@ function isValidEmail(email) {
 // Make these functions available to other files
 
 module.exports = {
+    sql,
     parseCookies,
     getCurrentUser,
     createSessionCookie,
