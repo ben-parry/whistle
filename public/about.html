@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Whistle</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Our stylesheet -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- ============================================ -->
+    <!-- MAIN CONTAINER -->
+    <!-- ============================================ -->
+    <div class="container app-container">
+
+        <!-- ============================================ -->
+        <!-- HEADER WITH NAVIGATION -->
+        <!-- ============================================ -->
+        <header class="app-header">
+            <h1 class="logo">Whistle</h1>
+            <nav class="app-nav" id="nav-links">
+                <!-- Navigation links will be set by JavaScript based on auth status -->
+            </nav>
+        </header>
+
+        <!-- ============================================ -->
+        <!-- ABOUT SECTION -->
+        <!-- ============================================ -->
+        <section class="about-section">
+            <h2 class="section-title">About Whistle</h2>
+
+            <div class="card about-card">
+                <div class="about-content">
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                    </p>
+                    <p>
+                        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida.
+                    </p>
+                    <p>
+                        Duis ac tellus et risus vulputate vehicula. Donec lobortis risus a elit. Etiam tempor ultrices ligula. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus. Phasellus ultrices nulla quis nibh. Quisque a lectus.
+                    </p>
+                    <p>
+                        Donec consectetuer ligula vulputate sem tristique cursus. Nam nulla quam, gravida non, commodo a, sodales sit amet, nisi. Pellentesque fermentum dolor. Aliquam quam lectus, facilisis auctor, ultrices ut, elementum vulputate, nunc. Sed adipiscing ornare risus. Morbi est est, blandit sit amet, sagittis vel, euismod vel, velit.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- DECORATIVE FOOTER -->
+        <!-- ============================================ -->
+        <footer class="app-footer">
+            <div class="ornament">&#10022;</div>
+        </footer>
+
+    </div>
+
+    <!-- Our JavaScript -->
+    <script>
+        // Check auth status and set navigation accordingly
+        document.addEventListener('DOMContentLoaded', async function() {
+            const navLinks = document.getElementById('nav-links');
+
+            try {
+                const response = await fetch('/api/auth/me');
+                const data = await response.json();
+
+                if (data.user) {
+                    // User is logged in - show app navigation
+                    navLinks.innerHTML = `
+                        <a href="/app.html" class="nav-link">Punch Clock</a>
+                        <a href="/profile.html" class="nav-link">Profile</a>
+                        <button id="logout-button" class="nav-link button-link">Sign Out</button>
+                    `;
+
+                    // Add logout handler
+                    document.getElementById('logout-button').addEventListener('click', async function() {
+                        try {
+                            await fetch('/api/auth/logout', { method: 'POST' });
+                            window.location.href = '/index.html';
+                        } catch (error) {
+                            window.location.href = '/index.html';
+                        }
+                    });
+                } else {
+                    // User is not logged in - show sign in link
+                    navLinks.innerHTML = `
+                        <a href="/index.html" class="nav-link">Sign In</a>
+                    `;
+                }
+            } catch (error) {
+                // Error checking auth - show sign in link
+                navLinks.innerHTML = `
+                    <a href="/index.html" class="nav-link">Sign In</a>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

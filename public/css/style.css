@@ -452,6 +452,25 @@ a:hover {
     color: #5C4033;
 }
 
+/* Progress bar towards annual goal */
+.progress-container {
+    width: 100%;
+    max-width: 200px;
+    height: 4px;
+    background-color: #E8E0D0;
+    margin: 12px auto 0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #4A9E8C;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
 
 /* ============================================
    HEATMAP SECTION
@@ -526,7 +545,7 @@ a:hover {
     opacity: 0.5;
 }
 
-/* Heatmap color levels (0-4) */
+/* Heatmap color levels (0-4) - Teal gradient for clear differentiation */
 .heatmap-cell.level-0,
 .legend-box.level-0 {
     background-color: #E8E0D0;
@@ -534,22 +553,48 @@ a:hover {
 
 .heatmap-cell.level-1,
 .legend-box.level-1 {
-    background-color: #D4C4A8;
+    background-color: #B8D4CE;
 }
 
 .heatmap-cell.level-2,
 .legend-box.level-2 {
-    background-color: #C4A882;
+    background-color: #7DBCB0;
 }
 
 .heatmap-cell.level-3,
 .legend-box.level-3 {
-    background-color: #A07850;
+    background-color: #4A9E8C;
 }
 
 .heatmap-cell.level-4,
 .legend-box.level-4 {
-    background-color: #6B4423;
+    background-color: #2D7A68;
+}
+
+/* Sunday cells - subtle lavender tint */
+.heatmap-cell.sunday.level-0 {
+    background-color: #E8E0E8;
+}
+
+.heatmap-cell.sunday.level-1 {
+    background-color: #C8B8D4;
+}
+
+.heatmap-cell.sunday.level-2 {
+    background-color: #A890BC;
+}
+
+.heatmap-cell.sunday.level-3 {
+    background-color: #8A6CA0;
+}
+
+.heatmap-cell.sunday.level-4 {
+    background-color: #6B4A82;
+}
+
+.heatmap-cell.sunday.future {
+    background-color: #F0E8F0;
+    opacity: 0.5;
 }
 
 .heatmap-legend {
@@ -763,4 +808,39 @@ a:hover {
     right: 12px;
     font-size: 16px;
     color: #E8E0D0;
+}
+
+
+/* ============================================
+   ABOUT PAGE STYLES
+   ============================================ */
+
+.about-section {
+    margin-bottom: 32px;
+}
+
+.about-card {
+    background-color: #FFFDF8;
+    border: 1px solid #E8E0D0;
+    padding: 24px;
+    position: relative;
+}
+
+.about-card::before {
+    content: '\2619';
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 16px;
+    color: #E8E0D0;
+}
+
+.about-content p {
+    margin-bottom: 16px;
+    color: #5C4033;
+    line-height: 1.7;
+}
+
+.about-content p:last-child {
+    margin-bottom: 0;
 }

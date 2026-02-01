@@ -13,6 +13,40 @@ const { sql, getCurrentUser, sendJson, sendError } = require('../_helpers');
 const MAX_SHIFT_HOURS = 15;
 
 // ============================================
+// WEEKEND RESTRICTION HELPER
+// ============================================
+// Returns an error message if clock in/out is restricted, null otherwise
+
+function checkWeekendRestriction(timezone) {
+    try {
+        // Get current time in user's timezone
+        const now = new Date();
+        const options = { timeZone: timezone, weekday: 'short', hour: 'numeric', hour12: false };
+        const formatter = new Intl.DateTimeFormat('en-US', options);
+        const parts = formatter.formatToParts(now);
+
+        const weekday = parts.find(p => p.type === 'weekday').value;
+        const hour = parseInt(parts.find(p => p.type === 'hour').value, 10);
+
+        // Sunday - all day restricted
+        if (weekday === 'Sun') {
+            return 'Clock in/out is not available on Sundays.';
+        }
+
+        // Saturday after 6pm (18:00) - restricted
+        if (weekday === 'Sat' && hour >= 18) {
+            return 'Clock in/out is not available after 6pm on Saturdays.';
+        }
+
+        return null;
+    } catch (error) {
+        // If timezone is invalid, don't block (fail open for simplicity)
+        console.error('Timezone check error:', error);
+        return null;
+    }
+}
+
+// ============================================
 // MAIN HANDLER FUNCTION
 // ============================================
 
@@ -47,6 +81,17 @@ module.exports = async function handler(request, response) {
         }
 
         const entry = openEntry.rows[0];
+
+        // ----------------------------------------
+        // STEP 2.5: Check weekend restriction (unless auto clock-out)
+        // ----------------------------------------
+        const isAuto = request.body && request.body.auto === true;
+        if (!isAuto && entry.start_timezone) {
+            const restrictionError = checkWeekendRestriction(entry.start_timezone);
+            if (restrictionError) {
+                return sendError(response, 400, restrictionError);
+            }
+        }
 
         // ----------------------------------------
         // STEP 3: Calculate the end time

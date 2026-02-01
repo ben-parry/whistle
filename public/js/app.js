@@ -24,6 +24,46 @@ let sessionStartTime = null;
 // Whether the user is currently working
 let isWorking = false;
 
+// Annual hours goal
+const ANNUAL_HOURS_GOAL = 2333;
+
+// ============================================
+// WEEKEND RESTRICTION HELPER
+// ============================================
+// Returns true if clock in/out is currently restricted
+// (after 6pm Saturday or all day Sunday in user's local timezone)
+
+function isRestrictedTime() {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+    const hour = now.getHours();
+
+    // Sunday - all day restricted
+    if (dayOfWeek === 0) {
+        return true;
+    }
+
+    // Saturday after 6pm (18:00) - restricted
+    if (dayOfWeek === 6 && hour >= 18) {
+        return true;
+    }
+
+    return false;
+}
+
+function getRestrictionMessage() {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+
+    if (dayOfWeek === 0) {
+        return 'Clock in/out is not available on Sundays.';
+    }
+    if (dayOfWeek === 6) {
+        return 'Clock in/out is not available after 6pm on Saturdays.';
+    }
+    return '';
+}
+
 
 // ============================================
 // WAIT FOR PAGE TO LOAD
@@ -41,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const punchButtonText = document.getElementById('punch-button-text');
     const yearTotal = document.getElementById('year-total');
     const currentYearSpan = document.getElementById('current-year');
+    const progressBar = document.getElementById('progress-bar');
     const logoutButton = document.getElementById('logout-button');
     const heatmapGrid = document.getElementById('heatmap-grid');
     const heatmapMonths = document.getElementById('heatmap-months');
@@ -90,21 +131,34 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update year total
             yearTotal.textContent = formatHours(data.year_total_hours);
 
+            // Update progress bar (capped at 100%)
+            const progressPercent = Math.min((data.year_total_hours / ANNUAL_HOURS_GOAL) * 100, 100);
+            progressBar.style.width = progressPercent + '%';
+            progressBar.title = `${formatHours(data.year_total_hours)} of ${ANNUAL_HOURS_GOAL} hours (${Math.round(progressPercent)}%)`;
+
             // Update working status
             isWorking = data.is_working;
 
+            // Check for weekend restriction
+            const restricted = isRestrictedTime();
+
             if (isWorking && data.current_session) {
                 // User is currently working
+                if (restricted) {
+                    // Auto clock-out during restricted time
+                    await autoClockOut();
+                    return;
+                }
                 sessionStartTime = new Date(data.current_session.start_time);
                 showWorkingState();
                 startElapsedTimer();
             } else {
                 // User is not working
-                showNotWorkingState();
+                showNotWorkingState(restricted);
             }
 
-            // Enable the punch button
-            punchButton.disabled = false;
+            // Enable the punch button (unless restricted)
+            punchButton.disabled = restricted;
 
         } catch (error) {
             console.error('Load status error:', error);
@@ -118,6 +172,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
 
     punchButton.addEventListener('click', async function() {
+        // Check for weekend restriction
+        if (isRestrictedTime()) {
+            alert(getRestrictionMessage());
+            return;
+        }
+
         // Disable button while processing
         punchButton.disabled = true;
 
@@ -178,7 +238,8 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({})
         });
 
         const data = await response.json();
@@ -200,6 +261,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // ============================================
+    // AUTO CLOCK OUT (for weekend restriction)
+    // ============================================
+
+    async function autoClockOut() {
+        try {
+            const response = await fetch('/api/time/clock-out', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ auto: true })
+            });
+
+            if (response.ok) {
+                // Successfully auto-clocked out
+                isWorking = false;
+                sessionStartTime = null;
+                showNotWorkingState(true);
+                stopElapsedTimer();
+
+                // Reload heatmap
+                loadHeatmap();
+            }
+        } catch (error) {
+            console.error('Auto clock-out error:', error);
+        }
+    }
+
+
+    // ============================================
     // UI STATE HELPERS
     // ============================================
 
@@ -215,14 +306,25 @@ document.addEventListener('DOMContentLoaded', function() {
         elapsedTime.hidden = false;
     }
 
-    function showNotWorkingState() {
-        statusText.textContent = 'Not Working';
-        statusText.classList.add('not-working');
-        statusText.classList.remove('working');
+    function showNotWorkingState(restricted = false) {
+        if (restricted) {
+            statusText.textContent = getRestrictionMessage();
+            statusText.classList.add('not-working');
+            statusText.classList.remove('working');
 
-        punchButtonText.textContent = 'Clock In';
-        punchButton.classList.add('not-working');
-        punchButton.classList.remove('working');
+            punchButtonText.textContent = 'Clock In';
+            punchButton.classList.add('not-working');
+            punchButton.classList.remove('working');
+            punchButton.disabled = true;
+        } else {
+            statusText.textContent = 'Not Working';
+            statusText.classList.add('not-working');
+            statusText.classList.remove('working');
+
+            punchButtonText.textContent = 'Clock In';
+            punchButton.classList.add('not-working');
+            punchButton.classList.remove('working');
+        }
 
         elapsedTime.hidden = true;
         elapsedTime.textContent = '00:00:00';
@@ -379,6 +481,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const cell = document.createElement('div');
                 cell.className = 'heatmap-cell';
+
+                // Add sunday class for Sunday cells (dayOfWeek 0)
+                if (dayOfWeek === 0) {
+                    cell.classList.add('sunday');
+                }
 
                 if (day === null) {
                     // Empty cell (before Jan 1 or after Dec 31)

@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const userEmail = document.getElementById('user-email');
     const exportButton = document.getElementById('export-button');
+    const updateEmailButton = document.getElementById('update-email-button');
     const deleteButton = document.getElementById('delete-button');
     const deleteModal = document.getElementById('delete-modal');
     const cancelDelete = document.getElementById('cancel-delete');
@@ -56,6 +57,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // ============================================
+    // REQUEST EMAIL CHANGE
+    // ============================================
+
+    updateEmailButton.addEventListener('click', function() {
+        const currentEmail = userEmail.textContent;
+        const subject = encodeURIComponent('Whistle - Email Change Request');
+        const body = encodeURIComponent(`Hi,\n\nI would like to change my Whistle account email.\n\nCurrent email: ${currentEmail}\nNew email: [please enter your new email here]\n\nThank you.`);
+        window.location.href = `mailto:ben@benparry.ca?subject=${subject}&body=${body}`;
+    });
+
+
+    // ============================================
     // EXPORT TO CSV
     // ============================================
 
@@ -77,8 +90,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Convert entries to CSV format
             const csv = convertToCSV(data.entries);
 
-            // Download the CSV file
-            downloadCSV(csv, 'whistle-time-entries.csv');
+            // Download the CSV file (with user's email in filename)
+            const email = userEmail.textContent;
+            downloadCSV(csv, `${email}-whistle-time-entries.csv`);
 
         } catch (error) {
             console.error('Export error:', error);
