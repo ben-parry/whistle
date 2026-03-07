@@ -4,16 +4,15 @@
    A hyper-opinionated punch clock with Art Nouveau accents.
 
    Core Colors:
-   - Background: #F0EAD9 (warm cream)
-   - Secondary surface: #E3D7BF (sand)
+   - Background: #F5F0E3 (light cream)
+   - Secondary surface: #EBE3D0 (warm sand)
    - Borders: #C2CDCD (sage)
    - Muted text: #9D8F86 (warm grey)
    - Primary text: #332F35 (deep charcoal)
 
    Highlight Colors:
-   - Terracotta: #D38370 (warnings, active/working)
-   - Steel blue: #4380A4 (links, interactive)
-   - Heatmap blue: #4380E4 (heatmap levels)
+   - Terracotta: #D38370 (links, interactive, highlights)
+   - Heatmap blue: #4380E4 (heatmap levels only)
    ============================================ */
 
 
@@ -35,10 +34,10 @@ body {
                  Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     font-size: 16px;
     line-height: 1.6;
-    background-color: #F0EAD9;
+    background-color: #F5F0E3;
     color: #332F35;
     background-image:
-        radial-gradient(circle at 20% 80%, rgba(67, 128, 164, 0.02) 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(211, 131, 112, 0.02) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(211, 131, 112, 0.02) 0%, transparent 50%);
     min-height: 100vh;
 }
@@ -55,7 +54,7 @@ h1, h2, h3, .logo {
 }
 
 a {
-    color: #4380A4;
+    color: #D38370;
     text-decoration: none;
 }
 
@@ -80,7 +79,7 @@ a:hover {
    ============================================ */
 
 .card {
-    background-color: #E3D7BF;
+    background-color: #EBE3D0;
     border: 1px solid #C2CDCD;
     padding: 24px;
     margin-bottom: 20px;
@@ -118,7 +117,7 @@ a:hover {
 
 .button-primary {
     background-color: #332F35;
-    color: #F0EAD9;
+    color: #F5F0E3;
 }
 
 .button-primary:hover:not(:disabled) {
@@ -136,7 +135,7 @@ a:hover {
 
 .button-danger {
     background-color: #D38370;
-    color: #F0EAD9;
+    color: #F5F0E3;
 }
 
 .button-danger:hover:not(:disabled) {
@@ -146,7 +145,7 @@ a:hover {
 .button-link {
     background: none;
     border: none;
-    color: #4380A4;
+    color: #D38370;
     padding: 0;
     font-size: inherit;
     cursor: pointer;
@@ -178,7 +177,7 @@ a:hover {
     padding: 12px;
     font-size: 16px;
     border: 1px solid #C2CDCD;
-    background-color: #F0EAD9;
+    background-color: #F5F0E3;
     color: #332F35;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -186,8 +185,8 @@ a:hover {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #4380A4;
-    box-shadow: 0 0 0 3px rgba(67, 128, 164, 0.15);
+    border-color: #D38370;
+    box-shadow: 0 0 0 3px rgba(211, 131, 112, 0.15);
 }
 
 .form-group input::placeholder {
@@ -208,9 +207,9 @@ a:hover {
 }
 
 .success-message {
-    background-color: rgba(67, 128, 164, 0.1);
-    border: 1px solid #4380A4;
-    color: #365f7a;
+    background-color: rgba(211, 131, 112, 0.1);
+    border: 1px solid #D38370;
+    color: #a0584a;
     padding: 12px 16px;
     margin-bottom: 20px;
 }
@@ -277,7 +276,7 @@ a:hover {
 
 .tab-button.active {
     color: #332F35;
-    border-bottom-color: #4380A4;
+    border-bottom-color: #D38370;
 }
 
 .auth-form .button {
@@ -339,7 +338,7 @@ a:hover {
 }
 
 .nav-link {
-    color: #4380A4;
+    color: #D38370;
     font-weight: 500;
 }
 
@@ -373,7 +372,7 @@ a:hover {
 }
 
 .status-text .restriction-link {
-    color: #4380A4;
+    color: #D38370;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 14px;
     display: block;
@@ -405,19 +404,19 @@ a:hover {
 }
 
 .punch-button.not-working {
-    background-color: #4380A4;
-    border-color: #365f7a;
-    color: #F0EAD9;
+    background-color: #D38370;
+    border-color: #c06f5c;
+    color: #F5F0E3;
 }
 
 .punch-button.not-working:hover:not(:disabled) {
-    background-color: #365f7a;
+    background-color: #c06f5c;
 }
 
 .punch-button.working {
     background-color: #D38370;
     border-color: #c06f5c;
-    color: #F0EAD9;
+    color: #F5F0E3;
 }
 
 .punch-button.working:hover:not(:disabled) {
@@ -434,7 +433,7 @@ a:hover {
 }
 
 .stat-card {
-    background-color: #E3D7BF;
+    background-color: #EBE3D0;
     border: 1px solid #C2CDCD;
     padding: 24px;
     text-align: center;
@@ -467,7 +466,7 @@ a:hover {
 
 .progress-bar {
     height: 100%;
-    background-color: #4380A4;
+    background-color: #D38370;
     border-radius: 2px;
     transition: width 0.3s ease;
     width: 0%;
@@ -535,7 +534,7 @@ a:hover {
 .heatmap-cell {
     width: 12px;
     height: 12px;
-    background-color: #F0EAD9;
+    background-color: #F5F0E3;
 }
 
 .heatmap-cell.empty {
@@ -543,14 +542,14 @@ a:hover {
 }
 
 .heatmap-cell.future {
-    background-color: #F0EAD9;
+    background-color: #F5F0E3;
     opacity: 0.5;
 }
 
 /* Heatmap color levels — #4380E4 at varying opacity */
 .heatmap-cell.level-0,
 .legend-box.level-0 {
-    background-color: #F0EAD9;
+    background-color: #F5F0E3;
 }
 
 .heatmap-cell.level-1,
@@ -575,7 +574,7 @@ a:hover {
 
 /* Sunday cells — uniformly greyed out */
 .heatmap-cell.sunday {
-    background-color: #E3D7BF !important;
+    background-color: #EBE3D0 !important;
     opacity: 1 !important;
 }
 
@@ -616,7 +615,7 @@ a:hover {
 .danger-card,
 .sessions-card,
 .password-card {
-    background-color: #E3D7BF;
+    background-color: #EBE3D0;
     border: 1px solid #C2CDCD;
     padding: 24px;
 }
@@ -646,7 +645,7 @@ a:hover {
 
 .cute-id {
     font-family: 'Courier New', Courier, monospace;
-    color: #4380A4;
+    color: #D38370;
     font-size: 14px;
 }
 
@@ -657,12 +656,12 @@ a:hover {
     line-height: 1.8;
     color: #332F35;
     padding: 24px;
-    background-color: #E3D7BF;
+    background-color: #EBE3D0;
     border: 1px solid #C2CDCD;
 }
 
 .stats-sentence .stat-highlight {
-    color: #4380A4;
+    color: #D38370;
     font-weight: 700;
 }
 
@@ -704,7 +703,7 @@ a:hover {
 .session-edit-btn {
     background: none;
     border: none;
-    color: #4380A4;
+    color: #D38370;
     cursor: pointer;
     font-size: 13px;
     padding: 4px 8px;
@@ -744,7 +743,7 @@ a:hover {
     padding: 10px;
     font-size: 14px;
     border: 1px solid #C2CDCD;
-    background-color: #F0EAD9;
+    background-color: #F5F0E3;
     color: #332F35;
 }
 
@@ -786,7 +785,7 @@ a:hover {
 }
 
 .modal-content {
-    background-color: #F0EAD9;
+    background-color: #F5F0E3;
     padding: 32px;
     max-width: 450px;
     width: 100%;
@@ -845,7 +844,7 @@ a:hover {
 .leaderboard-table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #E3D7BF;
+    background-color: #EBE3D0;
     border: 1px solid #C2CDCD;
 }
 
@@ -1003,7 +1002,7 @@ a:hover {
         90deg,
         transparent 0%,
         #C2CDCD 15%,
-        #4380A4 50%,
+        #D38370 50%,
         #C2CDCD 85%,
         transparent 100%
     );
@@ -1044,7 +1043,7 @@ a:hover {
 }
 
 .about-card {
-    background-color: #E3D7BF;
+    background-color: #EBE3D0;
     border: 1px solid #C2CDCD;
     padding: 24px;
     position: relative;
