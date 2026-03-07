@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const endTime = new Date(document.getElementById('edit-end-time').value);
 
         try {
-            const response = await fetch('/api/time/edit', {
+            const response = await fetch('/api/time/sessions', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            const response = await fetch('/api/auth/change-password', {
+            const response = await fetch('/api/auth/me', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function exportCSV() {
         try {
-            const response = await fetch('/api/time/entries');
+            const response = await fetch('/api/time/sessions?export=csv');
             const data = await response.json();
 
             if (!response.ok) {

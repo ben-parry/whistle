@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function loadYear() {
         try {
-            const response = await fetch('/api/leaderboard/year');
+            const response = await fetch('/api/leaderboard?view=year');
             const data = await response.json();
 
             if (data.rankings.length === 0) {
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function loadToday() {
         try {
-            const response = await fetch('/api/leaderboard/today?timezone=' + encodeURIComponent(userTimezone));
+            const response = await fetch('/api/leaderboard?view=today&timezone=' + encodeURIComponent(userTimezone));
             const data = await response.json();
 
             // Clear existing timers
