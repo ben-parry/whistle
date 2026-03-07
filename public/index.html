@@ -5,34 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whistle - Punch Clock</title>
 
-    <!-- Google Fonts: Playfair Display for elegant headings -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Our stylesheet -->
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <!-- ============================================ -->
-    <!-- MAIN CONTAINER -->
-    <!-- ============================================ -->
     <div class="container auth-container">
 
-        <!-- ============================================ -->
-        <!-- DECORATIVE HEADER -->
-        <!-- ============================================ -->
         <header class="auth-header">
             <h1 class="logo">Whistle</h1>
             <p class="tagline">Your Personal Punch Clock</p>
         </header>
 
-        <!-- ============================================ -->
-        <!-- AUTH FORM CARD -->
-        <!-- ============================================ -->
         <div class="card auth-card">
 
-            <!-- Tab buttons to switch between Login and Register -->
             <div class="auth-tabs">
                 <button id="login-tab" class="tab-button active" type="button">
                     Sign In
@@ -42,95 +30,51 @@
                 </button>
             </div>
 
-            <!-- Error message display (hidden by default) -->
             <div id="error-message" class="error-message" hidden></div>
-
-            <!-- Success message display (hidden by default) -->
             <div id="success-message" class="success-message" hidden></div>
 
-            <!-- ============================================ -->
             <!-- LOGIN FORM -->
-            <!-- ============================================ -->
             <form id="login-form" class="auth-form">
                 <div class="form-group">
                     <label for="login-email">Email</label>
-                    <input
-                        type="email"
-                        id="login-email"
-                        name="email"
-                        required
-                        autocomplete="email"
-                        placeholder="you@example.com"
-                    >
+                    <input type="email" id="login-email" name="email" required
+                           autocomplete="email" placeholder="you@example.com">
                 </div>
-
                 <div class="form-group">
                     <label for="login-password">Password</label>
-                    <input
-                        type="password"
-                        id="login-password"
-                        name="password"
-                        required
-                        autocomplete="current-password"
-                        placeholder="Your password"
-                    >
+                    <input type="password" id="login-password" name="password" required
+                           autocomplete="current-password" placeholder="Your password">
                 </div>
-
-                <button type="submit" class="button button-primary">
-                    Sign In
-                </button>
+                <button type="submit" class="button button-primary">Sign In</button>
             </form>
 
-            <!-- ============================================ -->
-            <!-- REGISTER FORM (hidden by default) -->
-            <!-- ============================================ -->
+            <!-- REGISTER FORM -->
             <form id="register-form" class="auth-form" hidden>
                 <div class="form-group">
-                    <label for="register-email">Email</label>
-                    <input
-                        type="email"
-                        id="register-email"
-                        name="email"
-                        required
-                        autocomplete="email"
-                        placeholder="you@example.com"
-                    >
+                    <label for="register-name">Full Name</label>
+                    <input type="text" id="register-name" name="name" required
+                           autocomplete="name" placeholder="Your real name">
                 </div>
-
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" name="email" required
+                           autocomplete="email" placeholder="you@example.com">
+                </div>
                 <div class="form-group">
                     <label for="register-password">Password</label>
-                    <input
-                        type="password"
-                        id="register-password"
-                        name="password"
-                        required
-                        autocomplete="new-password"
-                        minlength="8"
-                        placeholder="At least 8 characters"
-                    >
+                    <input type="password" id="register-password" name="password" required
+                           autocomplete="new-password" minlength="8"
+                           placeholder="At least 8 characters">
                 </div>
-
                 <div class="form-group">
                     <label for="register-password-confirm">Confirm Password</label>
-                    <input
-                        type="password"
-                        id="register-password-confirm"
-                        name="password-confirm"
-                        required
-                        autocomplete="new-password"
-                        minlength="8"
-                        placeholder="Type your password again"
-                    >
+                    <input type="password" id="register-password-confirm" name="password-confirm"
+                           required autocomplete="new-password" minlength="8"
+                           placeholder="Type your password again">
                 </div>
-
-                <button type="submit" class="button button-primary">
-                    Create Account
-                </button>
+                <button type="submit" class="button button-primary">Create Account</button>
             </form>
 
-            <!-- ============================================ -->
-            <!-- FORGOT PASSWORD HELP -->
-            <!-- ============================================ -->
             <p class="forgot-password">
                 Forgot your password? Contact <a href="mailto:ben@benparry.ca">ben@benparry.ca</a>
             </p>
@@ -141,16 +85,12 @@
 
         </div>
 
-        <!-- ============================================ -->
-        <!-- DECORATIVE FOOTER -->
-        <!-- ============================================ -->
         <footer class="auth-footer">
             <div class="ornament">&#10022;</div>
         </footer>
 
     </div>
 
-    <!-- Our JavaScript -->
     <script src="/js/auth.js"></script>
 </body>
 </html>

@@ -1,15 +1,19 @@
 /* ============================================
    WHISTLE - STYLESHEET
    ============================================
-   A punch clock app with subtle Art Nouveau accents.
+   A hyper-opinionated punch clock with Art Nouveau accents.
 
-   Color Palette:
-   - Background: #F5F0E6 (aged cream)
-   - Primary text: #2C2416 (deep brown)
-   - Accent: #8B4513 (saddle brown / brick)
-   - Secondary: #D4A574 (warm ochre)
-   - Button: #5C4033 (dark earth)
-   - Success: #4A5D23 (muted olive)
+   Core Colors:
+   - Background: #F0EAD9 (warm cream)
+   - Secondary surface: #E3D7BF (sand)
+   - Borders: #C2CDCD (sage)
+   - Muted text: #9D8F86 (warm grey)
+   - Primary text: #332F35 (deep charcoal)
+
+   Highlight Colors:
+   - Terracotta: #D38370 (warnings, active/working)
+   - Steel blue: #4380A4 (links, interactive)
+   - Heatmap blue: #4380E4 (heatmap levels)
    ============================================ */
 
 
@@ -17,34 +21,25 @@
    CSS RESET & BASE STYLES
    ============================================ */
 
-/* Box-sizing: makes width/height include padding and border */
 *, *::before, *::after {
     box-sizing: border-box;
 }
 
-/* Remove default margins */
 * {
     margin: 0;
     padding: 0;
 }
 
-/* Base body styles */
 body {
-    /* Use system fonts for body text (fast loading, readable) */
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
                  Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     font-size: 16px;
     line-height: 1.6;
-
-    /* Colors */
-    background-color: #F5F0E6;
-    color: #2C2416;
-
-    /* Subtle texture effect using a CSS gradient */
+    background-color: #F0EAD9;
+    color: #332F35;
     background-image:
-        radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(212, 165, 116, 0.03) 0%, transparent 50%);
-
+        radial-gradient(circle at 20% 80%, rgba(67, 128, 164, 0.02) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(211, 131, 112, 0.02) 0%, transparent 50%);
     min-height: 100vh;
 }
 
@@ -53,16 +48,14 @@ body {
    TYPOGRAPHY
    ============================================ */
 
-/* Headings use Playfair Display (Art Nouveau feel) */
 h1, h2, h3, .logo {
     font-family: 'Playfair Display', Georgia, serif;
     font-weight: 600;
-    color: #2C2416;
+    color: #332F35;
 }
 
-/* Links */
 a {
-    color: #8B4513;
+    color: #4380A4;
     text-decoration: none;
 }
 
@@ -87,8 +80,8 @@ a:hover {
    ============================================ */
 
 .card {
-    background-color: #FFFDF8;
-    border: 1px solid #E8E0D0;
+    background-color: #E3D7BF;
+    border: 1px solid #C2CDCD;
     padding: 24px;
     margin-bottom: 20px;
 }
@@ -123,41 +116,37 @@ a:hover {
     transform: none;
 }
 
-/* Primary button (main actions) */
 .button-primary {
-    background-color: #5C4033;
-    color: #FFFDF8;
+    background-color: #332F35;
+    color: #F0EAD9;
 }
 
 .button-primary:hover:not(:disabled) {
-    background-color: #4A3429;
+    background-color: #4a454d;
 }
 
-/* Secondary button (cancel, back) */
 .button-secondary {
-    background-color: #E8E0D0;
-    color: #2C2416;
+    background-color: #C2CDCD;
+    color: #332F35;
 }
 
 .button-secondary:hover:not(:disabled) {
-    background-color: #DDD4C4;
+    background-color: #b0bcbc;
 }
 
-/* Danger button (delete) */
 .button-danger {
-    background-color: #8B3A3A;
-    color: #FFFDF8;
+    background-color: #D38370;
+    color: #F0EAD9;
 }
 
 .button-danger:hover:not(:disabled) {
-    background-color: #722F2F;
+    background-color: #c06f5c;
 }
 
-/* Link-styled button */
 .button-link {
     background: none;
     border: none;
-    color: #8B4513;
+    color: #4380A4;
     padding: 0;
     font-size: inherit;
     cursor: pointer;
@@ -180,27 +169,29 @@ a:hover {
     display: block;
     margin-bottom: 6px;
     font-weight: 500;
-    color: #5C4033;
+    color: #332F35;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
     width: 100%;
     padding: 12px;
     font-size: 16px;
-    border: 1px solid #D4A574;
-    background-color: #FFFDF8;
-    color: #2C2416;
+    border: 1px solid #C2CDCD;
+    background-color: #F0EAD9;
+    color: #332F35;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
     outline: none;
-    border-color: #8B4513;
-    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+    border-color: #4380A4;
+    box-shadow: 0 0 0 3px rgba(67, 128, 164, 0.15);
 }
 
 .form-group input::placeholder {
-    color: #A89880;
+    color: #9D8F86;
 }
 
 
@@ -209,17 +200,17 @@ a:hover {
    ============================================ */
 
 .error-message {
-    background-color: #FDF2F2;
-    border: 1px solid #E8B4B4;
-    color: #8B3A3A;
+    background-color: rgba(211, 131, 112, 0.15);
+    border: 1px solid #D38370;
+    color: #a0584a;
     padding: 12px 16px;
     margin-bottom: 20px;
 }
 
 .success-message {
-    background-color: #F2F7EE;
-    border: 1px solid #B4C9A8;
-    color: #4A5D23;
+    background-color: rgba(67, 128, 164, 0.1);
+    border: 1px solid #4380A4;
+    color: #365f7a;
     padding: 12px 16px;
     margin-bottom: 20px;
 }
@@ -246,12 +237,12 @@ a:hover {
 .auth-header .logo {
     font-size: 48px;
     margin-bottom: 8px;
-    color: #5C4033;
+    color: #332F35;
 }
 
 .auth-header .tagline {
     font-size: 18px;
-    color: #8B4513;
+    color: #9D8F86;
     font-style: italic;
 }
 
@@ -260,11 +251,10 @@ a:hover {
     max-width: 400px;
 }
 
-/* Tab buttons */
 .auth-tabs {
     display: flex;
     margin-bottom: 24px;
-    border-bottom: 1px solid #E8E0D0;
+    border-bottom: 1px solid #C2CDCD;
 }
 
 .tab-button {
@@ -274,7 +264,7 @@ a:hover {
     border: none;
     font-size: 16px;
     font-weight: 500;
-    color: #A89880;
+    color: #9D8F86;
     cursor: pointer;
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
@@ -282,12 +272,12 @@ a:hover {
 }
 
 .tab-button:hover {
-    color: #5C4033;
+    color: #332F35;
 }
 
 .tab-button.active {
-    color: #5C4033;
-    border-bottom-color: #8B4513;
+    color: #332F35;
+    border-bottom-color: #4380A4;
 }
 
 .auth-form .button {
@@ -299,7 +289,7 @@ a:hover {
     text-align: center;
     margin-top: 24px;
     font-size: 14px;
-    color: #8B7355;
+    color: #9D8F86;
 }
 
 .auth-footer {
@@ -309,7 +299,7 @@ a:hover {
 .ornament {
     text-align: center;
     font-size: 24px;
-    color: #D4A574;
+    color: #C2CDCD;
 }
 
 
@@ -328,12 +318,18 @@ a:hover {
     align-items: center;
     margin-bottom: 40px;
     padding-bottom: 20px;
-    border-bottom: 1px solid #E8E0D0;
+    border-bottom: 1px solid #C2CDCD;
 }
 
 .app-header .logo {
     font-size: 28px;
-    color: #5C4033;
+    color: #332F35;
+    text-decoration: none;
+}
+
+.app-header .logo:hover {
+    text-decoration: none;
+    opacity: 0.8;
 }
 
 .app-nav {
@@ -343,7 +339,7 @@ a:hover {
 }
 
 .nav-link {
-    color: #8B4513;
+    color: #4380A4;
     font-weight: 500;
 }
 
@@ -369,22 +365,29 @@ a:hover {
 }
 
 .status-text.working {
-    color: #4A5D23;
+    color: #D38370;
 }
 
 .status-text.not-working {
-    color: #8B7355;
+    color: #9D8F86;
+}
+
+.status-text .restriction-link {
+    color: #4380A4;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    display: block;
+    margin-top: 8px;
 }
 
 .elapsed-time {
     font-size: 48px;
     font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
-    color: #5C4033;
+    color: #332F35;
     letter-spacing: 2px;
 }
 
-/* The main punch button */
 .punch-button {
     display: inline-block;
     padding: 24px 64px;
@@ -402,28 +405,28 @@ a:hover {
 }
 
 .punch-button.not-working {
-    background-color: #4A5D23;
-    border-color: #3D4D1C;
-    color: #FFFDF8;
+    background-color: #4380A4;
+    border-color: #365f7a;
+    color: #F0EAD9;
 }
 
 .punch-button.not-working:hover:not(:disabled) {
-    background-color: #3D4D1C;
+    background-color: #365f7a;
 }
 
 .punch-button.working {
-    background-color: #8B3A3A;
-    border-color: #722F2F;
-    color: #FFFDF8;
+    background-color: #D38370;
+    border-color: #c06f5c;
+    color: #F0EAD9;
 }
 
 .punch-button.working:hover:not(:disabled) {
-    background-color: #722F2F;
+    background-color: #c06f5c;
 }
 
 
 /* ============================================
-   STATS SECTION
+   STATS SECTION (Year Total)
    ============================================ */
 
 .stats-section {
@@ -431,15 +434,15 @@ a:hover {
 }
 
 .stat-card {
-    background-color: #FFFDF8;
-    border: 1px solid #E8E0D0;
+    background-color: #E3D7BF;
+    border: 1px solid #C2CDCD;
     padding: 24px;
     text-align: center;
 }
 
 .stat-label {
     font-size: 14px;
-    color: #8B7355;
+    color: #9D8F86;
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 8px;
@@ -449,15 +452,14 @@ a:hover {
     font-family: 'Playfair Display', Georgia, serif;
     font-size: 48px;
     font-weight: 700;
-    color: #5C4033;
+    color: #332F35;
 }
 
-/* Progress bar towards annual goal */
 .progress-container {
     width: 100%;
     max-width: 200px;
     height: 4px;
-    background-color: #E8E0D0;
+    background-color: #C2CDCD;
     margin: 12px auto 0;
     border-radius: 2px;
     overflow: hidden;
@@ -465,7 +467,7 @@ a:hover {
 
 .progress-bar {
     height: 100%;
-    background-color: #4A9E8C;
+    background-color: #4380A4;
     border-radius: 2px;
     transition: width 0.3s ease;
     width: 0%;
@@ -483,7 +485,7 @@ a:hover {
 .section-title {
     font-size: 20px;
     margin-bottom: 20px;
-    color: #5C4033;
+    color: #332F35;
 }
 
 .heatmap-container {
@@ -498,7 +500,7 @@ a:hover {
     flex-direction: column;
     gap: 2px;
     font-size: 10px;
-    color: #8B7355;
+    color: #9D8F86;
     padding-top: 2px;
 }
 
@@ -515,7 +517,7 @@ a:hover {
     margin-left: 28px;
     margin-bottom: 4px;
     font-size: 10px;
-    color: #8B7355;
+    color: #9D8F86;
 }
 
 .month-label {
@@ -533,7 +535,7 @@ a:hover {
 .heatmap-cell {
     width: 12px;
     height: 12px;
-    background-color: #E8E0D0;
+    background-color: #F0EAD9;
 }
 
 .heatmap-cell.empty {
@@ -541,60 +543,40 @@ a:hover {
 }
 
 .heatmap-cell.future {
-    background-color: #F0EBE0;
+    background-color: #F0EAD9;
     opacity: 0.5;
 }
 
-/* Heatmap color levels (0-4) - Teal gradient for clear differentiation */
+/* Heatmap color levels — #4380E4 at varying opacity */
 .heatmap-cell.level-0,
 .legend-box.level-0 {
-    background-color: #E8E0D0;
+    background-color: #F0EAD9;
 }
 
 .heatmap-cell.level-1,
 .legend-box.level-1 {
-    background-color: #B8D4CE;
+    background-color: rgba(67, 128, 228, 0.2);
 }
 
 .heatmap-cell.level-2,
 .legend-box.level-2 {
-    background-color: #7DBCB0;
+    background-color: rgba(67, 128, 228, 0.45);
 }
 
 .heatmap-cell.level-3,
 .legend-box.level-3 {
-    background-color: #4A9E8C;
+    background-color: rgba(67, 128, 228, 0.7);
 }
 
 .heatmap-cell.level-4,
 .legend-box.level-4 {
-    background-color: #2D7A68;
+    background-color: #4380E4;
 }
 
-/* Sunday cells - subtle lavender tint */
-.heatmap-cell.sunday.level-0 {
-    background-color: #E8E0E8;
-}
-
-.heatmap-cell.sunday.level-1 {
-    background-color: #C8B8D4;
-}
-
-.heatmap-cell.sunday.level-2 {
-    background-color: #A890BC;
-}
-
-.heatmap-cell.sunday.level-3 {
-    background-color: #8A6CA0;
-}
-
-.heatmap-cell.sunday.level-4 {
-    background-color: #6B4A82;
-}
-
-.heatmap-cell.sunday.future {
-    background-color: #F0E8F0;
-    opacity: 0.5;
+/* Sunday cells — uniformly greyed out */
+.heatmap-cell.sunday {
+    background-color: #E3D7BF !important;
+    opacity: 1 !important;
 }
 
 .heatmap-legend {
@@ -604,7 +586,7 @@ a:hover {
     gap: 4px;
     margin-top: 12px;
     font-size: 11px;
-    color: #8B7355;
+    color: #9D8F86;
 }
 
 .legend-box {
@@ -623,16 +605,24 @@ a:hover {
 
 .profile-section,
 .export-section,
-.danger-section {
+.danger-section,
+.sessions-section,
+.password-section {
     margin-bottom: 32px;
 }
 
 .profile-card,
 .export-card,
-.danger-card {
-    background-color: #FFFDF8;
-    border: 1px solid #E8E0D0;
+.danger-card,
+.sessions-card,
+.password-card {
+    background-color: #E3D7BF;
+    border: 1px solid #C2CDCD;
     padding: 24px;
+}
+
+.profile-info {
+    margin-bottom: 12px;
 }
 
 .profile-info label {
@@ -640,27 +630,136 @@ a:hover {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #8B7355;
+    color: #9D8F86;
     margin-bottom: 4px;
+}
+
+.profile-info p {
+    font-size: 18px;
+    color: #332F35;
 }
 
 .user-email {
     font-size: 18px;
-    color: #2C2416;
+    color: #332F35;
+}
+
+.cute-id {
+    font-family: 'Courier New', Courier, monospace;
+    color: #4380A4;
+    font-size: 14px;
+}
+
+/* Statistics sentence */
+.stats-sentence {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 20px;
+    line-height: 1.8;
+    color: #332F35;
+    padding: 24px;
+    background-color: #E3D7BF;
+    border: 1px solid #C2CDCD;
+}
+
+.stats-sentence .stat-highlight {
+    color: #4380A4;
+    font-weight: 700;
+}
+
+/* Session history */
+.sessions-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 16px;
+}
+
+.session-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #C2CDCD;
+}
+
+.session-item:last-child {
+    border-bottom: none;
+}
+
+.session-date {
+    font-weight: 500;
+    color: #332F35;
+}
+
+.session-times {
+    font-size: 14px;
+    color: #9D8F86;
+}
+
+.session-duration {
+    font-weight: 500;
+    color: #332F35;
+    white-space: nowrap;
+}
+
+.session-edit-btn {
+    background: none;
+    border: none;
+    color: #4380A4;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px 8px;
+    margin-left: 8px;
+}
+
+.session-edit-btn:hover {
+    text-decoration: underline;
+}
+
+.session-edit-btn:disabled {
+    color: #9D8F86;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.edits-warning {
+    font-size: 13px;
+    color: #D38370;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: rgba(211, 131, 112, 0.1);
+    border: 1px solid rgba(211, 131, 112, 0.3);
+}
+
+/* Edit modal */
+.edit-form {
+    margin-top: 16px;
+}
+
+.edit-form .form-group {
+    margin-bottom: 12px;
+}
+
+.edit-form .form-group input[type="datetime-local"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #C2CDCD;
+    background-color: #F0EAD9;
+    color: #332F35;
 }
 
 .export-description,
 .danger-description {
     margin-bottom: 16px;
-    color: #5C4033;
+    color: #332F35;
 }
 
 .danger-title {
-    color: #8B3A3A;
+    color: #D38370;
 }
 
 .danger-card {
-    border-color: #E8B4B4;
+    border-color: #D38370;
 }
 
 
@@ -674,7 +773,7 @@ a:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(44, 36, 22, 0.6);
+    background-color: rgba(51, 47, 53, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -687,28 +786,145 @@ a:hover {
 }
 
 .modal-content {
-    background-color: #FFFDF8;
+    background-color: #F0EAD9;
     padding: 32px;
-    max-width: 400px;
+    max-width: 450px;
     width: 100%;
-    border: 1px solid #E8E0D0;
+    border: 1px solid #C2CDCD;
 }
 
 .modal-title {
     font-size: 24px;
     margin-bottom: 16px;
-    color: #8B3A3A;
+    color: #D38370;
 }
 
 .modal-text {
     margin-bottom: 24px;
-    color: #5C4033;
+    color: #332F35;
 }
 
 .modal-buttons {
     display: flex;
     gap: 12px;
     justify-content: flex-end;
+}
+
+.modal-warning {
+    background-color: rgba(211, 131, 112, 0.1);
+    border: 1px solid rgba(211, 131, 112, 0.3);
+    padding: 12px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #a0584a;
+}
+
+.modal-csv-option {
+    margin-bottom: 20px;
+}
+
+.modal-csv-option .button {
+    margin-top: 8px;
+}
+
+
+/* ============================================
+   LEADERBOARD PAGE STYLES
+   ============================================ */
+
+.leaderboard-section {
+    margin-bottom: 32px;
+}
+
+.leaderboard-tabs {
+    display: flex;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #C2CDCD;
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #E3D7BF;
+    border: 1px solid #C2CDCD;
+}
+
+.leaderboard-table th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9D8F86;
+    border-bottom: 1px solid #C2CDCD;
+}
+
+.leaderboard-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(194, 205, 205, 0.5);
+    color: #332F35;
+}
+
+.leaderboard-table tr:last-child td {
+    border-bottom: none;
+}
+
+.leaderboard-rank {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    color: #9D8F86;
+    width: 50px;
+}
+
+.leaderboard-name {
+    font-weight: 500;
+}
+
+.leaderboard-cute-id {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: #9D8F86;
+    display: block;
+    margin-top: 2px;
+}
+
+.leaderboard-hours {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.leaderboard-sessions {
+    color: #9D8F86;
+    font-size: 14px;
+}
+
+.active-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #D38370;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.active-timer {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    color: #D38370;
+}
+
+.leaderboard-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9D8F86;
+    font-style: italic;
 }
 
 
@@ -719,7 +935,7 @@ a:hover {
 .app-footer {
     margin-top: 60px;
     padding-top: 20px;
-    border-top: 1px solid #E8E0D0;
+    border-top: 1px solid #C2CDCD;
 }
 
 
@@ -758,17 +974,27 @@ a:hover {
     .modal-buttons .button {
         width: 100%;
     }
+
+    .session-item {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .stats-sentence {
+        font-size: 17px;
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+        padding: 8px 10px;
+    }
 }
 
 
 /* ============================================
    ART NOUVEAU DECORATIVE TOUCHES
-   ============================================
-   These are subtle ornamental elements that add
-   character without overwhelming the simple design.
    ============================================ */
 
-/* Decorative border for auth card */
 .auth-card::before {
     content: '';
     display: block;
@@ -776,25 +1002,23 @@ a:hover {
     background: linear-gradient(
         90deg,
         transparent 0%,
-        #D4A574 15%,
-        #8B4513 50%,
-        #D4A574 85%,
+        #C2CDCD 15%,
+        #4380A4 50%,
+        #C2CDCD 85%,
         transparent 100%
     );
     margin-bottom: 24px;
 }
 
-/* Decorative element after stats */
 .stat-card::after {
-    content: '\2766'; /* Floral heart / rotated floral bullet */
+    content: '\2766';
     display: block;
     text-align: center;
     font-size: 20px;
-    color: #D4A574;
+    color: #C2CDCD;
     margin-top: 16px;
 }
 
-/* Subtle corner flourish on cards */
 .profile-card,
 .export-card {
     position: relative;
@@ -802,12 +1026,12 @@ a:hover {
 
 .profile-card::before,
 .export-card::before {
-    content: '\2619'; /* Reversed rotated floral heart bullet */
+    content: '\2619';
     position: absolute;
     top: 8px;
     right: 12px;
     font-size: 16px;
-    color: #E8E0D0;
+    color: #C2CDCD;
 }
 
 
@@ -820,8 +1044,8 @@ a:hover {
 }
 
 .about-card {
-    background-color: #FFFDF8;
-    border: 1px solid #E8E0D0;
+    background-color: #E3D7BF;
+    border: 1px solid #C2CDCD;
     padding: 24px;
     position: relative;
 }
@@ -832,12 +1056,12 @@ a:hover {
     top: 8px;
     right: 12px;
     font-size: 16px;
-    color: #E8E0D0;
+    color: #C2CDCD;
 }
 
 .about-content p {
     margin-bottom: 16px;
-    color: #5C4033;
+    color: #332F35;
     line-height: 1.7;
 }
 

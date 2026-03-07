@@ -2,72 +2,42 @@
 // CLOCK OUT API ENDPOINT
 // ============================================
 // POST /api/time/clock-out
-// Ends the current work session (clocks out)
+// Ends the current work session
 //
+// Request body: { auto: true } (optional, for auto clock-out)
 // Response: { success: true, entry: { id, start_time, end_time, duration_hours } }
 // ============================================
 
-const { sql, getCurrentUser, sendJson, sendError } = require('../_helpers');
-
-// Maximum shift length in hours
-const MAX_SHIFT_HOURS = 15;
-
-// ============================================
-// WEEKEND RESTRICTION HELPER
-// ============================================
-// Returns an error message if clock in/out is restricted, null otherwise
-
-function checkWeekendRestriction(timezone) {
-    try {
-        // Get current time in user's timezone
-        const now = new Date();
-        const options = { timeZone: timezone, weekday: 'short', hour: 'numeric', hour12: false };
-        const formatter = new Intl.DateTimeFormat('en-US', options);
-        const parts = formatter.formatToParts(now);
-
-        const weekday = parts.find(p => p.type === 'weekday').value;
-        const hour = parseInt(parts.find(p => p.type === 'hour').value, 10);
-
-        // Sunday - all day restricted
-        if (weekday === 'Sun') {
-            return 'Clock in/out is not available on Sundays.';
-        }
-
-        // Saturday after 6pm (18:00) - restricted
-        if (weekday === 'Sat' && hour >= 18) {
-            return 'Clock in/out is not available after 6pm on Saturdays.';
-        }
-
-        return null;
-    } catch (error) {
-        // If timezone is invalid, don't block (fail open for simplicity)
-        console.error('Timezone check error:', error);
-        return null;
-    }
-}
-
-// ============================================
-// MAIN HANDLER FUNCTION
-// ============================================
+const {
+    sql,
+    getCurrentUser,
+    sendJson,
+    sendError,
+    checkTimeRestrictions,
+    getRestrictionMessage,
+    get9pmCutoff,
+    getHoursWorkedOnDate,
+    getTimezoneDateTime,
+    MAX_DAILY_HOURS,
+    WORK_END_HOUR
+} = require('../_helpers');
 
 module.exports = async function handler(request, response) {
-    // Only allow POST requests
     if (request.method !== 'POST') {
         return sendError(response, 405, 'Method not allowed. Use POST.');
     }
 
     try {
         // ----------------------------------------
-        // STEP 1: Make sure user is logged in
+        // Check auth
         // ----------------------------------------
         const user = await getCurrentUser(request);
-
         if (!user) {
             return sendError(response, 401, 'You must be logged in to clock out.');
         }
 
         // ----------------------------------------
-        // STEP 2: Find the open time entry
+        // Find open entry
         // ----------------------------------------
         const openEntry = await sql`
             SELECT id, start_time, start_timezone
@@ -81,36 +51,56 @@ module.exports = async function handler(request, response) {
         }
 
         const entry = openEntry.rows[0];
+        const isAuto = request.body && request.body.auto === true;
 
         // ----------------------------------------
-        // STEP 2.5: Check weekend restriction (unless auto clock-out)
+        // Check time restrictions (unless auto clock-out)
         // ----------------------------------------
-        const isAuto = request.body && request.body.auto === true;
         if (!isAuto && entry.start_timezone) {
-            const restrictionError = checkWeekendRestriction(entry.start_timezone);
-            if (restrictionError) {
-                return sendError(response, 400, restrictionError);
+            const restriction = checkTimeRestrictions(entry.start_timezone);
+            if (restriction && restriction !== 'after_hours') {
+                // Allow clock-out after hours (they need to be able to stop)
+                // but block on Sundays (auto-close should handle that)
+                if (restriction === 'sunday') {
+                    return sendError(response, 400, getRestrictionMessage(restriction));
+                }
             }
         }
 
         // ----------------------------------------
-        // STEP 3: Calculate the end time
+        // Calculate end time with caps
         // ----------------------------------------
-        // Check if we need to cap at 15 hours
         const startTime = new Date(entry.start_time);
         const now = new Date();
-        const hoursWorked = (now - startTime) / (1000 * 60 * 60); // Convert ms to hours
+        let endTime = now;
 
-        let endTime;
-        if (hoursWorked > MAX_SHIFT_HOURS) {
-            // Cap at 15 hours from start time
-            endTime = new Date(startTime.getTime() + (MAX_SHIFT_HOURS * 60 * 60 * 1000));
-        } else {
-            endTime = now;
+        // Cap at 9pm in user's timezone
+        const cutoff9pm = get9pmCutoff(entry.start_time, entry.start_timezone);
+        if (cutoff9pm && endTime > cutoff9pm) {
+            endTime = cutoff9pm;
+        }
+
+        // Cap at 12 hours total for the day
+        const hoursAlreadyWorked = await getHoursWorkedOnDate(user.id, startTime, entry.start_timezone);
+        const currentSessionHours = (endTime - startTime) / (1000 * 60 * 60);
+        const totalIfClockedOut = hoursAlreadyWorked + currentSessionHours;
+
+        if (totalIfClockedOut > MAX_DAILY_HOURS) {
+            const allowedHours = MAX_DAILY_HOURS - hoursAlreadyWorked;
+            if (allowedHours > 0) {
+                endTime = new Date(startTime.getTime() + (allowedHours * 60 * 60 * 1000));
+            } else {
+                endTime = startTime; // Edge case: already at limit
+            }
+        }
+
+        // Ensure end_time is not before start_time
+        if (endTime < startTime) {
+            endTime = startTime;
         }
 
         // ----------------------------------------
-        // STEP 4: Update the entry with end time
+        // Update the entry
         // ----------------------------------------
         const result = await sql`
             UPDATE time_entries
@@ -120,8 +110,6 @@ module.exports = async function handler(request, response) {
         `;
 
         const updatedEntry = result.rows[0];
-
-        // Calculate duration for the response
         const start = new Date(updatedEntry.start_time);
         const end = new Date(updatedEntry.end_time);
         const durationHours = (end - start) / (1000 * 60 * 60);
@@ -132,7 +120,7 @@ module.exports = async function handler(request, response) {
                 id: updatedEntry.id,
                 start_time: updatedEntry.start_time,
                 end_time: updatedEntry.end_time,
-                duration_hours: Math.round(durationHours * 100) / 100 // Round to 2 decimals
+                duration_hours: Math.round(durationHours * 100) / 100
             }
         });
 

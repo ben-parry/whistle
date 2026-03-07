@@ -1,7 +1,7 @@
 {
   "name": "whistle",
-  "version": "1.0.0",
-  "description": "A simple punch clock app with Art Nouveau aesthetics",
+  "version": "2.0.0",
+  "description": "A hyper-opinionated punch clock app with Art Nouveau aesthetics",
   "private": true,
   "scripts": {
     "dev": "vercel dev",
@@ -11,6 +11,8 @@
     "pg": "^8.11.3",
     "bcryptjs": "^2.4.3",
     "cookie": "^0.6.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "resend": "^4.0.0",
+    "@anthropic-ai/sdk": "^0.39.0"
   }
 }

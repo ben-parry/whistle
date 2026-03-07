@@ -5,33 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About - Whistle</title>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Our stylesheet -->
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <!-- ============================================ -->
-    <!-- MAIN CONTAINER -->
-    <!-- ============================================ -->
     <div class="container app-container">
 
-        <!-- ============================================ -->
-        <!-- HEADER WITH NAVIGATION -->
-        <!-- ============================================ -->
         <header class="app-header">
-            <h1 class="logo">Whistle</h1>
+            <a href="/app.html" class="logo">Whistle</a>
             <nav class="app-nav" id="nav-links">
-                <!-- Navigation links will be set by JavaScript based on auth status -->
+                <!-- Set by JavaScript based on auth status -->
             </nav>
         </header>
 
-        <!-- ============================================ -->
-        <!-- ABOUT SECTION -->
-        <!-- ============================================ -->
         <section class="about-section">
             <h2 class="section-title">About Whistle</h2>
 
@@ -53,18 +42,13 @@
             </div>
         </section>
 
-        <!-- ============================================ -->
-        <!-- DECORATIVE FOOTER -->
-        <!-- ============================================ -->
         <footer class="app-footer">
             <div class="ornament">&#10022;</div>
         </footer>
 
     </div>
 
-    <!-- Our JavaScript -->
     <script>
-        // Check auth status and set navigation accordingly
         document.addEventListener('DOMContentLoaded', async function() {
             const navLinks = document.getElementById('nav-links');
 
@@ -73,14 +57,12 @@
                 const data = await response.json();
 
                 if (data.user) {
-                    // User is logged in - show app navigation
-                    navLinks.innerHTML = `
-                        <a href="/app.html" class="nav-link">Punch Clock</a>
-                        <a href="/profile.html" class="nav-link">Profile</a>
-                        <button id="logout-button" class="nav-link button-link">Sign Out</button>
-                    `;
+                    navLinks.innerHTML =
+                        '<a href="/leaderboard.html" class="nav-link">Leaderboard</a>' +
+                        '<a href="/about.html" class="nav-link">About</a>' +
+                        '<a href="/profile.html" class="nav-link">Profile</a>' +
+                        '<button id="logout-button" class="nav-link button-link">Sign Out</button>';
 
-                    // Add logout handler
                     document.getElementById('logout-button').addEventListener('click', async function() {
                         try {
                             await fetch('/api/auth/logout', { method: 'POST' });
@@ -90,16 +72,16 @@
                         }
                     });
                 } else {
-                    // User is not logged in - show sign in link
-                    navLinks.innerHTML = `
-                        <a href="/index.html" class="nav-link">Sign In</a>
-                    `;
+                    navLinks.innerHTML =
+                        '<a href="/leaderboard.html" class="nav-link">Leaderboard</a>' +
+                        '<a href="/about.html" class="nav-link">About</a>' +
+                        '<a href="/index.html" class="nav-link">Sign In</a>';
                 }
             } catch (error) {
-                // Error checking auth - show sign in link
-                navLinks.innerHTML = `
-                    <a href="/index.html" class="nav-link">Sign In</a>
-                `;
+                navLinks.innerHTML =
+                    '<a href="/leaderboard.html" class="nav-link">Leaderboard</a>' +
+                    '<a href="/about.html" class="nav-link">About</a>' +
+                    '<a href="/index.html" class="nav-link">Sign In</a>';
             }
         });
     </script>

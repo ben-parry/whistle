@@ -2,91 +2,56 @@
 // CLOCK IN API ENDPOINT
 // ============================================
 // POST /api/time/clock-in
-// Starts a new work session (clocks in)
+// Starts a new work session
 //
-// Request body: { timezone: "America/New_York" }
+// Request body: { timezone: "America/Toronto" }
 // Response: { success: true, entry: { id, start_time } }
 // ============================================
 
-const { sql, getCurrentUser, sendJson, sendError } = require('../_helpers');
-
-// ============================================
-// WEEKEND RESTRICTION HELPER
-// ============================================
-// Returns an error message if clock in/out is restricted, null otherwise
-
-function checkWeekendRestriction(timezone) {
-    try {
-        // Get current time in user's timezone
-        const now = new Date();
-        const options = { timeZone: timezone, weekday: 'short', hour: 'numeric', hour12: false };
-        const formatter = new Intl.DateTimeFormat('en-US', options);
-        const parts = formatter.formatToParts(now);
-
-        const weekday = parts.find(p => p.type === 'weekday').value;
-        const hour = parseInt(parts.find(p => p.type === 'hour').value, 10);
-
-        // Sunday - all day restricted
-        if (weekday === 'Sun') {
-            return 'Clock in/out is not available on Sundays.';
-        }
-
-        // Saturday after 6pm (18:00) - restricted
-        if (weekday === 'Sat' && hour >= 18) {
-            return 'Clock in/out is not available after 6pm on Saturdays.';
-        }
-
-        return null;
-    } catch (error) {
-        // If timezone is invalid, don't block (fail open for simplicity)
-        console.error('Timezone check error:', error);
-        return null;
-    }
-}
-
-// ============================================
-// MAIN HANDLER FUNCTION
-// ============================================
+const {
+    sql,
+    getCurrentUser,
+    sendJson,
+    sendError,
+    checkTimeRestrictions,
+    getRestrictionMessage,
+    getHoursWorkedOnDate,
+    MAX_DAILY_HOURS
+} = require('../_helpers');
 
 module.exports = async function handler(request, response) {
-    // Only allow POST requests
     if (request.method !== 'POST') {
         return sendError(response, 405, 'Method not allowed. Use POST.');
     }
 
     try {
         // ----------------------------------------
-        // STEP 1: Make sure user is logged in
+        // Check auth
         // ----------------------------------------
         const user = await getCurrentUser(request);
-
         if (!user) {
             return sendError(response, 401, 'You must be logged in to clock in.');
         }
 
         // ----------------------------------------
-        // STEP 2: Get the timezone from the request
+        // Get timezone
         // ----------------------------------------
-        // The frontend sends the user's timezone (e.g., "America/New_York")
         const { timezone } = request.body;
-
         if (!timezone || typeof timezone !== 'string') {
             return sendError(response, 400, 'Timezone is required.');
         }
 
         // ----------------------------------------
-        // STEP 2.5: Check weekend restriction
+        // Check time restrictions (5am-9pm, no Sundays)
         // ----------------------------------------
-        // No clock-in after 6pm Saturday or all day Sunday
-        const restrictionError = checkWeekendRestriction(timezone);
-        if (restrictionError) {
-            return sendError(response, 400, restrictionError);
+        const restriction = checkTimeRestrictions(timezone);
+        if (restriction) {
+            return sendError(response, 400, getRestrictionMessage(restriction));
         }
 
         // ----------------------------------------
-        // STEP 3: Check if user is already clocked in
+        // Check if already clocked in
         // ----------------------------------------
-        // Look for any entry with no end_time (meaning they're still working)
         const openEntry = await sql`
             SELECT id FROM time_entries
             WHERE user_id = ${user.id}
@@ -98,7 +63,15 @@ module.exports = async function handler(request, response) {
         }
 
         // ----------------------------------------
-        // STEP 4: Create a new time entry
+        // Check 12-hour daily limit
+        // ----------------------------------------
+        const hoursToday = await getHoursWorkedOnDate(user.id, new Date(), timezone);
+        if (hoursToday >= MAX_DAILY_HOURS) {
+            return sendError(response, 400, getRestrictionMessage('daily_limit'));
+        }
+
+        // ----------------------------------------
+        // Create new time entry
         // ----------------------------------------
         const result = await sql`
             INSERT INTO time_entries (user_id, start_time, start_timezone)

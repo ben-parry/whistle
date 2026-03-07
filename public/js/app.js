@@ -1,67 +1,50 @@
 // ============================================
 // APP.JS - Main Punch Clock Logic
 // ============================================
-// This file handles:
-// - Checking login status
-// - Clock in / clock out functionality
-// - Displaying elapsed time
-// - Loading year totals
-// - Rendering the heatmap
-// - Logout
-// ============================================
 
-
-// ============================================
-// GLOBAL VARIABLES
-// ============================================
-
-// Timer for updating elapsed time every second
 let elapsedTimer = null;
-
-// When the current session started (if working)
 let sessionStartTime = null;
-
-// Whether the user is currently working
 let isWorking = false;
-
-// Annual hours goal
 const ANNUAL_HOURS_GOAL = 2333;
+const WORK_START_HOUR = 5;
+const WORK_END_HOUR = 21;
 
 // ============================================
-// WEEKEND RESTRICTION HELPER
+// TIME RESTRICTION HELPERS
 // ============================================
-// Returns true if clock in/out is currently restricted
-// (after 6pm Saturday or all day Sunday in user's local timezone)
 
 function isRestrictedTime() {
     const now = new Date();
-    const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+    const dayOfWeek = now.getDay();
     const hour = now.getHours();
 
-    // Sunday - all day restricted
-    if (dayOfWeek === 0) {
-        return true;
-    }
-
-    // Saturday after 6pm (18:00) - restricted
-    if (dayOfWeek === 6 && hour >= 18) {
-        return true;
-    }
-
-    return false;
+    if (dayOfWeek === 0) return 'sunday';
+    if (hour < WORK_START_HOUR) return 'before_hours';
+    if (hour >= WORK_END_HOUR) return 'after_hours';
+    return null;
 }
 
-function getRestrictionMessage() {
-    const now = new Date();
-    const dayOfWeek = now.getDay();
+function getRestrictionMessage(type) {
+    switch (type) {
+        case 'sunday':
+            return 'It is Sunday, let us seize the means of relaxation.';
+        case 'before_hours':
+            return 'Clock in/out is available from 5:00 AM.';
+        case 'after_hours':
+            return 'Clock in/out is not available after 9:00 PM.';
+        case 'daily_limit':
+            return 'You have reached the 12-hour daily maximum.';
+        default:
+            return '';
+    }
+}
 
-    if (dayOfWeek === 0) {
-        return 'Clock in/out is not available on Sundays.';
+function getRestrictionHTML(type) {
+    let msg = getRestrictionMessage(type);
+    if (type === 'sunday') {
+        msg += ' <a href="https://x.com/lavitalenta" target="_blank" rel="noopener" class="restriction-link">@lavitalenta</a>';
     }
-    if (dayOfWeek === 6) {
-        return 'Clock in/out is not available after 6pm on Saturdays.';
-    }
-    return '';
+    return msg;
 }
 
 
@@ -70,10 +53,6 @@ function getRestrictionMessage() {
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-
-    // ============================================
-    // GET REFERENCES TO HTML ELEMENTS
-    // ============================================
 
     const statusText = document.getElementById('status-text');
     const elapsedTime = document.getElementById('elapsed-time');
@@ -86,28 +65,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const heatmapGrid = document.getElementById('heatmap-grid');
     const heatmapMonths = document.getElementById('heatmap-months');
 
-
-    // ============================================
-    // CHECK IF LOGGED IN
-    // ============================================
-
     checkAuth();
 
     async function checkAuth() {
         try {
             const response = await fetch('/api/auth/me');
             const data = await response.json();
-
             if (!data.user) {
-                // Not logged in, redirect to login page
                 window.location.href = '/index.html';
                 return;
             }
-
-            // User is logged in, load the app data
             loadStatus();
             loadHeatmap();
-
         } catch (error) {
             console.error('Auth check error:', error);
             window.location.href = '/index.html';
@@ -124,28 +93,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('/api/time/status');
             const data = await response.json();
 
-            // Update year display
             const currentYear = new Date().getFullYear();
             currentYearSpan.textContent = currentYear;
 
-            // Update year total
             yearTotal.textContent = formatHours(data.year_total_hours);
 
-            // Update progress bar (capped at 100%)
             const progressPercent = Math.min((data.year_total_hours / ANNUAL_HOURS_GOAL) * 100, 100);
             progressBar.style.width = progressPercent + '%';
             progressBar.title = `${formatHours(data.year_total_hours)} of ${ANNUAL_HOURS_GOAL} hours (${Math.round(progressPercent)}%)`;
 
-            // Update working status
             isWorking = data.is_working;
 
-            // Check for weekend restriction
-            const restricted = isRestrictedTime();
+            const restriction = isRestrictedTime();
 
             if (isWorking && data.current_session) {
-                // User is currently working
-                if (restricted) {
-                    // Auto clock-out during restricted time
+                if (restriction) {
                     await autoClockOut();
                     return;
                 }
@@ -153,12 +115,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 showWorkingState();
                 startElapsedTimer();
             } else {
-                // User is not working
-                showNotWorkingState(restricted);
+                showNotWorkingState(restriction, data.daily_limit_reached);
             }
 
-            // Enable the punch button (unless restricted)
-            punchButton.disabled = restricted;
+            punchButton.disabled = !!(restriction || data.daily_limit_reached);
 
         } catch (error) {
             console.error('Load status error:', error);
@@ -166,27 +126,43 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Set up 9pm auto-close check
+    function scheduleAutoCloseCheck() {
+        const now = new Date();
+        const hour = now.getHours();
+        if (hour < WORK_END_HOUR) {
+            // Calculate ms until 9pm
+            const ninePm = new Date(now);
+            ninePm.setHours(WORK_END_HOUR, 0, 0, 0);
+            const msUntil9pm = ninePm - now;
+            setTimeout(function() {
+                if (isWorking) {
+                    autoClockOut();
+                }
+            }, msUntil9pm + 1000); // +1s buffer
+        }
+    }
+
+    scheduleAutoCloseCheck();
+
 
     // ============================================
     // PUNCH BUTTON CLICK
     // ============================================
 
     punchButton.addEventListener('click', async function() {
-        // Check for weekend restriction
-        if (isRestrictedTime()) {
-            alert(getRestrictionMessage());
+        const restriction = isRestrictedTime();
+        if (restriction) {
+            alert(getRestrictionMessage(restriction));
             return;
         }
 
-        // Disable button while processing
         punchButton.disabled = true;
 
         try {
             if (isWorking) {
-                // Clock out
                 await clockOut();
             } else {
-                // Clock in
                 await clockIn();
             }
         } catch (error) {
@@ -194,64 +170,50 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Something went wrong. Please try again.');
         }
 
-        // Re-enable button
         punchButton.disabled = false;
     });
 
 
     // ============================================
-    // CLOCK IN
+    // CLOCK IN / CLOCK OUT
     // ============================================
 
     async function clockIn() {
-        // Get user's timezone
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
         const response = await fetch('/api/time/clock-in', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ timezone })
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            // Successfully clocked in
             isWorking = true;
             sessionStartTime = new Date(data.entry.start_time);
             showWorkingState();
             startElapsedTimer();
+            scheduleAutoCloseCheck();
         } else {
             alert(data.error || 'Failed to clock in');
         }
     }
 
-
-    // ============================================
-    // CLOCK OUT
-    // ============================================
-
     async function clockOut() {
         const response = await fetch('/api/time/clock-out', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({})
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            // Successfully clocked out
             isWorking = false;
             sessionStartTime = null;
             showNotWorkingState();
             stopElapsedTimer();
-
-            // Reload status to update year total and heatmap
             loadStatus();
             loadHeatmap();
         } else {
@@ -259,29 +221,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
-    // ============================================
-    // AUTO CLOCK OUT (for weekend restriction)
-    // ============================================
-
     async function autoClockOut() {
         try {
             const response = await fetch('/api/time/clock-out', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ auto: true })
             });
 
             if (response.ok) {
-                // Successfully auto-clocked out
                 isWorking = false;
                 sessionStartTime = null;
-                showNotWorkingState(true);
+                const restriction = isRestrictedTime();
+                showNotWorkingState(restriction);
                 stopElapsedTimer();
-
-                // Reload heatmap
                 loadHeatmap();
             }
         } catch (error) {
@@ -295,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
 
     function showWorkingState() {
-        statusText.textContent = 'Currently Working';
+        statusText.innerHTML = 'Currently Working';
         statusText.classList.add('working');
         statusText.classList.remove('not-working');
 
@@ -306,25 +259,23 @@ document.addEventListener('DOMContentLoaded', function() {
         elapsedTime.hidden = false;
     }
 
-    function showNotWorkingState(restricted = false) {
-        if (restricted) {
-            statusText.textContent = getRestrictionMessage();
-            statusText.classList.add('not-working');
-            statusText.classList.remove('working');
-
-            punchButtonText.textContent = 'Clock In';
-            punchButton.classList.add('not-working');
-            punchButton.classList.remove('working');
+    function showNotWorkingState(restriction, dailyLimitReached) {
+        if (restriction) {
+            statusText.innerHTML = getRestrictionHTML(restriction);
+            punchButton.disabled = true;
+        } else if (dailyLimitReached) {
+            statusText.innerHTML = getRestrictionMessage('daily_limit');
             punchButton.disabled = true;
         } else {
-            statusText.textContent = 'Not Working';
-            statusText.classList.add('not-working');
-            statusText.classList.remove('working');
-
-            punchButtonText.textContent = 'Clock In';
-            punchButton.classList.add('not-working');
-            punchButton.classList.remove('working');
+            statusText.innerHTML = 'Not Working';
         }
+
+        statusText.classList.add('not-working');
+        statusText.classList.remove('working');
+
+        punchButtonText.textContent = 'Clock In';
+        punchButton.classList.add('not-working');
+        punchButton.classList.remove('working');
 
         elapsedTime.hidden = true;
         elapsedTime.textContent = '00:00:00';
@@ -336,13 +287,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
 
     function startElapsedTimer() {
-        // Clear any existing timer
         stopElapsedTimer();
-
-        // Update immediately
         updateElapsedTime();
-
-        // Then update every second
         elapsedTimer = setInterval(updateElapsedTime, 1000);
     }
 
@@ -360,18 +306,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const diffMs = now - sessionStartTime;
         const diffSeconds = Math.floor(diffMs / 1000);
 
-        // Convert to hours:minutes:seconds
         const hours = Math.floor(diffSeconds / 3600);
         const minutes = Math.floor((diffSeconds % 3600) / 60);
         const seconds = diffSeconds % 60;
 
-        // Format with leading zeros
-        const formatted =
+        elapsedTime.textContent =
             String(hours).padStart(2, '0') + ':' +
             String(minutes).padStart(2, '0') + ':' +
             String(seconds).padStart(2, '0');
-
-        elapsedTime.textContent = formatted;
     }
 
 
@@ -380,122 +322,88 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
 
     function formatHours(hours) {
-        // Round to 1 decimal place
         const rounded = Math.round(hours * 10) / 10;
-
-        // Format nicely
-        if (rounded === 0) {
-            return '0';
-        } else if (rounded === Math.floor(rounded)) {
-            // Whole number
-            return rounded.toString();
-        } else {
-            // Has decimal
-            return rounded.toFixed(1);
-        }
+        if (rounded === 0) return '0';
+        if (rounded === Math.floor(rounded)) return rounded.toString();
+        return rounded.toFixed(1);
     }
 
 
     // ============================================
-    // LOAD AND RENDER HEATMAP
+    // HEATMAP
     // ============================================
 
     async function loadHeatmap() {
         try {
             const response = await fetch('/api/time/heatmap');
             const data = await response.json();
-
             renderHeatmap(data.year, data.days);
-
         } catch (error) {
             console.error('Load heatmap error:', error);
         }
     }
 
     function renderHeatmap(year, daysData) {
-        // Clear existing grid
         heatmapGrid.innerHTML = '';
         heatmapMonths.innerHTML = '';
 
-        // Get first day of the year
         const firstDay = new Date(year, 0, 1);
         const lastDay = new Date(year, 11, 31);
         const today = new Date();
 
-        // Calculate the number of weeks
-        // We need to start from the Sunday of the week containing Jan 1
-        const startOffset = firstDay.getDay(); // 0 = Sunday, 1 = Monday, etc.
-
-        // Create all day cells
-        // GitHub-style: columns are weeks, rows are days of week
+        const startOffset = firstDay.getDay();
         const weeks = [];
         let currentWeek = [];
 
-        // Add empty cells for days before Jan 1
         for (let i = 0; i < startOffset; i++) {
-            currentWeek.push(null); // null = empty cell
+            currentWeek.push(null);
         }
 
-        // Add all days of the year
         const currentDate = new Date(firstDay);
         while (currentDate <= lastDay) {
-            // Format date as YYYY-MM-DD
             const dateString = currentDate.toISOString().split('T')[0];
-
-            // Get hours for this day (0 if no data)
             const hours = daysData[dateString] || 0;
-
-            // Determine if this is in the future
             const isFuture = currentDate > today;
+            const dayOfWeek = currentDate.getDay();
 
             currentWeek.push({
                 date: dateString,
                 hours: hours,
-                isFuture: isFuture
+                isFuture: isFuture,
+                isSunday: dayOfWeek === 0
             });
 
-            // If we've completed a week (7 days), start a new one
             if (currentWeek.length === 7) {
                 weeks.push(currentWeek);
                 currentWeek = [];
             }
 
-            // Move to next day
             currentDate.setDate(currentDate.getDate() + 1);
         }
 
-        // Add any remaining days in the last week
         if (currentWeek.length > 0) {
-            // Fill remaining days with nulls
             while (currentWeek.length < 7) {
                 currentWeek.push(null);
             }
             weeks.push(currentWeek);
         }
 
-        // Render the grid
-        // CSS grid uses grid-auto-flow: column, so we render week by week
         for (let weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
             for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
                 const day = weeks[weekIndex][dayOfWeek];
-
                 const cell = document.createElement('div');
                 cell.className = 'heatmap-cell';
 
-                // Add sunday class for Sunday cells (dayOfWeek 0)
-                if (dayOfWeek === 0) {
-                    cell.classList.add('sunday');
-                }
-
                 if (day === null) {
-                    // Empty cell (before Jan 1 or after Dec 31)
                     cell.classList.add('empty');
+                } else if (day.isSunday) {
+                    // Sundays are always uniformly greyed out
+                    cell.classList.add('sunday');
+                    cell.title = day.date + ' (Sunday)';
                 } else if (day.isFuture) {
-                    // Future day
                     cell.classList.add('future');
                     cell.title = day.date;
                 } else {
-                    // Past or today
                     const level = getHeatLevel(day.hours);
                     cell.classList.add('level-' + level);
                     cell.title = day.date + ': ' + formatHours(day.hours) + ' hours';
@@ -505,15 +413,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Render month labels
         renderMonthLabels(weeks, year);
     }
 
     function getHeatLevel(hours) {
-        // Levels 0-4 based on hours (max 15 hours)
         if (hours === 0) return 0;
-        if (hours < 2) return 1;
-        if (hours < 5) return 2;
+        if (hours < 3) return 1;
+        if (hours < 6) return 2;
         if (hours < 10) return 3;
         return 4;
     }
@@ -521,25 +427,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderMonthLabels(weeks, year) {
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-        // Find the first week of each month
         let lastMonth = -1;
 
         for (let weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
-            // Find the first non-null day in this week
             const firstDay = weeks[weekIndex].find(d => d !== null);
-
             if (firstDay) {
-                const month = parseInt(firstDay.date.split('-')[1], 10) - 1; // 0-indexed
-
+                const month = parseInt(firstDay.date.split('-')[1], 10) - 1;
                 if (month !== lastMonth) {
-                    // New month starts in this week
                     const label = document.createElement('span');
                     label.className = 'month-label';
                     label.textContent = monthNames[month];
                     label.style.gridColumn = weekIndex + 1;
                     heatmapMonths.appendChild(label);
-
                     lastMonth = month;
                 }
             }
@@ -553,15 +452,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     logoutButton.addEventListener('click', async function() {
         try {
-            await fetch('/api/auth/logout', {
-                method: 'POST'
-            });
-
+            await fetch('/api/auth/logout', { method: 'POST' });
             window.location.href = '/index.html';
-
         } catch (error) {
             console.error('Logout error:', error);
-            // Redirect anyway
             window.location.href = '/index.html';
         }
     });

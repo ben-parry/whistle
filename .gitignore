@@ -22,3 +22,9 @@ npm-debug.log*
 .vscode/
 *.swp
 *.swo
+
+# iOS build artifacts
+ios/Whistle/build/
+ios/Whistle/DerivedData/
+ios/Whistle/*.xcuserdata
+*.xcworkspace/xcuserdata/

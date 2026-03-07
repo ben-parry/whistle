@@ -5,117 +5,172 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Whistle</title>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Our stylesheet -->
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <!-- ============================================ -->
-    <!-- MAIN CONTAINER -->
-    <!-- ============================================ -->
     <div class="container app-container">
 
-        <!-- ============================================ -->
-        <!-- HEADER WITH NAVIGATION -->
-        <!-- ============================================ -->
         <header class="app-header">
-            <h1 class="logo">Whistle</h1>
+            <a href="/app.html" class="logo">Whistle</a>
             <nav class="app-nav">
-                <a href="/app.html" class="nav-link">Punch Clock</a>
+                <a href="/leaderboard.html" class="nav-link">Leaderboard</a>
                 <a href="/about.html" class="nav-link">About</a>
+                <a href="/profile.html" class="nav-link">Profile</a>
                 <button id="logout-button" class="nav-link button-link">Sign Out</button>
             </nav>
         </header>
 
-        <!-- ============================================ -->
         <!-- PROFILE SECTION -->
-        <!-- ============================================ -->
         <section class="profile-section">
             <h2 class="section-title">Your Profile</h2>
-
             <div class="card profile-card">
+                <div class="profile-info">
+                    <label>Name</label>
+                    <p id="user-name">Loading...</p>
+                </div>
                 <div class="profile-info">
                     <label>Email</label>
                     <p id="user-email" class="user-email">Loading...</p>
                 </div>
-
-                <button id="update-email-button" class="button button-secondary" style="margin-top: 16px;">
-                    Request Email Change
-                </button>
+                <div class="profile-info">
+                    <label>Your ID</label>
+                    <p id="user-cute-id" class="cute-id">Loading...</p>
+                </div>
             </div>
         </section>
 
-        <!-- ============================================ -->
+        <!-- STATISTICS SECTION -->
+        <section class="profile-section">
+            <h2 class="section-title">Your Year</h2>
+            <div id="stats-sentence" class="stats-sentence">
+                Loading your statistics...
+            </div>
+        </section>
+
+        <!-- SESSION HISTORY SECTION -->
+        <section class="sessions-section">
+            <h2 class="section-title">Session History</h2>
+            <div class="card sessions-card">
+                <div id="edits-info" class="edits-warning" hidden></div>
+                <div id="sessions-list" class="sessions-list">
+                    Loading sessions...
+                </div>
+            </div>
+        </section>
+
+        <!-- CHANGE PASSWORD SECTION -->
+        <section class="password-section">
+            <h2 class="section-title">Change Password</h2>
+            <div class="card password-card">
+                <div id="password-message" hidden></div>
+                <form id="password-form">
+                    <div class="form-group">
+                        <label for="current-password">Current Password</label>
+                        <input type="password" id="current-password" required
+                               placeholder="Your current password">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">New Password</label>
+                        <input type="password" id="new-password" required minlength="8"
+                               placeholder="At least 8 characters">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-new-password">Confirm New Password</label>
+                        <input type="password" id="confirm-new-password" required minlength="8"
+                               placeholder="Type new password again">
+                    </div>
+                    <button type="submit" class="button button-primary">Change Password</button>
+                </form>
+            </div>
+        </section>
+
         <!-- EXPORT SECTION -->
-        <!-- ============================================ -->
         <section class="export-section">
             <h2 class="section-title">Export Data</h2>
-
             <div class="card export-card">
                 <p class="export-description">
                     Download all your time entries as a CSV file.
                     This includes every session from all years.
                 </p>
-
                 <button id="export-button" class="button button-primary">
                     Export to CSV
                 </button>
             </div>
         </section>
 
-        <!-- ============================================ -->
         <!-- DANGER ZONE -->
-        <!-- ============================================ -->
         <section class="danger-section">
             <h2 class="section-title danger-title">Danger Zone</h2>
-
             <div class="card danger-card">
                 <p class="danger-description">
                     Permanently delete your account and all your data.
                     This action cannot be undone.
                 </p>
-
                 <button id="delete-button" class="button button-danger">
                     Delete Account
                 </button>
             </div>
         </section>
 
-        <!-- ============================================ -->
         <!-- DELETE CONFIRMATION MODAL -->
-        <!-- ============================================ -->
         <div id="delete-modal" class="modal" hidden>
             <div class="modal-content">
                 <h3 class="modal-title">Delete Account?</h3>
+                <div class="modal-warning">
+                    This is permanent. All your time entries will be lost forever.
+                </div>
+                <div class="modal-csv-option">
+                    <p class="modal-text">
+                        Before deleting, you can download your data. This is your last chance.
+                    </p>
+                    <button id="modal-export-button" class="button button-secondary">
+                        Download CSV First
+                    </button>
+                </div>
                 <p class="modal-text">
-                    Are you sure you want to delete your account?
-                    All your time entries will be permanently lost.
+                    Are you sure you want to permanently delete your account?
                 </p>
                 <div class="modal-buttons">
-                    <button id="cancel-delete" class="button button-secondary">
-                        Cancel
-                    </button>
-                    <button id="confirm-delete" class="button button-danger">
-                        Yes, Delete My Account
-                    </button>
+                    <button id="cancel-delete" class="button button-secondary">Cancel</button>
+                    <button id="confirm-delete" class="button button-danger">Yes, Delete My Account</button>
                 </div>
             </div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- DECORATIVE FOOTER -->
-        <!-- ============================================ -->
+        <!-- EDIT SESSION MODAL -->
+        <div id="edit-modal" class="modal" hidden>
+            <div class="modal-content">
+                <h3 class="modal-title" style="color: #332F35;">Edit Session</h3>
+                <div id="edit-warning" class="edits-warning"></div>
+                <div id="edit-error" class="error-message" hidden></div>
+                <form id="edit-form" class="edit-form">
+                    <input type="hidden" id="edit-entry-id">
+                    <div class="form-group">
+                        <label for="edit-start-time">Start Time</label>
+                        <input type="datetime-local" id="edit-start-time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-end-time">End Time</label>
+                        <input type="datetime-local" id="edit-end-time" required>
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" id="cancel-edit" class="button button-secondary">Cancel</button>
+                        <button type="submit" class="button button-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <footer class="app-footer">
             <div class="ornament">&#10022;</div>
         </footer>
 
     </div>
 
-    <!-- Our JavaScript -->
     <script src="/js/profile.js"></script>
 </body>
 </html>

@@ -1,36 +1,34 @@
 // ============================================
 // PROFILE.JS - Profile Page Logic
 // ============================================
-// This file handles:
-// - Loading user info
-// - Exporting time entries to CSV
-// - Deleting account
-// - Logout
-// ============================================
-
-
-// ============================================
-// WAIT FOR PAGE TO LOAD
-// ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
 
-    // ============================================
-    // GET REFERENCES TO HTML ELEMENTS
-    // ============================================
-
+    const userName = document.getElementById('user-name');
     const userEmail = document.getElementById('user-email');
+    const userCuteId = document.getElementById('user-cute-id');
+    const statsSentence = document.getElementById('stats-sentence');
+    const sessionsList = document.getElementById('sessions-list');
+    const editsInfo = document.getElementById('edits-info');
     const exportButton = document.getElementById('export-button');
-    const updateEmailButton = document.getElementById('update-email-button');
     const deleteButton = document.getElementById('delete-button');
     const deleteModal = document.getElementById('delete-modal');
     const cancelDelete = document.getElementById('cancel-delete');
     const confirmDelete = document.getElementById('confirm-delete');
+    const modalExportButton = document.getElementById('modal-export-button');
+    const editModal = document.getElementById('edit-modal');
+    const editForm = document.getElementById('edit-form');
+    const cancelEdit = document.getElementById('cancel-edit');
+    const editError = document.getElementById('edit-error');
+    const editWarning = document.getElementById('edit-warning');
+    const passwordForm = document.getElementById('password-form');
+    const passwordMessage = document.getElementById('password-message');
     const logoutButton = document.getElementById('logout-button');
 
+    let currentEditsRemaining = 3;
 
     // ============================================
-    // CHECK IF LOGGED IN AND LOAD USER INFO
+    // CHECK AUTH AND LOAD DATA
     // ============================================
 
     checkAuth();
@@ -41,14 +39,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (!data.user) {
-                // Not logged in, redirect to login page
                 window.location.href = '/index.html';
                 return;
             }
 
-            // Display user email
+            userName.textContent = data.user.name;
             userEmail.textContent = data.user.email;
+            userCuteId.textContent = data.user.cute_id;
 
+            loadStats();
+            loadSessions();
         } catch (error) {
             console.error('Auth check error:', error);
             window.location.href = '/index.html';
@@ -57,28 +57,244 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // ============================================
-    // REQUEST EMAIL CHANGE
+    // STATISTICS
     // ============================================
 
-    updateEmailButton.addEventListener('click', function() {
-        const currentEmail = userEmail.textContent;
-        const subject = encodeURIComponent('Whistle - Email Change Request');
-        const body = encodeURIComponent(`Hi,\n\nI would like to change my Whistle account email.\n\nCurrent email: ${currentEmail}\nNew email: [please enter your new email here]\n\nThank you.`);
-        window.location.href = `mailto:ben@benparry.ca?subject=${subject}&body=${body}`;
+    async function loadStats() {
+        try {
+            const response = await fetch('/api/time/stats');
+            const data = await response.json();
+
+            const medianHours = Math.floor(data.median_minutes / 60);
+            const medianMins = data.median_minutes % 60;
+            let medianStr = '';
+            if (medianHours > 0) {
+                medianStr = medianHours + ' hour' + (medianHours !== 1 ? 's' : '');
+                if (medianMins > 0) medianStr += ' and ' + medianMins + ' minute' + (medianMins !== 1 ? 's' : '');
+            } else {
+                medianStr = medianMins + ' minute' + (medianMins !== 1 ? 's' : '');
+            }
+
+            statsSentence.innerHTML =
+                'In <span class="stat-highlight">' + data.year + '</span> you have clocked in on ' +
+                '<span class="stat-highlight">' + data.total_days + ' day' + (data.total_days !== 1 ? 's' : '') + '</span> and completed ' +
+                '<span class="stat-highlight">' + data.total_hours + ' hour' + (data.total_hours !== 1 ? 's' : '') + '</span> of work. ' +
+                'On a median day you have worked <span class="stat-highlight">' + medianStr + '</span>.';
+        } catch (error) {
+            console.error('Stats error:', error);
+            statsSentence.textContent = 'Unable to load statistics.';
+        }
+    }
+
+
+    // ============================================
+    // SESSION HISTORY
+    // ============================================
+
+    async function loadSessions() {
+        try {
+            const response = await fetch('/api/time/sessions');
+            const data = await response.json();
+
+            currentEditsRemaining = data.edits_remaining;
+
+            if (data.edits_remaining < 3) {
+                editsInfo.hidden = false;
+                editsInfo.textContent = data.edits_remaining + ' edit' + (data.edits_remaining !== 1 ? 's' : '') + ' remaining this month.';
+            }
+
+            if (data.sessions.length === 0) {
+                sessionsList.innerHTML = '<p style="color: #9D8F86; font-style: italic;">No sessions yet.</p>';
+                return;
+            }
+
+            sessionsList.innerHTML = '';
+            data.sessions.forEach(function(session) {
+                const item = document.createElement('div');
+                item.className = 'session-item';
+
+                const startDate = new Date(session.start_time);
+                const endDate = new Date(session.end_time);
+
+                const dateStr = startDate.toLocaleDateString('en-US', {
+                    weekday: 'short', month: 'short', day: 'numeric'
+                });
+
+                const startTimeStr = startDate.toLocaleTimeString('en-US', {
+                    hour: '2-digit', minute: '2-digit', hour12: true
+                });
+
+                const endTimeStr = endDate.toLocaleTimeString('en-US', {
+                    hour: '2-digit', minute: '2-digit', hour12: true
+                });
+
+                const durationStr = session.duration_hours.toFixed(1) + 'h';
+
+                let editButton = '';
+                if (session.editable && currentEditsRemaining > 0) {
+                    editButton = '<button class="session-edit-btn" data-id="' + session.id +
+                        '" data-start="' + session.start_time +
+                        '" data-end="' + session.end_time + '">Edit</button>';
+                } else if (session.editable && currentEditsRemaining <= 0) {
+                    editButton = '<button class="session-edit-btn" disabled title="No edits remaining this month">Edit</button>';
+                }
+
+                item.innerHTML =
+                    '<div>' +
+                        '<span class="session-date">' + dateStr + '</span><br>' +
+                        '<span class="session-times">' + startTimeStr + ' – ' + endTimeStr + '</span>' +
+                    '</div>' +
+                    '<div style="text-align: right;">' +
+                        '<span class="session-duration">' + durationStr + '</span>' +
+                        editButton +
+                    '</div>';
+
+                sessionsList.appendChild(item);
+            });
+
+            // Bind edit buttons
+            sessionsList.querySelectorAll('.session-edit-btn:not(:disabled)').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    openEditModal(btn.dataset.id, btn.dataset.start, btn.dataset.end);
+                });
+            });
+
+        } catch (error) {
+            console.error('Sessions error:', error);
+            sessionsList.innerHTML = '<p style="color: #D38370;">Failed to load sessions.</p>';
+        }
+    }
+
+
+    // ============================================
+    // EDIT SESSION MODAL
+    // ============================================
+
+    function openEditModal(entryId, startTime, endTime) {
+        document.getElementById('edit-entry-id').value = entryId;
+        editError.hidden = true;
+
+        editWarning.textContent = 'You have ' + currentEditsRemaining +
+            ' edit' + (currentEditsRemaining !== 1 ? 's' : '') +
+            ' remaining this month. This action cannot be undone.';
+
+        // Format for datetime-local input
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+        document.getElementById('edit-start-time').value = formatDatetimeLocal(start);
+        document.getElementById('edit-end-time').value = formatDatetimeLocal(end);
+
+        editModal.hidden = false;
+    }
+
+    function formatDatetimeLocal(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+    }
+
+    cancelEdit.addEventListener('click', function() {
+        editModal.hidden = true;
     });
+
+    editModal.addEventListener('click', function(event) {
+        if (event.target === editModal) editModal.hidden = true;
+    });
+
+    editForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        editError.hidden = true;
+
+        const entryId = document.getElementById('edit-entry-id').value;
+        const startTime = new Date(document.getElementById('edit-start-time').value);
+        const endTime = new Date(document.getElementById('edit-end-time').value);
+
+        try {
+            const response = await fetch('/api/time/edit', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    entry_id: parseInt(entryId),
+                    start_time: startTime.toISOString(),
+                    end_time: endTime.toISOString()
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                editModal.hidden = true;
+                loadSessions();
+                loadStats();
+            } else {
+                editError.textContent = data.error || 'Failed to save changes.';
+                editError.hidden = false;
+            }
+        } catch (error) {
+            console.error('Edit error:', error);
+            editError.textContent = 'Something went wrong. Please try again.';
+            editError.hidden = false;
+        }
+    });
+
+
+    // ============================================
+    // CHANGE PASSWORD
+    // ============================================
+
+    passwordForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        passwordMessage.hidden = true;
+
+        const currentPwd = document.getElementById('current-password').value;
+        const newPwd = document.getElementById('new-password').value;
+        const confirmPwd = document.getElementById('confirm-new-password').value;
+
+        if (newPwd !== confirmPwd) {
+            showPasswordMessage('New passwords do not match.', true);
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/auth/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    current_password: currentPwd,
+                    new_password: newPwd
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showPasswordMessage('Password changed successfully.', false);
+                passwordForm.reset();
+            } else {
+                showPasswordMessage(data.error || 'Failed to change password.', true);
+            }
+        } catch (error) {
+            console.error('Change password error:', error);
+            showPasswordMessage('Something went wrong. Please try again.', true);
+        }
+    });
+
+    function showPasswordMessage(message, isError) {
+        passwordMessage.textContent = message;
+        passwordMessage.className = isError ? 'error-message' : 'success-message';
+        passwordMessage.hidden = false;
+    }
 
 
     // ============================================
     // EXPORT TO CSV
     // ============================================
 
-    exportButton.addEventListener('click', async function() {
-        // Disable button while processing
-        exportButton.disabled = true;
-        exportButton.textContent = 'Exporting...';
-
+    async function exportCSV() {
         try {
-            // Fetch all time entries
             const response = await fetch('/api/time/entries');
             const data = await response.json();
 
@@ -87,75 +303,53 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Convert entries to CSV format
             const csv = convertToCSV(data.entries);
-
-            // Download the CSV file (with user's email in filename)
             const email = userEmail.textContent;
-            downloadCSV(csv, `${email}-whistle-time-entries.csv`);
-
+            downloadCSV(csv, email + '-whistle-time-entries.csv');
         } catch (error) {
             console.error('Export error:', error);
             alert('Something went wrong. Please try again.');
-        } finally {
-            // Re-enable button
-            exportButton.disabled = false;
-            exportButton.textContent = 'Export to CSV';
         }
+    }
+
+    exportButton.addEventListener('click', async function() {
+        exportButton.disabled = true;
+        exportButton.textContent = 'Exporting...';
+        await exportCSV();
+        exportButton.disabled = false;
+        exportButton.textContent = 'Export to CSV';
+    });
+
+    modalExportButton.addEventListener('click', async function() {
+        modalExportButton.disabled = true;
+        modalExportButton.textContent = 'Downloading...';
+        await exportCSV();
+        modalExportButton.disabled = false;
+        modalExportButton.textContent = 'Download CSV First';
     });
 
     function convertToCSV(entries) {
-        // CSV header row
         const headers = ['Date', 'Day', 'Start Time', 'End Time', 'Duration (Hours)'];
-
-        // Convert each entry to a CSV row
-        const rows = entries.map(entry => {
-            return [
-                entry.date,
-                entry.day_of_week,
-                entry.start_time,
-                entry.end_time,
-                entry.duration_hours
-            ];
+        const rows = entries.map(function(entry) {
+            return [entry.date, entry.day_of_week, entry.start_time, entry.end_time, entry.duration_hours];
         });
-
-        // Combine headers and rows
-        const allRows = [headers, ...rows];
-
-        // Convert to CSV string
-        // Each value is wrapped in quotes to handle any commas in the data
-        const csvContent = allRows.map(row => {
-            return row.map(value => {
-                // Escape any quotes in the value
-                const escaped = String(value).replace(/"/g, '""');
-                return '"' + escaped + '"';
+        const allRows = [headers].concat(rows);
+        return allRows.map(function(row) {
+            return row.map(function(value) {
+                return '"' + String(value).replace(/"/g, '""') + '"';
             }).join(',');
         }).join('\n');
-
-        return csvContent;
     }
 
     function downloadCSV(csv, filename) {
-        // Create a Blob (file-like object) from the CSV string
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-
-        // Create a temporary link element
         const link = document.createElement('a');
-
-        // Create a URL for the blob
-        const url = URL.createObjectURL(blob);
-
-        // Set link attributes
-        link.href = url;
+        link.href = URL.createObjectURL(blob);
         link.download = filename;
-
-        // Add link to page, click it, then remove it
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
-        // Clean up the URL object
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(link.href);
     }
 
 
@@ -163,46 +357,33 @@ document.addEventListener('DOMContentLoaded', function() {
     // DELETE ACCOUNT
     // ============================================
 
-    // Show modal when delete button is clicked
     deleteButton.addEventListener('click', function() {
         deleteModal.hidden = false;
     });
 
-    // Hide modal when cancel is clicked
     cancelDelete.addEventListener('click', function() {
         deleteModal.hidden = true;
     });
 
-    // Hide modal when clicking outside the modal content
     deleteModal.addEventListener('click', function(event) {
-        // Only close if clicking the backdrop (not the modal content)
-        if (event.target === deleteModal) {
-            deleteModal.hidden = true;
-        }
+        if (event.target === deleteModal) deleteModal.hidden = true;
     });
 
-    // Actually delete the account when confirmed
     confirmDelete.addEventListener('click', async function() {
-        // Disable button while processing
         confirmDelete.disabled = true;
         confirmDelete.textContent = 'Deleting...';
 
         try {
-            const response = await fetch('/api/account/delete', {
-                method: 'DELETE'
-            });
-
+            const response = await fetch('/api/account/delete', { method: 'DELETE' });
             const data = await response.json();
 
             if (response.ok) {
-                // Account deleted, redirect to login
                 alert('Your account has been deleted.');
                 window.location.href = '/index.html';
             } else {
                 alert(data.error || 'Failed to delete account');
                 deleteModal.hidden = true;
             }
-
         } catch (error) {
             console.error('Delete error:', error);
             alert('Something went wrong. Please try again.');
@@ -220,15 +401,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     logoutButton.addEventListener('click', async function() {
         try {
-            await fetch('/api/auth/logout', {
-                method: 'POST'
-            });
-
+            await fetch('/api/auth/logout', { method: 'POST' });
             window.location.href = '/index.html';
-
         } catch (error) {
             console.error('Logout error:', error);
-            // Redirect anyway
             window.location.href = '/index.html';
         }
     });
