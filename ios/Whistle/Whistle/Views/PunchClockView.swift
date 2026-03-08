@@ -25,7 +25,7 @@ struct PunchClockView: View {
                     showLogoutConfirm = true
                 }
                 .font(.subheadline)
-                .foregroundColor(Color(hex: "4380A4"))
+                .foregroundColor(Color(hex: "D38370"))
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
@@ -55,7 +55,7 @@ struct PunchClockView: View {
                         if restriction == "sunday" {
                             Link("@lavitalenta", destination: URL(string: "https://x.com/lavitalenta")!)
                                 .font(.footnote)
-                                .foregroundColor(Color(hex: "4380A4"))
+                                .foregroundColor(Color(hex: "D38370"))
                         }
                     } else if timeManager.isWorking {
                         Text("Currently Working")
@@ -78,11 +78,11 @@ struct PunchClockView: View {
                 Button(action: punch) {
                     Text(timeManager.isWorking ? "Clock Out" : "Clock In")
                         .font(.custom("PlayfairDisplay-SemiBold", size: 20, relativeTo: .title3))
-                        .foregroundColor(Color(hex: "F0EAD9"))
+                        .foregroundColor(Color(hex: "F5F0E3"))
                         .frame(width: 200, height: 60)
                         .background(timeManager.isWorking
                             ? Color(hex: "D38370")
-                            : Color(hex: "4380A4"))
+                            : Color(hex: "D38370"))
                 }
                 .disabled(!timeManager.canPunch)
                 .opacity(timeManager.canPunch ? 1 : 0.6)
@@ -113,7 +113,7 @@ struct PunchClockView: View {
                     Link(APIConfig.baseURL.replacingOccurrences(of: "https://", with: ""),
                          destination: URL(string: APIConfig.baseURL)!)
                         .font(.footnote)
-                        .foregroundColor(Color(hex: "4380A4"))
+                        .foregroundColor(Color(hex: "D38370"))
                 }
                 .padding(.bottom, 20)
 
@@ -125,7 +125,7 @@ struct PunchClockView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(hex: "F0EAD9"))
+        .background(Color(hex: "F5F0E3"))
         .onAppear {
             if let token = authManager.sessionToken {
                 let manager = TimeManager(sessionToken: token)

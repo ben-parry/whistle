@@ -51,7 +51,7 @@ struct LoginView: View {
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                         .padding(12)
-                        .background(Color(hex: "F0EAD9"))
+                        .background(Color(hex: "F5F0E3"))
                         .overlay(
                             Rectangle().stroke(Color(hex: "C2CDCD"), lineWidth: 1)
                         )
@@ -65,7 +65,7 @@ struct LoginView: View {
                     SecureField("Your password", text: $password)
                         .textContentType(.password)
                         .padding(12)
-                        .background(Color(hex: "F0EAD9"))
+                        .background(Color(hex: "F5F0E3"))
                         .overlay(
                             Rectangle().stroke(Color(hex: "C2CDCD"), lineWidth: 1)
                         )
@@ -74,7 +74,7 @@ struct LoginView: View {
                 Button(action: login) {
                     if isLoading {
                         ProgressView()
-                            .tint(Color(hex: "F0EAD9"))
+                            .tint(Color(hex: "F5F0E3"))
                             .frame(maxWidth: .infinity)
                             .padding(12)
                     } else {
@@ -85,12 +85,12 @@ struct LoginView: View {
                     }
                 }
                 .background(Color(hex: "332F35"))
-                .foregroundColor(Color(hex: "F0EAD9"))
+                .foregroundColor(Color(hex: "F5F0E3"))
                 .disabled(isLoading || email.isEmpty || password.isEmpty)
                 .opacity((isLoading || email.isEmpty || password.isEmpty) ? 0.6 : 1)
             }
             .padding(24)
-            .background(Color(hex: "E3D7BF"))
+            .background(Color(hex: "EBE3D0"))
             .overlay(
                 Rectangle().stroke(Color(hex: "C2CDCD"), lineWidth: 1)
             )
@@ -105,7 +105,7 @@ struct LoginView: View {
                 Link("Create one at whistle on the web",
                      destination: URL(string: "\(APIConfig.baseURL)")!)
                     .font(.footnote)
-                    .foregroundColor(Color(hex: "4380A4"))
+                    .foregroundColor(Color(hex: "D38370"))
             }
             .padding(.top, 24)
 
@@ -118,7 +118,7 @@ struct LoginView: View {
                 .padding(.bottom, 20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(hex: "F0EAD9"))
+        .background(Color(hex: "F5F0E3"))
     }
 
     private func login() {
