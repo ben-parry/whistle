@@ -4,15 +4,16 @@
    A hyper-opinionated punch clock with Art Nouveau accents.
 
    Core Colors:
-   - Background: #F5F0E3 (light cream)
-   - Secondary surface: #EBE3D0 (warm sand)
-   - Borders: #C2CDCD (sage)
+   - Background: #EEE7D1 (light cream)
+   - Secondary surface: #E5CCA4 (warm sand)
+   - Borders: #8A9A7B (sage)
    - Muted text: #9D8F86 (warm grey)
-   - Primary text: #332F35 (deep charcoal)
+   - Primary text: #36332E (deep charcoal)
 
    Highlight Colors:
-   - Terracotta: #D38370 (links, interactive, highlights)
-   - Heatmap blue: #4380E4 (heatmap levels only)
+   - Steel blue: #4380A4 (links, interactive)
+   - Deep red: #8F3416 (danger, active states)
+   - Heatmap green: #6C7A61 (heatmap levels only)
    ============================================ */
 
 
@@ -34,11 +35,11 @@ body {
                  Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     font-size: 16px;
     line-height: 1.6;
-    background-color: #F5F0E3;
-    color: #332F35;
+    background-color: #EEE7D1;
+    color: #36332E;
     background-image:
-        radial-gradient(circle at 20% 80%, rgba(211, 131, 112, 0.02) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(211, 131, 112, 0.02) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(138, 154, 123, 0.02) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(138, 154, 123, 0.02) 0%, transparent 50%);
     min-height: 100vh;
 }
 
@@ -50,11 +51,11 @@ body {
 h1, h2, h3, .logo {
     font-family: 'Playfair Display', Georgia, serif;
     font-weight: 600;
-    color: #332F35;
+    color: #36332E;
 }
 
 a {
-    color: #D38370;
+    color: #4380A4;
     text-decoration: none;
 }
 
@@ -68,7 +69,7 @@ a:hover {
    ============================================ */
 
 .container {
-    max-width: 800px;
+    max-width: 920px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -79,8 +80,8 @@ a:hover {
    ============================================ */
 
 .card {
-    background-color: #EBE3D0;
-    border: 1px solid #C2CDCD;
+    background-color: #E5CCA4;
+    border: 2px solid #8A9A7B;
     padding: 24px;
     margin-bottom: 20px;
 }
@@ -116,8 +117,8 @@ a:hover {
 }
 
 .button-primary {
-    background-color: #332F35;
-    color: #F5F0E3;
+    background-color: #36332E;
+    color: #EEE7D1;
 }
 
 .button-primary:hover:not(:disabled) {
@@ -125,27 +126,27 @@ a:hover {
 }
 
 .button-secondary {
-    background-color: #C2CDCD;
-    color: #332F35;
+    background-color: #8A9A7B;
+    color: #36332E;
 }
 
 .button-secondary:hover:not(:disabled) {
-    background-color: #b0bcbc;
+    background-color: #7a8a6b;
 }
 
 .button-danger {
-    background-color: #D38370;
-    color: #F5F0E3;
+    background-color: #8F3416;
+    color: #EEE7D1;
 }
 
 .button-danger:hover:not(:disabled) {
-    background-color: #c06f5c;
+    background-color: #7a2b12;
 }
 
 .button-link {
     background: none;
     border: none;
-    color: #D38370;
+    color: #4380A4;
     padding: 0;
     font-size: inherit;
     cursor: pointer;
@@ -168,7 +169,7 @@ a:hover {
     display: block;
     margin-bottom: 6px;
     font-weight: 500;
-    color: #332F35;
+    color: #36332E;
 }
 
 .form-group input,
@@ -176,17 +177,17 @@ a:hover {
     width: 100%;
     padding: 12px;
     font-size: 16px;
-    border: 1px solid #C2CDCD;
-    background-color: #F5F0E3;
-    color: #332F35;
+    border: 1px solid #8A9A7B;
+    background-color: #EEE7D1;
+    color: #36332E;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #D38370;
-    box-shadow: 0 0 0 3px rgba(211, 131, 112, 0.15);
+    border-color: #4380A4;
+    box-shadow: 0 0 0 3px rgba(67, 128, 164, 0.15);
 }
 
 .form-group input::placeholder {
@@ -199,17 +200,17 @@ a:hover {
    ============================================ */
 
 .error-message {
-    background-color: rgba(211, 131, 112, 0.15);
-    border: 1px solid #D38370;
-    color: #a0584a;
+    background-color: rgba(143, 52, 22, 0.15);
+    border: 2px solid #8F3416;
+    color: #8F3416;
     padding: 12px 16px;
     margin-bottom: 20px;
 }
 
 .success-message {
-    background-color: rgba(211, 131, 112, 0.1);
-    border: 1px solid #D38370;
-    color: #a0584a;
+    background-color: rgba(143, 52, 22, 0.1);
+    border: 2px solid #8F3416;
+    color: #8F3416;
     padding: 12px 16px;
     margin-bottom: 20px;
 }
@@ -236,7 +237,7 @@ a:hover {
 .auth-header .logo {
     font-size: 48px;
     margin-bottom: 8px;
-    color: #332F35;
+    color: #36332E;
 }
 
 .auth-header .tagline {
@@ -253,7 +254,7 @@ a:hover {
 .auth-tabs {
     display: flex;
     margin-bottom: 24px;
-    border-bottom: 1px solid #C2CDCD;
+    border-bottom: 1px solid #8A9A7B;
 }
 
 .tab-button {
@@ -271,12 +272,12 @@ a:hover {
 }
 
 .tab-button:hover {
-    color: #332F35;
+    color: #36332E;
 }
 
 .tab-button.active {
-    color: #332F35;
-    border-bottom-color: #D38370;
+    color: #36332E;
+    border-bottom-color: #4380A4;
 }
 
 .auth-form .button {
@@ -298,7 +299,7 @@ a:hover {
 .ornament {
     text-align: center;
     font-size: 24px;
-    color: #C2CDCD;
+    color: #8A9A7B;
 }
 
 
@@ -308,21 +309,21 @@ a:hover {
 
 .app-container {
     padding-top: 20px;
-    padding-bottom: 40px;
+    padding-bottom: 24px;
 }
 
 .app-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 40px;
+    margin-bottom: 24px;
     padding-bottom: 20px;
-    border-bottom: 1px solid #C2CDCD;
+    border-bottom: 1px solid #8A9A7B;
 }
 
 .app-header .logo {
     font-size: 28px;
-    color: #332F35;
+    color: #36332E;
     text-decoration: none;
 }
 
@@ -338,7 +339,7 @@ a:hover {
 }
 
 .nav-link {
-    color: #D38370;
+    color: #4380A4;
     font-weight: 500;
 }
 
@@ -349,12 +350,12 @@ a:hover {
 
 .punch-section {
     text-align: center;
-    padding: 40px 20px;
-    margin-bottom: 40px;
+    padding: 24px 20px;
+    margin-bottom: 24px;
 }
 
 .status-display {
-    margin-bottom: 32px;
+    margin-bottom: 20px;
 }
 
 .status-text {
@@ -364,7 +365,7 @@ a:hover {
 }
 
 .status-text.working {
-    color: #D38370;
+    color: #8F3416;
 }
 
 .status-text.not-working {
@@ -372,7 +373,7 @@ a:hover {
 }
 
 .status-text .restriction-link {
-    color: #D38370;
+    color: #4380A4;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 14px;
     display: block;
@@ -383,7 +384,7 @@ a:hover {
     font-size: 48px;
     font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
-    color: #332F35;
+    color: #36332E;
     letter-spacing: 2px;
 }
 
@@ -404,23 +405,23 @@ a:hover {
 }
 
 .punch-button.not-working {
-    background-color: #D38370;
-    border-color: #c06f5c;
-    color: #F5F0E3;
+    background-color: #7D8F67;
+    border-color: #6C7A61;
+    color: #EEE7D1;
 }
 
 .punch-button.not-working:hover:not(:disabled) {
-    background-color: #c06f5c;
+    background-color: #6C7A61;
 }
 
 .punch-button.working {
-    background-color: #D38370;
-    border-color: #c06f5c;
-    color: #F5F0E3;
+    background-color: #8F3416;
+    border-color: #7a2b12;
+    color: #EEE7D1;
 }
 
 .punch-button.working:hover:not(:disabled) {
-    background-color: #c06f5c;
+    background-color: #7a2b12;
 }
 
 
@@ -429,12 +430,12 @@ a:hover {
    ============================================ */
 
 .stats-section {
-    margin-bottom: 40px;
+    margin-bottom: 24px;
 }
 
 .stat-card {
-    background-color: #EBE3D0;
-    border: 1px solid #C2CDCD;
+    background-color: #E5CCA4;
+    border: 2px solid #8A9A7B;
     padding: 24px;
     text-align: center;
 }
@@ -451,25 +452,33 @@ a:hover {
     font-family: 'Playfair Display', Georgia, serif;
     font-size: 48px;
     font-weight: 700;
-    color: #332F35;
+    color: #36332E;
 }
 
 .progress-container {
     width: 100%;
     max-width: 200px;
     height: 4px;
-    background-color: #C2CDCD;
-    margin: 12px auto 0;
+    background-color: #8A9A7B;
     border-radius: 2px;
     overflow: hidden;
 }
 
 .progress-bar {
     height: 100%;
-    background-color: #D38370;
+    background-color: #4380A4;
     border-radius: 2px;
     transition: width 0.3s ease;
     width: 0%;
+}
+
+/* Progress bar container with info icon */
+.progress-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
 }
 
 
@@ -478,13 +487,13 @@ a:hover {
    ============================================ */
 
 .heatmap-section {
-    margin-bottom: 40px;
+    margin-bottom: 24px;
 }
 
 .section-title {
     font-size: 20px;
     margin-bottom: 20px;
-    color: #332F35;
+    color: #36332E;
 }
 
 .heatmap-container {
@@ -534,7 +543,7 @@ a:hover {
 .heatmap-cell {
     width: 12px;
     height: 12px;
-    background-color: #F5F0E3;
+    background-color: #EEE7D1;
 }
 
 .heatmap-cell.empty {
@@ -542,39 +551,39 @@ a:hover {
 }
 
 .heatmap-cell.future {
-    background-color: #F5F0E3;
+    background-color: #EEE7D1;
     opacity: 0.5;
 }
 
-/* Heatmap color levels — #4380E4 at varying opacity */
+/* Heatmap color levels — green at varying opacity */
 .heatmap-cell.level-0,
 .legend-box.level-0 {
-    background-color: #F5F0E3;
+    background-color: #EEE7D1;
 }
 
 .heatmap-cell.level-1,
 .legend-box.level-1 {
-    background-color: rgba(67, 128, 228, 0.2);
+    background-color: rgba(108, 122, 97, 0.2);
 }
 
 .heatmap-cell.level-2,
 .legend-box.level-2 {
-    background-color: rgba(67, 128, 228, 0.45);
+    background-color: rgba(108, 122, 97, 0.45);
 }
 
 .heatmap-cell.level-3,
 .legend-box.level-3 {
-    background-color: rgba(67, 128, 228, 0.7);
+    background-color: rgba(108, 122, 97, 0.7);
 }
 
 .heatmap-cell.level-4,
 .legend-box.level-4 {
-    background-color: #4380E4;
+    background-color: #6C7A61;
 }
 
 /* Sunday cells — uniformly greyed out */
 .heatmap-cell.sunday {
-    background-color: #EBE3D0 !important;
+    background-color: #E5CCA4 !important;
     opacity: 1 !important;
 }
 
@@ -597,6 +606,14 @@ a:hover {
     margin: 0 4px;
 }
 
+/* Heatmap hover text */
+.heatmap-hover-text {
+    font-size: 13px;
+    color: #9D8F86;
+    margin-top: 8px;
+    min-height: 20px;
+}
+
 
 /* ============================================
    PROFILE PAGE STYLES
@@ -615,8 +632,8 @@ a:hover {
 .danger-card,
 .sessions-card,
 .password-card {
-    background-color: #EBE3D0;
-    border: 1px solid #C2CDCD;
+    background-color: #E5CCA4;
+    border: 2px solid #8A9A7B;
     padding: 24px;
 }
 
@@ -635,17 +652,17 @@ a:hover {
 
 .profile-info p {
     font-size: 18px;
-    color: #332F35;
+    color: #36332E;
 }
 
 .user-email {
     font-size: 18px;
-    color: #332F35;
+    color: #36332E;
 }
 
 .cute-id {
     font-family: 'Courier New', Courier, monospace;
-    color: #D38370;
+    color: #4380A4;
     font-size: 14px;
 }
 
@@ -654,14 +671,14 @@ a:hover {
     font-family: 'Playfair Display', Georgia, serif;
     font-size: 20px;
     line-height: 1.8;
-    color: #332F35;
+    color: #36332E;
     padding: 24px;
-    background-color: #EBE3D0;
-    border: 1px solid #C2CDCD;
+    background-color: #E5CCA4;
+    border: 2px solid #8A9A7B;
 }
 
 .stats-sentence .stat-highlight {
-    color: #D38370;
+    color: #4380A4;
     font-weight: 700;
 }
 
@@ -677,7 +694,7 @@ a:hover {
     justify-content: space-between;
     align-items: center;
     padding: 12px 0;
-    border-bottom: 1px solid #C2CDCD;
+    border-bottom: 1px solid #8A9A7B;
 }
 
 .session-item:last-child {
@@ -686,7 +703,7 @@ a:hover {
 
 .session-date {
     font-weight: 500;
-    color: #332F35;
+    color: #36332E;
 }
 
 .session-times {
@@ -696,14 +713,14 @@ a:hover {
 
 .session-duration {
     font-weight: 500;
-    color: #332F35;
+    color: #36332E;
     white-space: nowrap;
 }
 
 .session-edit-btn {
     background: none;
     border: none;
-    color: #D38370;
+    color: #4380A4;
     cursor: pointer;
     font-size: 13px;
     padding: 4px 8px;
@@ -722,11 +739,11 @@ a:hover {
 
 .edits-warning {
     font-size: 13px;
-    color: #D38370;
+    color: #8F3416;
     margin-top: 8px;
     padding: 8px 12px;
-    background-color: rgba(211, 131, 112, 0.1);
-    border: 1px solid rgba(211, 131, 112, 0.3);
+    background-color: rgba(143, 52, 22, 0.1);
+    border: 1px solid rgba(143, 52, 22, 0.3);
 }
 
 /* Edit modal */
@@ -742,23 +759,23 @@ a:hover {
     width: 100%;
     padding: 10px;
     font-size: 14px;
-    border: 1px solid #C2CDCD;
-    background-color: #F5F0E3;
-    color: #332F35;
+    border: 1px solid #8A9A7B;
+    background-color: #EEE7D1;
+    color: #36332E;
 }
 
 .export-description,
 .danger-description {
     margin-bottom: 16px;
-    color: #332F35;
+    color: #36332E;
 }
 
 .danger-title {
-    color: #D38370;
+    color: #8F3416;
 }
 
 .danger-card {
-    border-color: #D38370;
+    border-color: #8F3416;
 }
 
 
@@ -772,7 +789,7 @@ a:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(51, 47, 53, 0.6);
+    background-color: rgba(54, 51, 46, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -785,22 +802,22 @@ a:hover {
 }
 
 .modal-content {
-    background-color: #F5F0E3;
+    background-color: #EEE7D1;
     padding: 32px;
     max-width: 450px;
     width: 100%;
-    border: 1px solid #C2CDCD;
+    border: 2px solid #8A9A7B;
 }
 
 .modal-title {
     font-size: 24px;
     margin-bottom: 16px;
-    color: #D38370;
+    color: #8F3416;
 }
 
 .modal-text {
     margin-bottom: 24px;
-    color: #332F35;
+    color: #36332E;
 }
 
 .modal-buttons {
@@ -810,12 +827,12 @@ a:hover {
 }
 
 .modal-warning {
-    background-color: rgba(211, 131, 112, 0.1);
-    border: 1px solid rgba(211, 131, 112, 0.3);
+    background-color: rgba(143, 52, 22, 0.1);
+    border: 1px solid rgba(143, 52, 22, 0.3);
     padding: 12px;
     margin-bottom: 16px;
     font-size: 14px;
-    color: #a0584a;
+    color: #8F3416;
 }
 
 .modal-csv-option {
@@ -838,14 +855,14 @@ a:hover {
 .leaderboard-tabs {
     display: flex;
     margin-bottom: 24px;
-    border-bottom: 1px solid #C2CDCD;
+    border-bottom: 1px solid #8A9A7B;
 }
 
 .leaderboard-table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #EBE3D0;
-    border: 1px solid #C2CDCD;
+    background-color: #E5CCA4;
+    border: 2px solid #8A9A7B;
 }
 
 .leaderboard-table th {
@@ -855,13 +872,13 @@ a:hover {
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #9D8F86;
-    border-bottom: 1px solid #C2CDCD;
+    border-bottom: 1px solid #8A9A7B;
 }
 
 .leaderboard-table td {
     padding: 12px 16px;
-    border-bottom: 1px solid rgba(194, 205, 205, 0.5);
-    color: #332F35;
+    border-bottom: 1px solid rgba(138, 154, 123, 0.5);
+    color: #36332E;
 }
 
 .leaderboard-table tr:last-child td {
@@ -903,7 +920,7 @@ a:hover {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #D38370;
+    background-color: #8F3416;
     margin-right: 6px;
     animation: pulse 2s infinite;
 }
@@ -916,7 +933,7 @@ a:hover {
 .active-timer {
     font-family: 'Courier New', Courier, monospace;
     font-size: 14px;
-    color: #D38370;
+    color: #8F3416;
 }
 
 .leaderboard-empty {
@@ -924,6 +941,40 @@ a:hover {
     padding: 40px 20px;
     color: #9D8F86;
     font-style: italic;
+}
+
+/* Leaderboard unified header */
+.leaderboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.leaderboard-toggle {
+    display: flex;
+    gap: 8px;
+}
+
+.toggle-btn {
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    background: none;
+    border: 2px solid #8A9A7B;
+    color: #9D8F86;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toggle-btn.active {
+    background-color: #36332E;
+    border-color: #36332E;
+    color: #EEE7D1;
+}
+
+.toggle-btn:hover:not(.active) {
+    color: #36332E;
 }
 
 
@@ -934,7 +985,7 @@ a:hover {
 .app-footer {
     margin-top: 60px;
     padding-top: 20px;
-    border-top: 1px solid #C2CDCD;
+    border-top: 1px solid #8A9A7B;
 }
 
 
@@ -1001,9 +1052,9 @@ a:hover {
     background: linear-gradient(
         90deg,
         transparent 0%,
-        #C2CDCD 15%,
-        #D38370 50%,
-        #C2CDCD 85%,
+        #8A9A7B 15%,
+        #8A9A7B 50%,
+        #8A9A7B 85%,
         transparent 100%
     );
     margin-bottom: 24px;
@@ -1014,7 +1065,7 @@ a:hover {
     display: block;
     text-align: center;
     font-size: 20px;
-    color: #C2CDCD;
+    color: #8A9A7B;
     margin-top: 16px;
 }
 
@@ -1030,7 +1081,7 @@ a:hover {
     top: 8px;
     right: 12px;
     font-size: 16px;
-    color: #C2CDCD;
+    color: #8A9A7B;
 }
 
 
@@ -1043,8 +1094,8 @@ a:hover {
 }
 
 .about-card {
-    background-color: #EBE3D0;
-    border: 1px solid #C2CDCD;
+    background-color: #E5CCA4;
+    border: 2px solid #8A9A7B;
     padding: 24px;
     position: relative;
 }
@@ -1055,15 +1106,130 @@ a:hover {
     top: 8px;
     right: 12px;
     font-size: 16px;
-    color: #C2CDCD;
+    color: #8A9A7B;
 }
 
 .about-content p {
     margin-bottom: 16px;
-    color: #332F35;
+    color: #36332E;
     line-height: 1.7;
 }
 
 .about-content p:last-child {
     margin-bottom: 0;
+}
+
+
+/* ============================================
+   SUNDAY CONTENT
+   ============================================ */
+
+.sunday-section {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.sunday-quote {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 24px;
+    font-style: italic;
+    color: #36332E;
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+
+.sunday-image {
+    max-width: 400px;
+    width: 100%;
+    opacity: 0.9;
+}
+
+/* Sunday poem (leaderboard) */
+.sunday-poem {
+    max-width: 600px;
+    margin: 40px auto;
+    text-align: center;
+}
+
+.sunday-poem .poem-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #36332E;
+    margin-bottom: 8px;
+}
+
+.sunday-poem .poem-text {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.9;
+    color: #36332E;
+    white-space: pre-line;
+    margin-bottom: 16px;
+}
+
+.sunday-poem .poem-attribution {
+    font-size: 14px;
+    color: #9D8F86;
+    font-style: italic;
+}
+
+
+/* ============================================
+   PROFILE HEADER IMAGE
+   ============================================ */
+
+.profile-header-image-container {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.profile-header-image {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #8A9A7B;
+}
+
+
+/* ============================================
+   INFO ICON
+   ============================================ */
+
+.info-icon {
+    display: inline-block;
+    color: #9D8F86;
+    font-size: 16px;
+    margin-left: 8px;
+    text-decoration: none;
+    vertical-align: middle;
+}
+
+.info-icon:hover {
+    color: #4380A4;
+    text-decoration: none;
+}
+
+
+/* ============================================
+   ACTIVE TODAY CELL
+   ============================================ */
+
+.today-active {
+    background-color: rgba(143, 52, 22, 0.12) !important;
+    color: #8F3416 !important;
+    font-weight: 700;
+}
+
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+
+.loading-state {
+    text-align: center;
+    padding: 20px;
+    color: #9D8F86;
+    font-style: italic;
 }

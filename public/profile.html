@@ -26,6 +26,9 @@
 
         <!-- PROFILE SECTION -->
         <section class="profile-section">
+            <div class="profile-header-image-container">
+                <img id="profile-header-img" class="profile-header-image" alt="Profile decoration">
+            </div>
             <h2 class="section-title">Your Profile</h2>
             <div class="card profile-card">
                 <div class="profile-info">
@@ -45,10 +48,29 @@
 
         <!-- STATISTICS SECTION -->
         <section class="profile-section">
-            <h2 class="section-title">Your Year</h2>
             <div id="stats-sentence" class="stats-sentence">
                 Loading your statistics...
             </div>
+            <section class="heatmap-section profile-heatmap">
+                <div class="heatmap-months" id="profile-heatmap-months"></div>
+                <div class="heatmap-container">
+                    <div class="heatmap-days">
+                        <span></span><span>Mon</span><span></span><span>Wed</span>
+                        <span></span><span>Fri</span><span></span>
+                    </div>
+                    <div id="profile-heatmap-grid" class="heatmap-grid"></div>
+                </div>
+                <div class="heatmap-legend">
+                    <span class="legend-label">Less</span>
+                    <span class="legend-box level-0"></span>
+                    <span class="legend-box level-1"></span>
+                    <span class="legend-box level-2"></span>
+                    <span class="legend-box level-3"></span>
+                    <span class="legend-box level-4"></span>
+                    <span class="legend-label">More</span>
+                </div>
+                <div id="heatmap-hover-text" class="heatmap-hover-text">&nbsp;</div>
+            </section>
         </section>
 
         <!-- SESSION HISTORY SECTION -->
@@ -144,7 +166,7 @@
         <!-- EDIT SESSION MODAL -->
         <div id="edit-modal" class="modal" hidden>
             <div class="modal-content">
-                <h3 class="modal-title" style="color: #332F35;">Edit Session</h3>
+                <h3 class="modal-title" style="color: #36332E;">Edit Session</h3>
                 <div id="edit-warning" class="edits-warning"></div>
                 <div id="edit-error" class="error-message" hidden></div>
                 <form id="edit-form" class="edit-form">

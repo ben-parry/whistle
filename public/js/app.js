@@ -75,6 +75,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = '/index.html';
                 return;
             }
+
+            // Sunday: hide work UI, show sunday content
+            if (new Date().getDay() === 0) {
+                const punchSection = document.querySelector('.punch-section');
+                const statsSection = document.querySelector('.stats-section');
+                const heatmapSection = document.querySelector('.heatmap-section');
+                if (punchSection) punchSection.hidden = true;
+                if (statsSection) statsSection.hidden = true;
+                if (heatmapSection) heatmapSection.hidden = true;
+                const sundayContent = document.getElementById('sunday-content');
+                if (sundayContent) sundayContent.hidden = false;
+                return;
+            }
+
             loadStatus();
             loadHeatmap();
         } catch (error) {

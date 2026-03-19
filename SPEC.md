@@ -15,13 +15,14 @@ Whistle enforces boundaries. Work happens between 5am and 9pm, never on Sundays,
 - **Simple punch clock** — One button to clock in/out
 - **Year total** — Hours worked this year with progress bar toward 2,333 hours
 - **Heatmap visualization** — GitHub-style calendar showing daily work (Sundays greyed out)
-- **Public leaderboard** — See who's working today (realtime) and yearly totals
+- **Public leaderboard** — Unified table with year/today toggle, realtime ticking for active users
 - **Session history** — View and edit recent sessions (with limits)
 - **Statistics** — Inline prose summary of your year
 - **CSV export** — Download all your time entries
 - **Change password** — Self-service password changes
 - **Native iOS app** — Minimal companion for clock in/out on the go
 - **Multi-user** — Each person gets a name, a cute three-word ID, and their own account
+- **Sunday experience** — Special quote, image, and poetry on Sundays
 
 ## Tech Stack
 
@@ -50,9 +51,53 @@ These rules are enforced on both client and server:
 |---|---|
 | **Working hours** | 5:00 AM – 9:00 PM only |
 | **Daily maximum** | 12 hours per calendar day (across all sessions) |
-| **Sundays** | No work allowed. Message: "It is Sunday, let us seize the means of relaxation." with a link to [lavitalenta](https://x.com/lavitalenta) |
-| **Auto clock-out** | If a session is still open at 9:00 PM, it is automatically closed with `end_time = 21:00`. Enforced server-side on next status check and client-side in realtime. |
-| **No Saturday restriction** | Saturdays follow the standard 5am–9pm rules (the old 6pm Saturday cutoff is removed) |
+| **Sundays** | No work allowed. Full Sunday experience displayed (see Sunday Behavior below) |
+| **Auto clock-out** | If a session is still open at 9:00 PM, it is automatically closed with `end_time = 21:00`. Enforced server-side on next status check, on leaderboard API requests, and client-side in realtime. |
+| **No Saturday restriction** | Saturdays follow the standard 5am–9pm rules |
+
+### Server-Side Auto-Close (Bug Fix)
+
+Stale sessions (those that should have been auto-closed at 9pm but the user never returned) must be closed server-side **proactively** — not just on the owning user's status check, but also:
+
+- When the **leaderboard API** is called: before computing today's or year's data, auto-close any open sessions that are past 9pm in their `start_timezone`. This prevents the leaderboard from showing impossible values like "20+ hours working."
+- When the **status API** is called: existing behavior, auto-close on the user's own status check.
+
+### Client-Side Stale Session Handling (Bug Fix)
+
+When a user returns to the punch clock page after a long absence:
+
+- Do **not** display elapsed time or working state until the first status API response has returned.
+- Show a loading/neutral state instead of assuming the previous client-side state is current.
+- Same applies to the leaderboard: do not render live timers until the first API response confirms active sessions.
+
+## Sunday Behavior
+
+Sundays have a completely different experience across the app.
+
+### Punch Clock Page (Sundays)
+
+- **Hide entirely**: The clock-in/out button, year-at-a-glance heatmap, year total / hours worked, and progress bar are all removed from the page.
+- **Show instead**: A centered quote in quotation marks: "It is Sunday, let us seize the means of relaxation."
+- **Below the quote**: Display the image `whistle-resources/pics/sunday.png`.
+- The navigation bar remains visible and functional.
+
+### Leaderboard Page (Sundays)
+
+- **Hide entirely**: Both the Year and Today table views, plus the toggle. No leaderboard data is shown.
+- **Show instead**: A poem from the curated poetry collection (see Poems Database below), selected by week number so that each Sunday of the year shows a different poem.
+- Attribution format: poem title, poet name, year.
+
+### Poems Database
+
+A file at `public/data/poems.js` containing ~52 exceptional public domain poems. The collection should span:
+
+- **Death, pain, suffering** — difficult, weighty poems
+- **God and the divine** — spiritual and theological
+- **Beauty and wonder of the world** — nature, joy, awe
+
+Preferred poets include William Blake, T.S. Eliot, Emily Dickinson, Walt Whitman, Gerard Manley Hopkins, John Keats, Percy Bysshe Shelley, William Butler Yeats, Christina Rossetti, Rainer Maria Rilke, and others of similar caliber.
+
+Each poem entry should include: `title`, `poet`, `year`, and `text` (full poem text). The file exports a simple array. Selection is by week number of the year (`weekNumber % poems.length`), ensuring a different poem each Sunday.
 
 ## User Identity
 
@@ -61,7 +106,7 @@ These rules are enforced on both client and server:
 Every user must provide a real name at registration. Names are validated:
 - Must contain only Unicode letters (no numbers)
 - No more than one consecutive space between parts
-- Multi-part names are fine (e.g., "María José", "李明")
+- Multi-part names are fine (e.g., "Maria Jose", "Li Ming")
 - Validated by Claude API as a plausible real name from any language/culture (fails open — if API is unavailable, regex-only validation is accepted)
 - Displayed on the leaderboard (email is never shown publicly)
 
@@ -83,6 +128,7 @@ This ID is displayed alongside the user's name on the leaderboard and profile.
 
 - Tabbed form for Sign In and Create Account
 - Registration requires: email, password (8+ chars), and name (validated)
+- **No password confirmation field** — single password entry only
 - "Forgot password?" links to admin email
 - Link to About page
 
@@ -90,17 +136,30 @@ This ID is displayed alongside the user's name on the leaderboard and profile.
 
 - Main working interface
 - Big clock in/out button with elapsed time display
+- **Clock In button color**: `#7D8F67` (muted green)
 - Year total with progress bar (goal: 2,333 hours)
-- GitHub-style heatmap for the current year
+  - **(i) icon** next to the progress bar that links to the About page
+- GitHub-style heatmap titled **"Calendar"** (not "Your Year At A Glance")
   - Sundays are uniformly greyed out regardless of data
-  - Heatmap color: `#4380E4` at full opacity for the most hours, decreasing opacity for fewer hours
+  - Heatmap uses green color scheme (see Color Scheme below)
 - Clicking the "Whistle" wordmark navigates here
+- On Sundays: all of the above is hidden, replaced with Sunday quote + image (see Sunday Behavior)
+- **Loading state**: Do not show elapsed time or working status until the first API status response returns
 
 ### Profile (`profile.html`)
 
+- **Profile header image**: At the top of the page, before "Your Profile", display one of the Mucha Art Nouveau images (`whistle-resources/pics/mucha-1.png` through `mucha-9.png`) as a circular crop, ~120-150px diameter, centered. A random image is selected on each page load.
 - User info: name, email, cute ID
-- **Statistics section**: Inline prose with highlighted dynamic values:
-  > "In **2026** you have clocked in on **47 days** and completed **312 hours** of work. On a median day you have worked **6 hours and 38 minutes**."
+- **Statistics section** (in its own boxed card, **no "Your Year" header**):
+  - Inline prose with highlighted dynamic values (highlight color: steel blue `#4380A4`):
+    > "In **2026** you have clocked in on **47 days** and completed **312 hours** of work. On a median day you worked **6 hours** and **38 minutes**."
+  - Note the wording change: "you worked" (past tense), and median formatted as "X hours and Y minutes" (not "X hours and Y minutes" with "have worked" phrasing).
+- **Heatmap** (immediately below the statistics card):
+  - Same GitHub-style heatmap as the clock page, using the same green color scheme
+  - **No title** above the heatmap
+  - **Hover interaction**: When hovering over a heatmap cell, a line of text appears below the heatmap (outside the heatmap box, in a slightly muted color) saying: "On the [DAY]th of [Month], [Year] you worked [X] hours and [Y] minutes of work."
+  - When not hovering, no text is shown (the space is reserved but empty — the box does not resize).
+  - Ordinal suffixes: 1st, 2nd, 3rd, 4th, etc.
 - **Session history**: Scrollable list of all sessions with start/end times
   - Sessions from the previous calendar month and current month can be edited (start and end time)
   - One edit operation = one count toward the limit (even if both start and end time change)
@@ -115,17 +174,30 @@ This ID is displayed alongside the user's name on the leaderboard and profile.
 ### Leaderboard (`leaderboard.html`)
 
 - **Public page** — no authentication required
-- Two views toggled by tabs:
+- **Single unified table** with a toggle in the top right corner (inline with the "Leaderboard" title) that switches sort order between "This Year" and "Today"
+- The table always shows both columns: yearly total hours and today's hours
 
-**Yearly View:**
-- All users ranked by total hours worked this calendar year
-- Shows: rank, name, cute ID, total sessions, total hours
+**Table columns:**
+- Rank
+- Name (with cute ID below)
+- Year Hours
+- Today Hours
 
-**Today View:**
-- All users who have logged any time today
-- Shows: name, cute ID, total time today, active indicator (if currently clocked in)
-- Active sessions show a live-ticking timer (client-side, between polls)
-- Data refreshes via polling every 30 seconds (seamless, no loading indicators)
+**Today column behavior:**
+- If a user is currently working: their today cell is shaded in highlight color `#8F3416` and the value ticks up in realtime (every second)
+- If a user is not currently working: their today value is shown in regular text color (`#36332E`)
+
+**No Status column** — the active/working state is conveyed purely through the today cell's color and ticking behavior.
+
+**Sorting:**
+- "This Year" toggle: rows sorted by Year Hours descending
+- "Today" toggle: rows sorted by Today Hours descending
+
+**Polling**: Data refreshes every 30 seconds (seamless, no loading indicators). Active timers tick every 1 second client-side between polls.
+
+**On Sundays**: The entire table and toggle are hidden. A poem from the curated collection is displayed instead (see Sunday Behavior).
+
+**Loading state**: Do not render live timers until the first API response confirms active session data.
 
 ### About (`about.html`)
 
@@ -156,38 +228,61 @@ All time-of-day rules (5am–9pm, Sunday check, 12h/day limit) are evaluated in 
 
 | Color | Hex | Usage |
 |---|---|---|
-| Warm cream | `#F0EAD9` | Page background |
-| Sand | `#E3D7BF` | Card backgrounds, secondary surfaces |
-| Sage | `#C2CDCD` | Borders, subtle accents |
+| Cream | `#EEE7D1` | Page background |
+| Sand | `#E5CCA4` | Card backgrounds, boxed content |
+| Muted green border | `#8A9A7B` | Borders (complementing the green palette) |
 | Warm grey | `#9D8F86` | Secondary text, muted elements |
-| Deep charcoal | `#332F35` | Primary text |
+| Deep charcoal | `#36332E` | Primary text |
 
 ### Highlight Colors
 
 | Color | Hex | Usage |
 |---|---|---|
-| Terracotta | `#D38370` | Warnings, danger zone, active/working state |
-| Steel blue | `#4380A4` | Links, interactive elements |
+| Deep red | `#8F3416` | Highlight 1: warnings, danger zone, active/working state on leaderboard |
+| Mauve | `#A07178` | Highlight 2: (available for accent use) |
+| Steel blue | `#4380A4` | Links, interactive elements, profile stat highlights |
+| Muted green | `#7D8F67` | Clock In button |
 
-### Heatmap
+### Heatmap (Green scheme)
 
-Fixed thresholds using `#4380E4` at varying opacity:
+Fixed thresholds using `#6C7A61` at varying opacity (same pattern as before but green):
 
-- Level 4 (10+ hours): `#4380E4` at 100% opacity
-- Level 3 (6–10 hours): `#4380E4` at ~70% opacity
-- Level 2 (3–6 hours): `#4380E4` at ~45% opacity
-- Level 1 (0.1–3 hours): `#4380E4` at ~20% opacity
-- Level 0 (no work): Background color (`#F0EAD9`)
-- Sundays: Uniformly `#E3D7BF` regardless of data
+- Level 4 (10+ hours): `#6C7A61` at 100% opacity
+- Level 3 (6–10 hours): `#6C7A61` at ~70% opacity
+- Level 2 (3–6 hours): `#6C7A61` at ~45% opacity
+- Level 1 (0.1–3 hours): `#6C7A61` at ~20% opacity
+- Level 0 (no work): Background color (`#EEE7D1`)
+- Sundays: Uniformly `#E5CCA4` regardless of data
 
-All styling must maintain the existing Art Nouveau aesthetic: Playfair Display font, decorative ornaments, elegant card layouts, warm tones.
+### Decorative Accents
+
+All styling must maintain the existing Art Nouveau aesthetic: Playfair Display font, decorative ornaments, elegant card layouts, warm tones. Background radial gradient accents should be updated to complement the new palette.
+
+## UI Specifications
+
+### Box Borders
+
+All card and box borders are **2px solid** (increased from 1px). This applies globally to: `.card`, `.stat-card`, `.profile-card`, `.export-card`, `.danger-card`, `.sessions-card`, `.password-card`, `.stats-sentence`, `.leaderboard-table`, `.modal-content`, `.about-card`, and any other bordered elements.
+
+### Content Width
+
+The primary content column (`.container`) should be wider than the current 800px max-width. The width should ensure that "Calendar" (previously "Your Year At A Glance") and all content fits comfortably without horizontal scrolling. Target: ~900-950px.
+
+### Spacing & Padding
+
+Reduce margins and padding throughout so content fits more comfortably on a standard desktop viewport. The goal: the punch clock page (clock button, year total, heatmap) should fit on screen without scrolling at typical desktop resolutions (1080p+). Specific areas to tighten:
+- `.punch-section` padding
+- `.stats-section` and `.heatmap-section` margins
+- `.app-header` margin-bottom
+- `.app-container` padding
+- General card padding where possible without feeling cramped
 
 ## API Endpoints
 
 ### Auth
 | Method | Path | Description |
 |---|---|---|
-| POST | `/api/auth/register` | Create account (email, password, name) |
+| POST | `/api/auth/register` | Create account (email, password, name — no password confirmation) |
 | POST | `/api/auth/login` | Log in |
 | POST | `/api/auth/logout` | Log out |
 | GET | `/api/auth/me` | Get current user info |
@@ -208,8 +303,8 @@ All styling must maintain the existing Art Nouveau aesthetic: Playfair Display f
 ### Leaderboard
 | Method | Path | Description |
 |---|---|---|
-| GET | `/api/leaderboard/year` | Yearly rankings (all users) |
-| GET | `/api/leaderboard/today` | Today's activity (all users) |
+| GET | `/api/leaderboard?view=year` | Yearly rankings (all users) — auto-closes stale sessions before computing |
+| GET | `/api/leaderboard?view=today` | Today's activity (all users) — auto-closes stale sessions before computing |
 
 ### Account
 | Method | Path | Description |
@@ -239,7 +334,7 @@ start_timezone  VARCHAR(100) NOT NULL
 created_at      TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 ```
 
-### `session_edits` table (new)
+### `session_edits` table
 ```sql
 id              SERIAL PRIMARY KEY
 user_id         INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE
@@ -298,9 +393,7 @@ whistle/
 │   │   ├── edit.js             # Edit a session (with limits)
 │   │   ├── stats.js            # Statistics for profile
 │   │   └── sessions.js         # Session history for profile
-│   ├── leaderboard/
-│   │   ├── year.js             # Yearly leaderboard
-│   │   └── today.js            # Today's leaderboard
+│   ├── leaderboard.js          # Leaderboard (consolidated: ?view=year|today)
 │   └── account/
 │       └── delete.js           # Delete account + email notification
 ├── public/                     # Frontend files
@@ -311,11 +404,20 @@ whistle/
 │   ├── about.html              # About page
 │   ├── css/
 │   │   └── style.css           # All styles (Art Nouveau theme)
-│   └── js/
-│       ├── auth.js             # Login/register logic
-│       ├── app.js              # Punch clock logic
-│       ├── profile.js          # Profile page logic
-│       └── leaderboard.js      # Leaderboard logic
+│   ├── js/
+│   │   ├── auth.js             # Login/register logic
+│   │   ├── app.js              # Punch clock logic
+│   │   ├── profile.js          # Profile page logic
+│   │   └── leaderboard.js      # Leaderboard logic
+│   └── data/
+│       └── poems.js            # Curated poetry collection (~52 poems)
+├── whistle-resources/          # Design assets
+│   └── pics/
+│       ├── sunday.png          # Sunday page image
+│       ├── mucha-1.png         # Profile header images (Art Nouveau)
+│       ├── mucha-2.png
+│       ├── ...
+│       └── mucha-9.png
 ├── ios/                        # iOS app (SwiftUI)
 │   └── Whistle/
 │       ├── Whistle.xcodeproj
@@ -328,7 +430,7 @@ whistle/
 │   └── schema.sql              # Database table definitions
 ├── package.json
 ├── vercel.json                 # Vercel configuration
-└── README.md                   # This file
+└── SPEC.md                     # This file
 ```
 
 ## Environment Variables
@@ -367,7 +469,7 @@ Follow the prompts to create a new project.
 1. Go to your Vercel dashboard: https://vercel.com/dashboard
 2. Select your project
 3. Go to the "Storage" tab
-4. Click "Create Database" → "Postgres"
+4. Click "Create Database" -> "Postgres"
 5. Follow the prompts to create a database
 6. Once created, Vercel will automatically add the database environment variables to your project
 
@@ -380,7 +482,7 @@ Follow the prompts to create a new project.
 
 ### Step 6: Set Environment Variables
 
-Add the following in Vercel dashboard → Settings → Environment Variables:
+Add the following in Vercel dashboard -> Settings -> Environment Variables:
 - `ANTHROPIC_API_KEY` — Your Claude API key (for name validation)
 - `RESEND_API_KEY` — Your Resend API key (for deletion emails)
 

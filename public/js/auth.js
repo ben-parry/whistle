@@ -82,13 +82,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const name = document.getElementById('register-name').value;
         const email = document.getElementById('register-email').value;
         const password = document.getElementById('register-password').value;
-        const passwordConfirm = document.getElementById('register-password-confirm').value;
-
-        if (password !== passwordConfirm) {
-            showError('Passwords do not match.');
-            return;
-        }
-
         // Client-side name validation
         if (/\d/.test(name)) {
             showError('Names cannot contain numbers.');

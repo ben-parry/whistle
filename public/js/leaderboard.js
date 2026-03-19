@@ -2,19 +2,24 @@
 // LEADERBOARD.JS - Leaderboard Page Logic
 // ============================================
 
+let currentSort = 'year';
+let yearData = [];
+let todayData = [];
+let timerInterval = null;
+let pollInterval = null;
+let dataLoaded = false;
+let lastFetchTime = null;
+
+function setSort(sort) {
+    currentSort = sort;
+    document.getElementById('sort-year').classList.toggle('active', sort === 'year');
+    document.getElementById('sort-today').classList.toggle('active', sort === 'today');
+    renderTable();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 
     const navLinks = document.getElementById('nav-links');
-    const yearTab = document.getElementById('year-tab');
-    const todayTab = document.getElementById('today-tab');
-    const yearView = document.getElementById('year-view');
-    const todayView = document.getElementById('today-view');
-    const yearBody = document.getElementById('year-body');
-    const todayBody = document.getElementById('today-body');
-
-    let todayPollTimer = null;
-    let activeTimers = [];
-    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     // ============================================
     // SETUP NAV BASED ON AUTH STATUS
@@ -57,158 +62,214 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================
-    // TAB SWITCHING
+    // INITIALIZATION
     // ============================================
 
-    yearTab.addEventListener('click', function() {
-        yearView.hidden = false;
-        todayView.hidden = true;
-        yearTab.classList.add('active');
-        todayTab.classList.remove('active');
-        stopTodayPolling();
-    });
-
-    todayTab.addEventListener('click', function() {
-        yearView.hidden = true;
-        todayView.hidden = false;
-        yearTab.classList.remove('active');
-        todayTab.classList.add('active');
-        loadToday();
-        startTodayPolling();
-    });
-
-    // ============================================
-    // YEARLY LEADERBOARD
-    // ============================================
-
-    loadYear();
-
-    async function loadYear() {
-        try {
-            const response = await fetch('/api/leaderboard?view=year');
-            const data = await response.json();
-
-            if (data.rankings.length === 0) {
-                yearBody.innerHTML = '<tr><td colspan="4" class="leaderboard-empty">No one has logged any time this year yet.</td></tr>';
-                return;
-            }
-
-            yearBody.innerHTML = '';
-            data.rankings.forEach(function(person) {
-                const row = document.createElement('tr');
-                row.innerHTML =
-                    '<td class="leaderboard-rank">' + person.rank + '</td>' +
-                    '<td><span class="leaderboard-name">' + escapeHtml(person.name) + '</span>' +
-                        '<span class="leaderboard-cute-id">' + escapeHtml(person.cute_id) + '</span></td>' +
-                    '<td class="leaderboard-sessions">' + person.total_sessions + '</td>' +
-                    '<td class="leaderboard-hours">' + formatHours(person.total_hours) + '</td>';
-                yearBody.appendChild(row);
-            });
-        } catch (error) {
-            console.error('Year leaderboard error:', error);
-            yearBody.innerHTML = '<tr><td colspan="4" class="leaderboard-empty">Failed to load leaderboard.</td></tr>';
-        }
-    }
-
-    // ============================================
-    // TODAY'S LEADERBOARD
-    // ============================================
-
-    async function loadToday() {
-        try {
-            const response = await fetch('/api/leaderboard?view=today&timezone=' + encodeURIComponent(userTimezone));
-            const data = await response.json();
-
-            // Clear existing timers
-            activeTimers.forEach(function(timer) { clearInterval(timer); });
-            activeTimers = [];
-
-            if (data.entries.length === 0) {
-                todayBody.innerHTML = '<tr><td colspan="3" class="leaderboard-empty">No one has logged any time today.</td></tr>';
-                return;
-            }
-
-            todayBody.innerHTML = '';
-            data.entries.forEach(function(person) {
-                const row = document.createElement('tr');
-
-                let hoursCell;
-                let statusCell;
-
-                if (person.is_active) {
-                    const timerId = 'timer-' + escapeHtml(person.cute_id).replace(/[^a-zA-Z0-9]/g, '-');
-                    hoursCell = '<td class="leaderboard-hours">' +
-                        formatHours(person.total_hours_today) +
-                        '<br><span class="active-timer" id="' + timerId + '"></span></td>';
-                    statusCell = '<td><span class="active-indicator"></span>Working</td>';
-
-                    // Start client-side timer for active session
-                    const activeSince = new Date(person.active_since);
-                    const timer = setInterval(function() {
-                        const el = document.getElementById(timerId);
-                        if (!el) { clearInterval(timer); return; }
-                        const now = new Date();
-                        const diff = Math.floor((now - activeSince) / 1000);
-                        const h = Math.floor(diff / 3600);
-                        const m = Math.floor((diff % 3600) / 60);
-                        const s = diff % 60;
-                        el.textContent = String(h).padStart(2, '0') + ':' +
-                            String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-                    }, 1000);
-                    activeTimers.push(timer);
-                } else {
-                    hoursCell = '<td class="leaderboard-hours">' + formatHours(person.total_hours_today) + '</td>';
-                    statusCell = '<td style="color: #9D8F86;">Done</td>';
-                }
-
-                row.innerHTML =
-                    '<td><span class="leaderboard-name">' + escapeHtml(person.name) + '</span>' +
-                        '<span class="leaderboard-cute-id">' + escapeHtml(person.cute_id) + '</span></td>' +
-                    hoursCell + statusCell;
-
-                todayBody.appendChild(row);
-            });
-        } catch (error) {
-            console.error('Today leaderboard error:', error);
-            todayBody.innerHTML = '<tr><td colspan="3" class="leaderboard-empty">Failed to load today\'s data.</td></tr>';
-        }
-    }
-
-    // ============================================
-    // POLLING (every 30 seconds for today view)
-    // ============================================
-
-    function startTodayPolling() {
-        stopTodayPolling();
-        todayPollTimer = setInterval(function() {
-            loadToday();
-        }, 30000);
-    }
-
-    function stopTodayPolling() {
-        if (todayPollTimer) {
-            clearInterval(todayPollTimer);
-            todayPollTimer = null;
-        }
-        activeTimers.forEach(function(timer) { clearInterval(timer); });
-        activeTimers = [];
-    }
-
-    // ============================================
-    // HELPERS
-    // ============================================
-
-    function formatHours(hours) {
-        const rounded = Math.round(hours * 10) / 10;
-        if (rounded === 0) return '0';
-        if (rounded === Math.floor(rounded)) return rounded.toString();
-        return rounded.toFixed(1);
-    }
-
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
+    if (!checkSunday()) {
+        loadData();
+        pollInterval = setInterval(loadData, 30000);
     }
 
 });
+
+// ============================================
+// SUNDAY POEM
+// ============================================
+
+function getWeekNumber(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function checkSunday() {
+    if (new Date().getDay() === 0) {
+        // Hide table and toggle
+        document.getElementById('leaderboard-table').hidden = true;
+        document.getElementById('leaderboard-toggle').hidden = true;
+
+        // Show poem
+        const sundayContent = document.getElementById('sunday-content');
+        sundayContent.hidden = false;
+
+        if (window.poems && window.poems.length > 0) {
+            const weekNum = getWeekNumber(new Date());
+            const poem = window.poems[weekNum % window.poems.length];
+            document.getElementById('poem-title').textContent = poem.title;
+            document.getElementById('poem-text').textContent = poem.text;
+            document.getElementById('poem-attribution').textContent = poem.poet + ', ' + poem.year;
+        }
+        return true;
+    }
+    return false;
+}
+
+// ============================================
+// DATA LOADING
+// ============================================
+
+async function loadData() {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    try {
+        const [yearRes, todayRes] = await Promise.all([
+            fetch('/api/leaderboard?view=year'),
+            fetch('/api/leaderboard?view=today&timezone=' + encodeURIComponent(timezone))
+        ]);
+
+        const yearJson = await yearRes.json();
+        const todayJson = await todayRes.json();
+
+        yearData = yearJson.rankings || [];
+        todayData = todayJson.entries || [];
+        lastFetchTime = Date.now();
+        dataLoaded = true;
+
+        renderTable();
+        startActiveTimers();
+    } catch (err) {
+        console.error('Failed to load leaderboard:', err);
+    }
+}
+
+// ============================================
+// RENDERING
+// ============================================
+
+function renderTable() {
+    if (!dataLoaded) return;
+
+    const tbody = document.getElementById('leaderboard-body');
+
+    // Merge year and today data by cute_id
+    const merged = new Map();
+
+    yearData.forEach(function(u) {
+        merged.set(u.cute_id, {
+            name: u.name,
+            cute_id: u.cute_id,
+            year_hours: parseFloat(u.total_hours) || 0,
+            today_hours: 0,
+            is_active: false,
+            active_since: null
+        });
+    });
+
+    todayData.forEach(function(u) {
+        if (merged.has(u.cute_id)) {
+            var existing = merged.get(u.cute_id);
+            existing.today_hours = parseFloat(u.total_hours_today) || 0;
+            existing.is_active = u.is_active;
+            existing.active_since = u.active_since;
+        } else {
+            merged.set(u.cute_id, {
+                name: u.name,
+                cute_id: u.cute_id,
+                year_hours: 0,
+                today_hours: parseFloat(u.total_hours_today) || 0,
+                is_active: u.is_active,
+                active_since: u.active_since
+            });
+        }
+    });
+
+    var rows = Array.from(merged.values());
+
+    // Sort based on current toggle
+    if (currentSort === 'year') {
+        rows.sort(function(a, b) { return b.year_hours - a.year_hours; });
+    } else {
+        rows.sort(function(a, b) {
+            var aHours = a.is_active ? getCurrentHoursSimple(a) : a.today_hours;
+            var bHours = b.is_active ? getCurrentHoursSimple(b) : b.today_hours;
+            return bHours - aHours;
+        });
+    }
+
+    // Filter out rows with zero in both columns
+    rows = rows.filter(function(r) { return r.year_hours > 0 || r.today_hours > 0 || r.is_active; });
+
+    if (rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="leaderboard-empty">No activity yet.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = rows.map(function(row, i) {
+        var rank = i + 1;
+        var yearFormatted = row.year_hours.toFixed(1);
+
+        var todayFormatted;
+        var todayCellClass = '';
+        var todayCellId = '';
+
+        if (row.is_active) {
+            var currentHours = getCurrentHoursSimple(row);
+            todayFormatted = formatHours(currentHours);
+            todayCellClass = ' class="today-active"';
+            todayCellId = ' id="today-' + CSS.escape(row.cute_id) + '"';
+        } else {
+            todayFormatted = row.today_hours > 0 ? formatHours(row.today_hours) : '\u2014';
+        }
+
+        return '<tr>' +
+            '<td class="leaderboard-rank">' + rank + '</td>' +
+            '<td><span class="leaderboard-name">' + escapeHtml(row.name) + '</span>' +
+                '<span class="leaderboard-cute-id">' + escapeHtml(row.cute_id) + '</span></td>' +
+            '<td class="leaderboard-hours">' + yearFormatted + '</td>' +
+            '<td' + todayCellClass + todayCellId + '>' + todayFormatted + '</td>' +
+        '</tr>';
+    }).join('');
+}
+
+// ============================================
+// ACTIVE TIMERS
+// ============================================
+
+function getCurrentHoursSimple(row) {
+    if (!row.is_active || !lastFetchTime) return row.today_hours;
+    var elapsed = (Date.now() - lastFetchTime) / (1000 * 60 * 60);
+    return row.today_hours + elapsed;
+}
+
+function formatHours(hours) {
+    var h = Math.floor(hours);
+    var m = Math.floor((hours - h) * 60);
+    var s = Math.floor(((hours - h) * 60 - m) * 60);
+    if (h > 0) {
+        return h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+    return '0:' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function startActiveTimers() {
+    if (timerInterval) clearInterval(timerInterval);
+
+    var hasActive = todayData.some(function(u) { return u.is_active; });
+    if (!hasActive) return;
+
+    timerInterval = setInterval(function() {
+        todayData.forEach(function(u) {
+            if (!u.is_active) return;
+            var cell = document.getElementById('today-' + CSS.escape(u.cute_id));
+            if (cell) {
+                var hours = getCurrentHoursSimple({
+                    today_hours: parseFloat(u.total_hours_today) || 0,
+                    is_active: true
+                });
+                cell.textContent = formatHours(hours);
+            }
+        });
+    }, 1000);
+}
+
+// ============================================
+// HELPERS
+// ============================================
+
+function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}

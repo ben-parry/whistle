@@ -47,8 +47,12 @@ document.addEventListener('DOMContentLoaded', function() {
             userEmail.textContent = data.user.email;
             userCuteId.textContent = data.user.cute_id;
 
+            const imgNum = Math.floor(Math.random() * 9) + 1;
+            document.getElementById('profile-header-img').src = '/whistle-resources/pics/mucha-' + imgNum + '.png';
+
             loadStats();
             loadSessions();
+            loadProfileHeatmap();
         } catch (error) {
             console.error('Auth check error:', error);
             window.location.href = '/index.html';
@@ -79,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'In <span class="stat-highlight">' + data.year + '</span> you have clocked in on ' +
                 '<span class="stat-highlight">' + data.total_days + ' day' + (data.total_days !== 1 ? 's' : '') + '</span> and completed ' +
                 '<span class="stat-highlight">' + data.total_hours + ' hour' + (data.total_hours !== 1 ? 's' : '') + '</span> of work. ' +
-                'On a median day you have worked <span class="stat-highlight">' + medianStr + '</span>.';
+                'On a median day you worked <span class="stat-highlight">' + medianStr + '</span>.';
         } catch (error) {
             console.error('Stats error:', error);
             statsSentence.textContent = 'Unable to load statistics.';
@@ -161,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             console.error('Sessions error:', error);
-            sessionsList.innerHTML = '<p style="color: #D38370;">Failed to load sessions.</p>';
+            sessionsList.innerHTML = '<p style="color: #8F3416;">Failed to load sessions.</p>';
         }
     }
 
@@ -393,6 +397,155 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmDelete.textContent = 'Yes, Delete My Account';
         }
     });
+
+
+    // ============================================
+    // HEATMAP
+    // ============================================
+
+    async function loadProfileHeatmap() {
+        try {
+            const response = await fetch('/api/time/heatmap');
+            const data = await response.json();
+            renderProfileHeatmap(data.year, data.days);
+        } catch (error) {
+            console.error('Load heatmap error:', error);
+        }
+    }
+
+    function getOrdinalSuffix(n) {
+        const s = ['th', 'st', 'nd', 'rd'];
+        const v = n % 100;
+        return (s[(v - 20) % 10] || s[v] || s[0]);
+    }
+
+    function getHeatLevel(hours) {
+        if (hours === 0) return 0;
+        if (hours < 3) return 1;
+        if (hours < 6) return 2;
+        if (hours < 10) return 3;
+        return 4;
+    }
+
+    function renderProfileHeatmap(year, daysData) {
+        const heatmapGrid = document.getElementById('profile-heatmap-grid');
+        const heatmapMonths = document.getElementById('profile-heatmap-months');
+        heatmapGrid.innerHTML = '';
+        heatmapMonths.innerHTML = '';
+
+        const heatColors = {
+            0: '#EEE7D1',
+            1: 'rgba(108, 122, 97, 0.2)',
+            2: 'rgba(108, 122, 97, 0.45)',
+            3: 'rgba(108, 122, 97, 0.7)',
+            4: '#6C7A61'
+        };
+        const sundayColor = '#E5CCA4';
+
+        const firstDay = new Date(year, 0, 1);
+        const lastDay = new Date(year, 11, 31);
+        const today = new Date();
+
+        const startOffset = firstDay.getDay();
+        const weeks = [];
+        let currentWeek = [];
+
+        for (let i = 0; i < startOffset; i++) {
+            currentWeek.push(null);
+        }
+
+        const currentDate = new Date(firstDay);
+        while (currentDate <= lastDay) {
+            const dateString = currentDate.toISOString().split('T')[0];
+            const hours = daysData[dateString] || 0;
+            const isFuture = currentDate > today;
+            const dayOfWeek = currentDate.getDay();
+
+            currentWeek.push({
+                date: dateString,
+                hours: hours,
+                isFuture: isFuture,
+                isSunday: dayOfWeek === 0
+            });
+
+            if (currentWeek.length === 7) {
+                weeks.push(currentWeek);
+                currentWeek = [];
+            }
+
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        if (currentWeek.length > 0) {
+            while (currentWeek.length < 7) {
+                currentWeek.push(null);
+            }
+            weeks.push(currentWeek);
+        }
+
+        for (let weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
+            for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                var day = weeks[weekIndex][dayOfWeek];
+                var cell = document.createElement('div');
+                cell.className = 'heatmap-cell';
+
+                if (day === null) {
+                    cell.classList.add('empty');
+                } else if (day.isSunday) {
+                    cell.style.backgroundColor = sundayColor;
+                    cell.title = day.date + ' (Sunday)';
+                } else if (day.isFuture) {
+                    cell.classList.add('future');
+                    cell.title = day.date;
+                } else {
+                    var level = getHeatLevel(day.hours);
+                    cell.style.backgroundColor = heatColors[level];
+                    cell.title = day.date + ': ' + day.hours + ' hours';
+
+                    // Add hover interaction for cells with data
+                    (function(dayData) {
+                        cell.addEventListener('mouseenter', function() {
+                            var hoverText = document.getElementById('heatmap-hover-text');
+                            var date = new Date(dayData.date);
+                            var d = date.getDate();
+                            var suffix = getOrdinalSuffix(d);
+                            var month = date.toLocaleString('en-US', { month: 'long' });
+                            var yr = date.getFullYear();
+                            var h = Math.floor(dayData.hours);
+                            var m = Math.round((dayData.hours - h) * 60);
+                            hoverText.textContent = 'On the ' + d + suffix + ' of ' + month + ', ' + yr + ' you worked ' + h + ' hours and ' + m + ' minutes.';
+                        });
+
+                        cell.addEventListener('mouseleave', function() {
+                            document.getElementById('heatmap-hover-text').innerHTML = '&nbsp;';
+                        });
+                    })(day);
+                }
+
+                heatmapGrid.appendChild(cell);
+            }
+        }
+
+        // Render month labels
+        var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        var lastMonth = -1;
+
+        for (var weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
+            var firstDayInWeek = weeks[weekIndex].find(function(d) { return d !== null; });
+            if (firstDayInWeek) {
+                var month = parseInt(firstDayInWeek.date.split('-')[1], 10) - 1;
+                if (month !== lastMonth) {
+                    var label = document.createElement('span');
+                    label.className = 'month-label';
+                    label.textContent = monthNames[month];
+                    label.style.gridColumn = weekIndex + 1;
+                    heatmapMonths.appendChild(label);
+                    lastMonth = month;
+                }
+            }
+        }
+    }
 
 
     // ============================================

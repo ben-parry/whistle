@@ -309,6 +309,21 @@ async function autoCloseSessionAt9pm(entry) {
 }
 
 // ============================================
+// AUTO-CLOSE ALL STALE SESSIONS
+// ============================================
+
+async function autoCloseAllStaleSessions() {
+    const openSessions = await sql`
+        SELECT id, start_time, start_timezone
+        FROM time_entries
+        WHERE end_time IS NULL
+    `;
+    for (const entry of openSessions.rows) {
+        await autoCloseSessionAt9pm(entry);
+    }
+}
+
+// ============================================
 // PARSE COOKIES FROM REQUEST
 // ============================================
 
@@ -416,6 +431,7 @@ module.exports = {
     getTimezoneDateTime,
     get9pmCutoff,
     autoCloseSessionAt9pm,
+    autoCloseAllStaleSessions,
     parseCookies,
     getCurrentUser,
     createSessionCookie,

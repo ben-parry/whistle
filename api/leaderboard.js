@@ -6,12 +6,15 @@
 // Public endpoint — no auth required
 // ============================================
 
-const { sql, sendJson, sendError } = require('./_helpers');
+const { sql, sendJson, sendError, autoCloseAllStaleSessions } = require('./_helpers');
 
 module.exports = async function handler(request, response) {
     if (request.method !== 'GET') {
         return sendError(response, 405, 'Method not allowed. Use GET.');
     }
+
+    // Auto-close any stale sessions before computing leaderboard data
+    await autoCloseAllStaleSessions();
 
     const view = request.query.view || 'year';
 

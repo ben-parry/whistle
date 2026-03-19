@@ -40,15 +40,16 @@
             <div class="stat-card">
                 <p class="stat-label">Hours worked in <span id="current-year">2026</span></p>
                 <p id="year-total" class="stat-value">0</p>
-                <div class="progress-container">
-                    <div id="progress-bar" class="progress-bar"></div>
+                <div class="progress-wrapper">
+                    <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+                    <a href="/about.html" class="info-icon" title="About Whistle">&#9432;</a>
                 </div>
             </div>
         </section>
 
         <!-- HEATMAP SECTION -->
         <section class="heatmap-section">
-            <h2 class="section-title">Your Year at a Glance</h2>
+            <h2 class="section-title">Calendar</h2>
             <div class="heatmap-months" id="heatmap-months"></div>
             <div class="heatmap-container">
                 <div class="heatmap-days">
@@ -71,6 +72,11 @@
                 <span class="legend-box level-4"></span>
                 <span class="legend-label">More</span>
             </div>
+        </section>
+
+        <section id="sunday-content" class="sunday-section" hidden>
+            <p class="sunday-quote">&ldquo;It is Sunday, let us seize the means of relaxation.&rdquo;</p>
+            <img src="/whistle-resources/pics/sunday.png" alt="Sunday" class="sunday-image">
         </section>
 
         <footer class="app-footer">

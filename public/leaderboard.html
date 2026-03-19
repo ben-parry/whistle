@@ -22,49 +22,36 @@
         </header>
 
         <section class="leaderboard-section">
-            <h2 class="section-title">Leaderboard</h2>
-
-            <div class="leaderboard-tabs">
-                <button id="year-tab" class="tab-button active" type="button">
-                    This Year
-                </button>
-                <button id="today-tab" class="tab-button" type="button">
-                    Today
-                </button>
+            <div class="leaderboard-header">
+                <h2 class="section-title">Leaderboard</h2>
+                <div class="leaderboard-toggle" id="leaderboard-toggle">
+                    <button id="sort-year" class="toggle-btn active" onclick="setSort('year')">This Year</button>
+                    <button id="sort-today" class="toggle-btn" onclick="setSort('today')">Today</button>
+                </div>
             </div>
 
-            <!-- YEARLY VIEW -->
-            <div id="year-view">
-                <table class="leaderboard-table" id="year-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Sessions</th>
-                            <th>Hours</th>
-                        </tr>
-                    </thead>
-                    <tbody id="year-body">
-                        <tr><td colspan="4" class="leaderboard-empty">Loading...</td></tr>
-                    </tbody>
-                </table>
+            <!-- Sunday poem container (hidden unless Sunday) -->
+            <div id="sunday-content" hidden>
+                <div class="sunday-poem">
+                    <h3 class="poem-title" id="poem-title"></h3>
+                    <div class="poem-text" id="poem-text"></div>
+                    <p class="poem-attribution" id="poem-attribution"></p>
+                </div>
             </div>
 
-            <!-- TODAY VIEW -->
-            <div id="today-view" hidden>
-                <table class="leaderboard-table" id="today-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Today</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="today-body">
-                        <tr><td colspan="3" class="leaderboard-empty">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <table class="leaderboard-table" id="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>This Year</th>
+                        <th>Today</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <tr><td colspan="4" class="leaderboard-empty">Loading...</td></tr>
+                </tbody>
+            </table>
         </section>
 
         <footer class="app-footer">
@@ -73,6 +60,7 @@
 
     </div>
 
+    <script src="/data/poems.js"></script>
     <script src="/js/leaderboard.js"></script>
 </body>
 </html>
