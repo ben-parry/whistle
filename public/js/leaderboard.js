@@ -228,9 +228,9 @@ function renderTable() {
 // ============================================
 
 function getCurrentHoursSimple(row) {
-    if (!row.is_active || !lastFetchTime) return row.today_hours;
-    var elapsed = (Date.now() - lastFetchTime) / (1000 * 60 * 60);
-    return row.today_hours + elapsed;
+    if (!row.is_active || !row.active_since) return row.today_hours;
+    var activeElapsed = (Date.now() - new Date(row.active_since).getTime()) / (1000 * 60 * 60);
+    return row.today_hours + activeElapsed;
 }
 
 function formatHours(hours) {
@@ -256,7 +256,8 @@ function startActiveTimers() {
             if (cell) {
                 var hours = getCurrentHoursSimple({
                     today_hours: parseFloat(u.total_hours_today) || 0,
-                    is_active: true
+                    is_active: true,
+                    active_since: u.active_since
                 });
                 cell.textContent = formatHours(hours);
             }

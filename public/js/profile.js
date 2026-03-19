@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const userName = document.getElementById('user-name');
     const userEmail = document.getElementById('user-email');
     const userCuteId = document.getElementById('user-cute-id');
-    const statsSentence = document.getElementById('stats-sentence');
+    const statsSentence = document.getElementById('stats-text');
     const sessionsList = document.getElementById('sessions-list');
     const editsInfo = document.getElementById('edits-info');
     const exportButton = document.getElementById('export-button');
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
             userCuteId.textContent = data.user.cute_id;
 
             const imgNum = Math.floor(Math.random() * 9) + 1;
-            document.getElementById('profile-header-img').src = '/whistle-resources/pics/mucha-' + imgNum + '.png';
+            document.getElementById('profile-header-img').src = '/whistle-resources/pics/profile-headers/mucha-' + imgNum + '.png';
 
             loadStats();
             loadSessions();

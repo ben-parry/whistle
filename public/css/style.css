@@ -609,7 +609,7 @@ a:hover {
 /* Heatmap hover text */
 .heatmap-hover-text {
     font-size: 13px;
-    color: #9D8F86;
+    color: #4380A4;
     margin-top: 8px;
     min-height: 20px;
 }
@@ -908,6 +908,13 @@ a:hover {
     font-family: 'Playfair Display', Georgia, serif;
     font-weight: 700;
     font-size: 18px;
+    width: 140px;
+}
+
+.leaderboard-table th:last-child,
+.leaderboard-table td:last-child {
+    width: 140px;
+    min-width: 140px;
 }
 
 .leaderboard-sessions {
