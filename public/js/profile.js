@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
             userCuteId.textContent = data.user.cute_id;
 
             const imgNum = Math.floor(Math.random() * 9) + 1;
-            document.getElementById('profile-header-img').src = '/whistle-resources/pics/profile-headers/mucha-' + imgNum + '.png';
+            document.getElementById('profile-header-img').src = '/pics/profile-headers/mucha-' + imgNum + '.png';
 
             loadStats();
             loadSessions();

@@ -1,6 +1,5 @@
 {
   "rewrites": [
-    { "source": "/whistle-resources/:path*", "destination": "/whistle-resources/:path*" },
     { "source": "/((?!api/).*)", "destination": "/public/$1" }
   ]
 }
