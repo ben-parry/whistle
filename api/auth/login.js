@@ -8,8 +8,8 @@
 // Response: { success: true, user: { id, email } }
 // ============================================
 
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
 const {
     sql,
     createSessionCookie,
@@ -72,7 +72,7 @@ module.exports = async function handler(request, response) {
         // STEP 4: Create a new session token
         // ----------------------------------------
         // Generate a new random token for this login session
-        const sessionToken = uuidv4();
+        const sessionToken = crypto.randomUUID();
 
         // Save the session token to the database
         await sql`

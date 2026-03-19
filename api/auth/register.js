@@ -8,8 +8,8 @@
 // Response: { success: true, user: { id, email, name, cute_id } }
 // ============================================
 
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
 const {
     sql,
     createSessionCookie,
@@ -87,7 +87,7 @@ module.exports = async function handler(request, response) {
         // Hash password and generate IDs
         // ----------------------------------------
         const passwordHash = await bcrypt.hash(password, 10);
-        const sessionToken = uuidv4();
+        const sessionToken = crypto.randomUUID();
         const cuteId = await generateUniqueCuteId();
 
         // ----------------------------------------

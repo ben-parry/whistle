@@ -53,26 +53,30 @@ module.exports = async function handler(request, response) {
         // Send notification email via Resend
         // ----------------------------------------
         try {
-            const { Resend } = require('resend');
-            const resend = new Resend(process.env.RESEND_API_KEY);
-
-            await resend.emails.send({
-                from: 'Whistle <onboarding@resend.dev>',
-                to: 'ben@benparry.ca',
-                subject: `Whistle — Account Deleted: ${user.name}`,
-                html: `
-                    <h2>Account Deletion Notification</h2>
-                    <p>A user has deleted their Whistle account.</p>
-                    <table style="border-collapse: collapse; margin: 16px 0;">
-                        <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Name</td><td>${user.name}</td></tr>
-                        <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Email</td><td>${user.email}</td></tr>
-                        <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Cute ID</td><td>${user.cute_id}</td></tr>
-                        <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Joined</td><td>${new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td></tr>
-                        <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Total Hours</td><td>${totalHours}</td></tr>
-                        <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Total Sessions</td><td>${totalSessions}</td></tr>
-                    </table>
-                    <p style="color: #666; font-size: 14px;">This is an automated notification from Whistle.</p>
-                `
+            await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    from: 'Whistle <onboarding@resend.dev>',
+                    to: 'ben@benparry.ca',
+                    subject: `Whistle — Account Deleted: ${user.name}`,
+                    html: `
+                        <h2>Account Deletion Notification</h2>
+                        <p>A user has deleted their Whistle account.</p>
+                        <table style="border-collapse: collapse; margin: 16px 0;">
+                            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Name</td><td>${user.name}</td></tr>
+                            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Email</td><td>${user.email}</td></tr>
+                            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Cute ID</td><td>${user.cute_id}</td></tr>
+                            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Joined</td><td>${new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td></tr>
+                            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Total Hours</td><td>${totalHours}</td></tr>
+                            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Total Sessions</td><td>${totalSessions}</td></tr>
+                        </table>
+                        <p style="color: #666; font-size: 14px;">This is an automated notification from Whistle.</p>
+                    `
+                })
             });
         } catch (emailError) {
             // Don't fail the deletion if email fails

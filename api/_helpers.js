@@ -125,19 +125,25 @@ function isValidName(name) {
 
 async function validateNameWithLLM(name) {
     try {
-        const Anthropic = require('@anthropic-ai/sdk');
-        const client = new Anthropic();
-
-        const response = await client.messages.create({
-            model: 'claude-haiku-4-5-20251001',
-            max_tokens: 10,
-            messages: [{
-                role: 'user',
-                content: `Is "${name}" a plausible real human name from any language or culture? Answer only "yes" or "no". Names can be from any culture, language, or tradition. Be generous — if it could reasonably be someone's name, say yes.`
-            }]
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'x-api-key': process.env.ANTHROPIC_API_KEY,
+                'content-type': 'application/json',
+                'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+                model: 'claude-haiku-4-5-20251001',
+                max_tokens: 10,
+                messages: [{
+                    role: 'user',
+                    content: `Is "${name}" a plausible real human name from any language or culture? Answer only "yes" or "no". Names can be from any culture, language, or tradition. Be generous — if it could reasonably be someone's name, say yes.`
+                }]
+            })
         });
 
-        const answer = response.content[0].text.toLowerCase().trim();
+        const data = await res.json();
+        const answer = data.content[0].text.toLowerCase().trim();
         return answer.startsWith('yes');
     } catch (error) {
         // Fail open: if the API is unavailable, accept the name
