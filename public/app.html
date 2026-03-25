@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whistle - Punch Clock</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -30,9 +26,11 @@
                 <p id="status-text" class="status-text">Loading...</p>
                 <p id="elapsed-time" class="elapsed-time" hidden>00:00:00</p>
             </div>
-            <button id="punch-button" class="punch-button" disabled>
+            <button id="punch-button" class="punch-button" hidden disabled>
                 <span id="punch-button-text">Loading...</span>
             </button>
+            <div id="punch-timestamps" class="punch-timestamps" hidden></div>
+            <p id="punch-completed" class="punch-completed-message" hidden></p>
         </section>
 
         <!-- YEAR TOTAL SECTION -->
@@ -76,6 +74,7 @@
 
         <section id="sunday-content" class="sunday-section" hidden>
             <p class="sunday-quote">&ldquo;It is Sunday, let us seize the means of relaxation.&rdquo;</p>
+            <a href="https://lavitalenta.substack.com/" target="_blank" rel="noopener" class="sunday-link">lavitalenta.substack.com</a>
             <img src="/pics/sunday.png" alt="Sunday" class="sunday-image">
         </section>
 

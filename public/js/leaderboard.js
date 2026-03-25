@@ -86,17 +86,18 @@ function getWeekNumber(date) {
 
 function checkSunday() {
     if (new Date().getDay() === 0) {
-        // Hide table and toggle
+        // Hide table, toggle, and header
         document.getElementById('leaderboard-table').hidden = true;
-        document.getElementById('leaderboard-toggle').hidden = true;
+        var toggle = document.getElementById('leaderboard-toggle');
+        if (toggle) toggle.hidden = true;
 
         // Show poem
-        const sundayContent = document.getElementById('sunday-content');
+        var sundayContent = document.getElementById('sunday-content');
         sundayContent.hidden = false;
 
         if (window.poems && window.poems.length > 0) {
-            const weekNum = getWeekNumber(new Date());
-            const poem = window.poems[weekNum % window.poems.length];
+            var weekNum = getWeekNumber(new Date());
+            var poem = window.poems[weekNum % window.poems.length];
             document.getElementById('poem-title').textContent = poem.title;
             document.getElementById('poem-text').textContent = poem.text;
             document.getElementById('poem-attribution').textContent = poem.poet + ', ' + poem.year;

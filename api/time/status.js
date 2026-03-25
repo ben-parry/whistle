@@ -2,13 +2,8 @@
 // STATUS API ENDPOINT
 // ============================================
 // GET /api/time/status
-// Gets current work status and year total
-// Auto-closes stale sessions (past 9pm)
-//
-// Response: {
-//   is_working, current_session, year_total_hours,
-//   restriction, restriction_message
-// }
+// Gets current work status, year total, and today's session
+// Auto-closes stale sessions server-side
 // ============================================
 
 const {
@@ -16,11 +11,13 @@ const {
     getCurrentUser,
     sendJson,
     sendError,
-    autoCloseSessionAt9pm,
+    autoCloseStaleSession,
     checkTimeRestrictions,
     getRestrictionMessage,
-    getHoursWorkedOnDate,
-    MAX_DAILY_HOURS
+    getTimezoneDateTime,
+    MAX_DAILY_HOURS,
+    WORK_START_HOUR,
+    WORK_END_HOUR
 } = require('../_helpers');
 
 module.exports = async function handler(request, response) {
@@ -34,9 +31,7 @@ module.exports = async function handler(request, response) {
             return sendError(response, 401, 'You must be logged in to view status.');
         }
 
-        // ----------------------------------------
-        // Check for open session
-        // ----------------------------------------
+        // Check for open session and auto-close if stale
         const openEntry = await sql`
             SELECT id, start_time, start_timezone
             FROM time_entries
@@ -49,50 +44,58 @@ module.exports = async function handler(request, response) {
 
         if (openEntry.rows.length > 0) {
             const entry = openEntry.rows[0];
-
-            // Try to auto-close at 9pm if past cutoff
-            const wasClosed = await autoCloseSessionAt9pm(entry);
+            const wasClosed = await autoCloseStaleSession(entry);
 
             if (wasClosed) {
                 isWorking = false;
-                currentSession = null;
             } else {
-                const startTime = new Date(entry.start_time);
-                const now = new Date();
-                const elapsedSeconds = (now - startTime) / 1000;
-
                 isWorking = true;
                 currentSession = {
                     id: entry.id,
                     start_time: entry.start_time,
-                    timezone: entry.start_timezone,
-                    elapsed_seconds: Math.floor(elapsedSeconds)
+                    timezone: entry.start_timezone
                 };
             }
         }
 
-        // ----------------------------------------
         // Check current restrictions
-        // ----------------------------------------
-        // Use a default timezone for restriction check when not working
         const tz = (currentSession && currentSession.timezone) ||
                    Intl.DateTimeFormat().resolvedOptions().timeZone;
 
         const restriction = checkTimeRestrictions(tz);
         const restrictionMessage = restriction ? getRestrictionMessage(restriction) : null;
 
-        // Check daily hours limit
-        let dailyLimitReached = false;
-        if (!restriction) {
-            const hoursToday = await getHoursWorkedOnDate(user.id, new Date(), tz);
-            if (hoursToday >= MAX_DAILY_HOURS) {
-                dailyLimitReached = true;
+        // Check if already completed a session today (one per day)
+        let todaySession = null;
+        if (!isWorking) {
+            const dayStart = getTimezoneDateTime(new Date(), tz, WORK_START_HOUR, 0);
+            const dayEnd = getTimezoneDateTime(new Date(), tz, WORK_END_HOUR, 0);
+
+            if (dayStart && dayEnd) {
+                const todayEntry = await sql`
+                    SELECT id, start_time, end_time, start_timezone
+                    FROM time_entries
+                    WHERE user_id = ${user.id}
+                    AND end_time IS NOT NULL
+                    AND start_time >= ${dayStart.toISOString()}
+                    AND start_time < ${dayEnd.toISOString()}
+                    ORDER BY start_time DESC
+                    LIMIT 1
+                `;
+
+                if (todayEntry.rows.length > 0) {
+                    const entry = todayEntry.rows[0];
+                    todaySession = {
+                        id: entry.id,
+                        start_time: entry.start_time,
+                        end_time: entry.end_time,
+                        timezone: entry.start_timezone
+                    };
+                }
             }
         }
 
-        // ----------------------------------------
         // Calculate year total
-        // ----------------------------------------
         const currentYear = new Date().getFullYear();
         const yearStart = `${currentYear}-01-01T00:00:00Z`;
         const yearEnd = `${currentYear + 1}-01-01T00:00:00Z`;
@@ -114,10 +117,10 @@ module.exports = async function handler(request, response) {
         return sendJson(response, 200, {
             is_working: isWorking,
             current_session: currentSession,
+            today_session: todaySession,
             year_total_hours: Math.round(yearTotalHours * 100) / 100,
             restriction: restriction,
-            restriction_message: restrictionMessage,
-            daily_limit_reached: dailyLimitReached
+            restriction_message: restrictionMessage
         });
 
     } catch (error) {

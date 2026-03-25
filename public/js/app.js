@@ -2,51 +2,11 @@
 // APP.JS - Main Punch Clock Logic
 // ============================================
 
-let elapsedTimer = null;
-let sessionStartTime = null;
-let isWorking = false;
 const ANNUAL_HOURS_GOAL = 2333;
-const WORK_START_HOUR = 5;
 const WORK_END_HOUR = 21;
 
-// ============================================
-// TIME RESTRICTION HELPERS
-// ============================================
-
-function isRestrictedTime() {
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const hour = now.getHours();
-
-    if (dayOfWeek === 0) return 'sunday';
-    if (hour < WORK_START_HOUR) return 'before_hours';
-    if (hour >= WORK_END_HOUR) return 'after_hours';
-    return null;
-}
-
-function getRestrictionMessage(type) {
-    switch (type) {
-        case 'sunday':
-            return 'It is Sunday, let us seize the means of relaxation.';
-        case 'before_hours':
-            return 'Clock in/out is available from 5:00 AM.';
-        case 'after_hours':
-            return 'Clock in/out is not available after 9:00 PM.';
-        case 'daily_limit':
-            return 'You have reached the 12-hour daily maximum.';
-        default:
-            return '';
-    }
-}
-
-function getRestrictionHTML(type) {
-    let msg = getRestrictionMessage(type);
-    if (type === 'sunday') {
-        msg += ' <a href="https://x.com/lavitalenta" target="_blank" rel="noopener" class="restriction-link">@lavitalenta</a>';
-    }
-    return msg;
-}
-
+let elapsedTimer = null;
+let sessionStartTime = null;
 
 // ============================================
 // WAIT FOR PAGE TO LOAD
@@ -58,6 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const elapsedTime = document.getElementById('elapsed-time');
     const punchButton = document.getElementById('punch-button');
     const punchButtonText = document.getElementById('punch-button-text');
+    const punchTimestamps = document.getElementById('punch-timestamps');
+    const punchCompleted = document.getElementById('punch-completed');
     const yearTotal = document.getElementById('year-total');
     const currentYearSpan = document.getElementById('current-year');
     const progressBar = document.getElementById('progress-bar');
@@ -78,14 +40,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Sunday: hide work UI, show sunday content
             if (new Date().getDay() === 0) {
-                const punchSection = document.querySelector('.punch-section');
-                const statsSection = document.querySelector('.stats-section');
-                const heatmapSection = document.querySelector('.heatmap-section');
-                if (punchSection) punchSection.hidden = true;
-                if (statsSection) statsSection.hidden = true;
-                if (heatmapSection) heatmapSection.hidden = true;
-                const sundayContent = document.getElementById('sunday-content');
-                if (sundayContent) sundayContent.hidden = false;
+                document.querySelector('.punch-section').hidden = true;
+                document.querySelector('.stats-section').hidden = true;
+                document.querySelector('.heatmap-section').hidden = true;
+                document.getElementById('sunday-content').hidden = false;
                 return;
             }
 
@@ -107,32 +65,29 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('/api/time/status');
             const data = await response.json();
 
-            const currentYear = new Date().getFullYear();
-            currentYearSpan.textContent = currentYear;
-
-            yearTotal.textContent = formatHours(data.year_total_hours);
+            currentYearSpan.textContent = new Date().getFullYear();
+            yearTotal.textContent = formatHoursDisplay(data.year_total_hours);
 
             const progressPercent = Math.min((data.year_total_hours / ANNUAL_HOURS_GOAL) * 100, 100);
             progressBar.style.width = progressPercent + '%';
-            progressBar.title = `${formatHours(data.year_total_hours)} of ${ANNUAL_HOURS_GOAL} hours (${Math.round(progressPercent)}%)`;
+            progressBar.title = formatHoursDisplay(data.year_total_hours) + ' of ' + ANNUAL_HOURS_GOAL + ' hours (' + Math.round(progressPercent) + '%)';
 
-            isWorking = data.is_working;
-
-            const restriction = isRestrictedTime();
-
-            if (isWorking && data.current_session) {
-                if (restriction) {
-                    await autoClockOut();
-                    return;
-                }
+            if (data.is_working && data.current_session) {
+                // Currently clocked in
                 sessionStartTime = new Date(data.current_session.start_time);
                 showWorkingState();
                 startElapsedTimer();
+                scheduleAutoCloseCheck();
+            } else if (data.today_session) {
+                // Already clocked in and out today
+                showCompletedState(data.today_session);
+            } else if (data.restriction) {
+                // Time restriction active
+                showRestrictionState(data.restriction);
             } else {
-                showNotWorkingState(restriction, data.daily_limit_reached);
+                // Ready to clock in
+                showReadyState();
             }
-
-            punchButton.disabled = !!(restriction || data.daily_limit_reached);
 
         } catch (error) {
             console.error('Load status error:', error);
@@ -140,24 +95,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Set up 9pm auto-close check
+    // Schedule auto-close at 9pm
     function scheduleAutoCloseCheck() {
-        const now = new Date();
-        const hour = now.getHours();
-        if (hour < WORK_END_HOUR) {
-            // Calculate ms until 9pm
-            const ninePm = new Date(now);
+        var now = new Date();
+        if (now.getHours() < WORK_END_HOUR) {
+            var ninePm = new Date(now);
             ninePm.setHours(WORK_END_HOUR, 0, 0, 0);
-            const msUntil9pm = ninePm - now;
             setTimeout(function() {
-                if (isWorking) {
-                    autoClockOut();
-                }
-            }, msUntil9pm + 1000); // +1s buffer
+                // Re-fetch status — server will have auto-closed
+                loadStatus();
+                loadHeatmap();
+            }, ninePm - now + 2000);
         }
     }
-
-    scheduleAutoCloseCheck();
 
 
     // ============================================
@@ -165,16 +115,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
 
     punchButton.addEventListener('click', async function() {
-        const restriction = isRestrictedTime();
-        if (restriction) {
-            alert(getRestrictionMessage(restriction));
-            return;
-        }
-
         punchButton.disabled = true;
 
         try {
-            if (isWorking) {
+            if (punchButton.classList.contains('working')) {
                 await clockOut();
             } else {
                 await clockIn();
@@ -182,9 +126,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Punch error:', error);
             alert('Something went wrong. Please try again.');
+            punchButton.disabled = false;
         }
-
-        punchButton.disabled = false;
     });
 
 
@@ -193,66 +136,48 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
 
     async function clockIn() {
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-        const response = await fetch('/api/time/clock-in', {
+        var response = await fetch('/api/time/clock-in', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ timezone })
+            body: JSON.stringify({ timezone: timezone })
         });
 
-        const data = await response.json();
+        var data = await response.json();
 
         if (response.ok) {
-            isWorking = true;
             sessionStartTime = new Date(data.entry.start_time);
             showWorkingState();
             startElapsedTimer();
             scheduleAutoCloseCheck();
         } else {
             alert(data.error || 'Failed to clock in');
+            punchButton.disabled = false;
         }
     }
 
     async function clockOut() {
-        const response = await fetch('/api/time/clock-out', {
+        var response = await fetch('/api/time/clock-out', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({})
         });
 
-        const data = await response.json();
+        var data = await response.json();
 
         if (response.ok) {
-            isWorking = false;
-            sessionStartTime = null;
-            showNotWorkingState();
             stopElapsedTimer();
+            showCompletedState({
+                start_time: data.entry.start_time,
+                end_time: data.entry.end_time
+            });
+            // Refresh year total and heatmap
             loadStatus();
             loadHeatmap();
         } else {
             alert(data.error || 'Failed to clock out');
-        }
-    }
-
-    async function autoClockOut() {
-        try {
-            const response = await fetch('/api/time/clock-out', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ auto: true })
-            });
-
-            if (response.ok) {
-                isWorking = false;
-                sessionStartTime = null;
-                const restriction = isRestrictedTime();
-                showNotWorkingState(restriction);
-                stopElapsedTimer();
-                loadHeatmap();
-            }
-        } catch (error) {
-            console.error('Auto clock-out error:', error);
+            punchButton.disabled = false;
         }
     }
 
@@ -262,37 +187,80 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
 
     function showWorkingState() {
-        statusText.innerHTML = 'Currently Working';
-        statusText.classList.add('working');
-        statusText.classList.remove('not-working');
+        statusText.textContent = 'Currently Working';
+        statusText.className = 'status-text working';
 
+        punchButton.hidden = false;
+        punchButton.disabled = false;
         punchButtonText.textContent = 'Clock Out';
-        punchButton.classList.add('working');
-        punchButton.classList.remove('not-working');
+        punchButton.className = 'punch-button working';
 
         elapsedTime.hidden = false;
+        punchCompleted.hidden = true;
+
+        // Show clock-in timestamp
+        if (sessionStartTime) {
+            punchTimestamps.innerHTML = 'Clocked in at <span class="timestamp-value">' + formatTime(sessionStartTime) + '</span>';
+            punchTimestamps.hidden = false;
+        }
     }
 
-    function showNotWorkingState(restriction, dailyLimitReached) {
-        if (restriction) {
-            statusText.innerHTML = getRestrictionHTML(restriction);
-            punchButton.disabled = true;
-        } else if (dailyLimitReached) {
-            statusText.innerHTML = getRestrictionMessage('daily_limit');
-            punchButton.disabled = true;
-        } else {
-            statusText.innerHTML = 'Not Working';
+    function showCompletedState(session) {
+        stopElapsedTimer();
+        var start = new Date(session.start_time);
+        var end = new Date(session.end_time);
+
+        statusText.textContent = 'Done for today';
+        statusText.className = 'status-text not-working';
+
+        punchButton.hidden = true;
+        elapsedTime.hidden = true;
+
+        punchTimestamps.innerHTML =
+            'Clocked in at <span class="timestamp-value">' + formatTime(start) + '</span><br>' +
+            'Clocked out at <span class="timestamp-value">' + formatTime(end) + '</span>';
+        punchTimestamps.hidden = false;
+
+        punchCompleted.textContent = 'See you tomorrow.';
+        punchCompleted.hidden = false;
+    }
+
+    function showRestrictionState(restriction) {
+        if (restriction === 'sunday') {
+            statusText.textContent = 'It is Sunday, let us seize the means of relaxation.';
+        } else if (restriction === 'before_hours') {
+            statusText.textContent = 'Clock in/out is available from 5:00 AM.';
+        } else if (restriction === 'after_hours') {
+            statusText.textContent = 'Clock in/out is not available after 9:00 PM.';
         }
+        statusText.className = 'status-text not-working';
 
-        statusText.classList.add('not-working');
-        statusText.classList.remove('working');
+        punchButton.hidden = true;
+        elapsedTime.hidden = true;
+        punchTimestamps.hidden = true;
+        punchCompleted.hidden = true;
+    }
 
+    function showReadyState() {
+        statusText.textContent = 'Not Working';
+        statusText.className = 'status-text not-working';
+
+        punchButton.hidden = false;
+        punchButton.disabled = false;
         punchButtonText.textContent = 'Clock In';
-        punchButton.classList.add('not-working');
-        punchButton.classList.remove('working');
+        punchButton.className = 'punch-button not-working';
 
         elapsedTime.hidden = true;
-        elapsedTime.textContent = '00:00:00';
+        punchTimestamps.hidden = true;
+        punchCompleted.hidden = true;
+    }
+
+    function formatTime(date) {
+        return date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
     }
 
 
@@ -316,13 +284,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateElapsedTime() {
         if (!sessionStartTime) return;
 
-        const now = new Date();
-        const diffMs = now - sessionStartTime;
-        const diffSeconds = Math.floor(diffMs / 1000);
+        var now = new Date();
+        var diffMs = now - sessionStartTime;
+        if (diffMs < 0) diffMs = 0;
+        var diffSeconds = Math.floor(diffMs / 1000);
 
-        const hours = Math.floor(diffSeconds / 3600);
-        const minutes = Math.floor((diffSeconds % 3600) / 60);
-        const seconds = diffSeconds % 60;
+        var hours = Math.floor(diffSeconds / 3600);
+        var minutes = Math.floor((diffSeconds % 3600) / 60);
+        var seconds = diffSeconds % 60;
 
         elapsedTime.textContent =
             String(hours).padStart(2, '0') + ':' +
@@ -335,8 +304,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // FORMAT HOURS
     // ============================================
 
-    function formatHours(hours) {
-        const rounded = Math.round(hours * 10) / 10;
+    function formatHoursDisplay(hours) {
+        var rounded = Math.round(hours * 10) / 10;
         if (rounded === 0) return '0';
         if (rounded === Math.floor(rounded)) return rounded.toString();
         return rounded.toFixed(1);
@@ -349,8 +318,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function loadHeatmap() {
         try {
-            const response = await fetch('/api/time/heatmap');
-            const data = await response.json();
+            var response = await fetch('/api/time/heatmap');
+            var data = await response.json();
             renderHeatmap(data.year, data.days);
         } catch (error) {
             console.error('Load heatmap error:', error);
@@ -361,24 +330,24 @@ document.addEventListener('DOMContentLoaded', function() {
         heatmapGrid.innerHTML = '';
         heatmapMonths.innerHTML = '';
 
-        const firstDay = new Date(year, 0, 1);
-        const lastDay = new Date(year, 11, 31);
-        const today = new Date();
+        var firstDay = new Date(year, 0, 1);
+        var lastDay = new Date(year, 11, 31);
+        var today = new Date();
 
-        const startOffset = firstDay.getDay();
-        const weeks = [];
-        let currentWeek = [];
+        var startOffset = firstDay.getDay();
+        var weeks = [];
+        var currentWeek = [];
 
-        for (let i = 0; i < startOffset; i++) {
+        for (var i = 0; i < startOffset; i++) {
             currentWeek.push(null);
         }
 
-        const currentDate = new Date(firstDay);
+        var currentDate = new Date(firstDay);
         while (currentDate <= lastDay) {
-            const dateString = currentDate.toISOString().split('T')[0];
-            const hours = daysData[dateString] || 0;
-            const isFuture = currentDate > today;
-            const dayOfWeek = currentDate.getDay();
+            var dateString = currentDate.toISOString().split('T')[0];
+            var hours = daysData[dateString] || 0;
+            var isFuture = currentDate > today;
+            var dayOfWeek = currentDate.getDay();
 
             currentWeek.push({
                 date: dateString,
@@ -402,32 +371,31 @@ document.addEventListener('DOMContentLoaded', function() {
             weeks.push(currentWeek);
         }
 
-        for (let weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
-            for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-                const day = weeks[weekIndex][dayOfWeek];
-                const cell = document.createElement('div');
+        for (var weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
+            for (var d = 0; d < 7; d++) {
+                var day = weeks[weekIndex][d];
+                var cell = document.createElement('div');
                 cell.className = 'heatmap-cell';
 
                 if (day === null) {
                     cell.classList.add('empty');
                 } else if (day.isSunday) {
-                    // Sundays are always uniformly greyed out
                     cell.classList.add('sunday');
                     cell.title = day.date + ' (Sunday)';
                 } else if (day.isFuture) {
                     cell.classList.add('future');
                     cell.title = day.date;
                 } else {
-                    const level = getHeatLevel(day.hours);
+                    var level = getHeatLevel(day.hours);
                     cell.classList.add('level-' + level);
-                    cell.title = day.date + ': ' + formatHours(day.hours) + ' hours';
+                    cell.title = day.date + ': ' + formatHoursDisplay(day.hours) + ' hours';
                 }
 
                 heatmapGrid.appendChild(cell);
             }
         }
 
-        renderMonthLabels(weeks, year);
+        renderMonthLabels(weeks);
     }
 
     function getHeatLevel(hours) {
@@ -438,17 +406,17 @@ document.addEventListener('DOMContentLoaded', function() {
         return 4;
     }
 
-    function renderMonthLabels(weeks, year) {
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        let lastMonth = -1;
+    function renderMonthLabels(weeks) {
+        var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        var lastMonth = -1;
 
-        for (let weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
-            const firstDay = weeks[weekIndex].find(d => d !== null);
-            if (firstDay) {
-                const month = parseInt(firstDay.date.split('-')[1], 10) - 1;
+        for (var weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
+            var firstDayInWeek = weeks[weekIndex].find(function(d) { return d !== null; });
+            if (firstDayInWeek) {
+                var month = parseInt(firstDayInWeek.date.split('-')[1], 10) - 1;
                 if (month !== lastMonth) {
-                    const label = document.createElement('span');
+                    var label = document.createElement('span');
                     label.className = 'month-label';
                     label.textContent = monthNames[month];
                     label.style.gridColumn = weekIndex + 1;
@@ -467,11 +435,10 @@ document.addEventListener('DOMContentLoaded', function() {
     logoutButton.addEventListener('click', async function() {
         try {
             await fetch('/api/auth/logout', { method: 'POST' });
-            window.location.href = '/index.html';
         } catch (error) {
             console.error('Logout error:', error);
-            window.location.href = '/index.html';
         }
+        window.location.href = '/index.html';
     });
 
 });

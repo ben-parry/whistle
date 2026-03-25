@@ -4,11 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About - Whistle</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -16,29 +11,13 @@
 
         <header class="app-header">
             <a href="/app.html" class="logo">Whistle</a>
-            <nav class="app-nav" id="nav-links">
-                <!-- Set by JavaScript based on auth status -->
-            </nav>
+            <nav class="app-nav" id="nav-links"></nav>
         </header>
 
         <section class="about-section">
             <h2 class="section-title">About Whistle</h2>
-
             <div class="card about-card">
-                <div class="about-content">
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                    </p>
-                    <p>
-                        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida.
-                    </p>
-                    <p>
-                        Duis ac tellus et risus vulputate vehicula. Donec lobortis risus a elit. Etiam tempor ultrices ligula. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus. Phasellus ultrices nulla quis nibh. Quisque a lectus.
-                    </p>
-                    <p>
-                        Donec consectetuer ligula vulputate sem tristique cursus. Nam nulla quam, gravida non, commodo a, sodales sit amet, nisi. Pellentesque fermentum dolor. Aliquam quam lectus, facilisis auctor, ultrices ut, elementum vulputate, nunc. Sed adipiscing ornare risus. Morbi est est, blandit sit amet, sagittis vel, euismod vel, velit.
-                    </p>
-                </div>
+                <div class="about-content" id="about-content">Loading...</div>
             </div>
         </section>
 
@@ -49,12 +28,47 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async function() {
-            const navLinks = document.getElementById('nav-links');
+        // Simple markdown to HTML (handles #, ##, ###, **, -, blank lines)
+        function renderMarkdown(md) {
+            var lines = md.split('\n');
+            var html = '';
+            var inList = false;
 
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+
+                // Skip the first H1 (we already have the page title)
+                if (line.match(/^# /) && i < 3) continue;
+
+                if (line.match(/^### /)) {
+                    if (inList) { html += '</ul>'; inList = false; }
+                    html += '<h3>' + line.replace(/^### /, '') + '</h3>';
+                } else if (line.match(/^## /)) {
+                    if (inList) { html += '</ul>'; inList = false; }
+                    html += '<h2>' + line.replace(/^## /, '') + '</h2>';
+                } else if (line.match(/^- /)) {
+                    if (!inList) { html += '<ul>'; inList = true; }
+                    var content = line.replace(/^- /, '').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                    html += '<li>' + content + '</li>';
+                } else if (line.trim() === '') {
+                    if (inList) { html += '</ul>'; inList = false; }
+                } else {
+                    if (inList) { html += '</ul>'; inList = false; }
+                    var text = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                    html += '<p>' + text + '</p>';
+                }
+            }
+            if (inList) html += '</ul>';
+            return html;
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            var navLinks = document.getElementById('nav-links');
+
+            // Setup nav
             try {
-                const response = await fetch('/api/auth/me');
-                const data = await response.json();
+                var response = await fetch('/api/auth/me');
+                var data = await response.json();
 
                 if (data.user) {
                     navLinks.innerHTML =
@@ -64,12 +78,8 @@
                         '<button id="logout-button" class="nav-link button-link">Sign Out</button>';
 
                     document.getElementById('logout-button').addEventListener('click', async function() {
-                        try {
-                            await fetch('/api/auth/logout', { method: 'POST' });
-                            window.location.href = '/index.html';
-                        } catch (error) {
-                            window.location.href = '/index.html';
-                        }
+                        try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+                        window.location.href = '/index.html';
                     });
                 } else {
                     navLinks.innerHTML =
@@ -82,6 +92,15 @@
                     '<a href="/leaderboard.html" class="nav-link">Leaderboard</a>' +
                     '<a href="/about.html" class="nav-link">About</a>' +
                     '<a href="/index.html" class="nav-link">Sign In</a>';
+            }
+
+            // Load and render ABOUT.md
+            try {
+                var mdResponse = await fetch('/ABOUT.md');
+                var md = await mdResponse.text();
+                document.getElementById('about-content').innerHTML = renderMarkdown(md);
+            } catch (error) {
+                document.getElementById('about-content').textContent = 'Failed to load content.';
             }
         });
     </script>

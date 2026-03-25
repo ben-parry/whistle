@@ -6,7 +6,7 @@
 // Public endpoint — no auth required
 // ============================================
 
-const { sql, sendJson, sendError, autoCloseAllStaleSessions } = require('./_helpers');
+const { sql, sendJson, sendError, autoCloseAllStaleSessions, HIDDEN_USERS } = require('./_helpers');
 
 module.exports = async function handler(request, response) {
     if (request.method !== 'GET') {
@@ -48,6 +48,7 @@ async function handleYear(request, response) {
                 AND te.end_time IS NOT NULL
                 AND te.start_time >= ${yearStart}
                 AND te.start_time < ${yearEnd}
+            WHERE u.email != ALL(${HIDDEN_USERS})
             GROUP BY u.id, u.name, u.cute_id
             HAVING COALESCE(SUM(EXTRACT(EPOCH FROM (te.end_time - te.start_time)) / 3600), 0) > 0
             ORDER BY total_hours DESC
@@ -134,7 +135,8 @@ async function handleToday(request, response) {
                 MAX(CASE WHEN te.end_time IS NULL THEN te.start_time ELSE NULL END) as active_since
             FROM users u
             INNER JOIN time_entries te ON te.user_id = u.id
-            WHERE (
+            WHERE u.email != ALL(${HIDDEN_USERS})
+            AND (
                 (te.end_time IS NOT NULL AND te.start_time >= ${todayStart.toISOString()} AND te.start_time < ${todayEnd.toISOString()})
                 OR te.end_time IS NULL
             )

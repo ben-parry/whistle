@@ -64,6 +64,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // STATISTICS
     // ============================================
 
+    function formatMinutesToTime(totalMinutes) {
+        var h = Math.floor(totalMinutes / 60);
+        var m = totalMinutes % 60;
+        var ampm = h >= 12 ? 'PM' : 'AM';
+        var displayH = h % 12 || 12;
+        return displayH + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+    }
+
     async function loadStats() {
         try {
             const response = await fetch('/api/time/stats');
@@ -79,11 +87,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 medianStr = medianMins + ' minute' + (medianMins !== 1 ? 's' : '');
             }
 
-            statsSentence.innerHTML =
+            var html =
                 'In <span class="stat-highlight">' + data.year + '</span> you have clocked in on ' +
                 '<span class="stat-highlight">' + data.total_days + ' day' + (data.total_days !== 1 ? 's' : '') + '</span> and completed ' +
                 '<span class="stat-highlight">' + data.total_hours + ' hour' + (data.total_hours !== 1 ? 's' : '') + '</span> of work. ' +
                 'On a median day you worked <span class="stat-highlight">' + medianStr + '</span>.';
+
+            if (data.median_clock_in_minutes !== null && data.median_clock_out_minutes !== null) {
+                html += '<br>You usually clock in at <span class="stat-highlight">' +
+                    formatMinutesToTime(data.median_clock_in_minutes) +
+                    '</span> and clock out at <span class="stat-highlight">' +
+                    formatMinutesToTime(data.median_clock_out_minutes) +
+                    '</span>.';
+            }
+
+            statsSentence.innerHTML = html;
         } catch (error) {
             console.error('Stats error:', error);
             statsSentence.textContent = 'Unable to load statistics.';
@@ -108,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (data.sessions.length === 0) {
-                sessionsList.innerHTML = '<p style="color: #9D8F86; font-style: italic;">No sessions yet.</p>';
+                sessionsList.innerHTML = '<p class="loading-state">No sessions yet.</p>';
                 return;
             }
 
@@ -165,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             console.error('Sessions error:', error);
-            sessionsList.innerHTML = '<p style="color: #8F3416;">Failed to load sessions.</p>';
+            sessionsList.innerHTML = '<p class="error-message">Failed to load sessions.</p>';
         }
     }
 
@@ -434,13 +452,13 @@ document.addEventListener('DOMContentLoaded', function() {
         heatmapMonths.innerHTML = '';
 
         const heatColors = {
-            0: '#EEE7D1',
-            1: 'rgba(108, 122, 97, 0.2)',
-            2: 'rgba(108, 122, 97, 0.45)',
-            3: 'rgba(108, 122, 97, 0.7)',
+            0: '#EDE9E2',
+            1: 'rgba(108, 122, 97, 0.25)',
+            2: 'rgba(108, 122, 97, 0.5)',
+            3: 'rgba(108, 122, 97, 0.75)',
             4: '#6C7A61'
         };
-        const sundayColor = '#E5CCA4';
+        const sundayColor = '#EEBC8B';
 
         const firstDay = new Date(year, 0, 1);
         const lastDay = new Date(year, 11, 31);

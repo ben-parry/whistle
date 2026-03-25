@@ -296,16 +296,27 @@ function get9pmCutoff(startTime, timezone) {
     return getTimezoneDateTime(new Date(startTime), timezone, WORK_END_HOUR, 0);
 }
 
-// Auto-close a session at 9pm if it's past that time
-async function autoCloseSessionAt9pm(entry) {
-    const cutoff = get9pmCutoff(entry.start_time, entry.start_timezone);
-    if (!cutoff) return false;
-
+// Auto-close a stale open session
+// End time = min(start + 12h, 9pm cutoff)
+async function autoCloseStaleSession(entry) {
     const now = new Date();
-    if (now > cutoff) {
+    const startTime = new Date(entry.start_time);
+
+    // Calculate both caps
+    const cutoff9pm = get9pmCutoff(entry.start_time, entry.start_timezone);
+    const cutoff12h = new Date(startTime.getTime() + MAX_DAILY_HOURS * 60 * 60 * 1000);
+
+    // Determine the effective end time (earliest cap that's in the past)
+    let endTime = cutoff12h;
+    if (cutoff9pm && cutoff9pm < endTime) {
+        endTime = cutoff9pm;
+    }
+
+    // Only close if the cap has passed
+    if (now > endTime) {
         await sql`
             UPDATE time_entries
-            SET end_time = ${cutoff.toISOString()}
+            SET end_time = ${endTime.toISOString()}
             WHERE id = ${entry.id}
             AND end_time IS NULL
         `;
@@ -325,9 +336,12 @@ async function autoCloseAllStaleSessions() {
         WHERE end_time IS NULL
     `;
     for (const entry of openSessions.rows) {
-        await autoCloseSessionAt9pm(entry);
+        await autoCloseStaleSession(entry);
     }
 }
+
+// Hidden users — these users are excluded from the public leaderboard
+const HIDDEN_USERS = ['ben@benparry.ca'];
 
 // ============================================
 // PARSE COOKIES FROM REQUEST
@@ -427,6 +441,7 @@ module.exports = {
     WORK_END_HOUR,
     MAX_DAILY_HOURS,
     ANNUAL_HOURS_GOAL,
+    HIDDEN_USERS,
     generateUniqueCuteId,
     isValidName,
     validateNameWithLLM,
@@ -436,7 +451,7 @@ module.exports = {
     getHoursWorkedOnDate,
     getTimezoneDateTime,
     get9pmCutoff,
-    autoCloseSessionAt9pm,
+    autoCloseStaleSession,
     autoCloseAllStaleSessions,
     parseCookies,
     getCurrentUser,

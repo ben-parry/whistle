@@ -2,7 +2,7 @@
 // CLOCK IN API ENDPOINT
 // ============================================
 // POST /api/time/clock-in
-// Starts a new work session
+// Starts a new work session (one per day max)
 //
 // Request body: { timezone: "America/Toronto" }
 // Response: { success: true, entry: { id, start_time } }
@@ -15,8 +15,9 @@ const {
     sendError,
     checkTimeRestrictions,
     getRestrictionMessage,
-    getHoursWorkedOnDate,
-    MAX_DAILY_HOURS
+    getTimezoneDateTime,
+    WORK_START_HOUR,
+    WORK_END_HOUR
 } = require('../_helpers');
 
 module.exports = async function handler(request, response) {
@@ -25,33 +26,23 @@ module.exports = async function handler(request, response) {
     }
 
     try {
-        // ----------------------------------------
-        // Check auth
-        // ----------------------------------------
         const user = await getCurrentUser(request);
         if (!user) {
             return sendError(response, 401, 'You must be logged in to clock in.');
         }
 
-        // ----------------------------------------
-        // Get timezone
-        // ----------------------------------------
         const { timezone } = request.body;
         if (!timezone || typeof timezone !== 'string') {
             return sendError(response, 400, 'Timezone is required.');
         }
 
-        // ----------------------------------------
         // Check time restrictions (5am-9pm, no Sundays)
-        // ----------------------------------------
         const restriction = checkTimeRestrictions(timezone);
         if (restriction) {
             return sendError(response, 400, getRestrictionMessage(restriction));
         }
 
-        // ----------------------------------------
-        // Check if already clocked in
-        // ----------------------------------------
+        // Check if already clocked in (open session)
         const openEntry = await sql`
             SELECT id FROM time_entries
             WHERE user_id = ${user.id}
@@ -62,17 +53,24 @@ module.exports = async function handler(request, response) {
             return sendError(response, 400, 'You are already clocked in.');
         }
 
-        // ----------------------------------------
-        // Check 12-hour daily limit
-        // ----------------------------------------
-        const hoursToday = await getHoursWorkedOnDate(user.id, new Date(), timezone);
-        if (hoursToday >= MAX_DAILY_HOURS) {
-            return sendError(response, 400, getRestrictionMessage('daily_limit'));
+        // One session per day: check if any entry exists today
+        const dayStart = getTimezoneDateTime(new Date(), timezone, WORK_START_HOUR, 0);
+        const dayEnd = getTimezoneDateTime(new Date(), timezone, WORK_END_HOUR, 0);
+
+        if (dayStart && dayEnd) {
+            const todayEntry = await sql`
+                SELECT id FROM time_entries
+                WHERE user_id = ${user.id}
+                AND start_time >= ${dayStart.toISOString()}
+                AND start_time < ${dayEnd.toISOString()}
+            `;
+
+            if (todayEntry.rows.length > 0) {
+                return sendError(response, 400, 'You have already clocked in today. One session per day.');
+            }
         }
 
-        // ----------------------------------------
         // Create new time entry
-        // ----------------------------------------
         const result = await sql`
             INSERT INTO time_entries (user_id, start_time, start_timezone)
             VALUES (${user.id}, NOW(), ${timezone})

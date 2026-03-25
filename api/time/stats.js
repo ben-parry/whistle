@@ -3,10 +3,6 @@
 // ============================================
 // GET /api/time/stats
 // Returns statistics for the profile stats sentence
-//
-// Response: {
-//   year, total_days, total_hours, median_minutes
-// }
 // ============================================
 
 const { sql, getCurrentUser, sendJson, sendError } = require('../_helpers');
@@ -50,7 +46,6 @@ module.exports = async function handler(request, response) {
         `;
 
         // Median daily working time
-        // First get total hours per day, then calculate the median
         const dailyTotals = await sql`
             SELECT
                 DATE(start_time) as work_date,
@@ -75,11 +70,44 @@ module.exports = async function handler(request, response) {
             }
         }
 
+        // Median clock-in and clock-out times
+        const timesResult = await sql`
+            SELECT
+                EXTRACT(HOUR FROM start_time) * 60 + EXTRACT(MINUTE FROM start_time) as start_minutes,
+                EXTRACT(HOUR FROM end_time) * 60 + EXTRACT(MINUTE FROM end_time) as end_minutes
+            FROM time_entries
+            WHERE user_id = ${user.id}
+            AND end_time IS NOT NULL
+            AND start_time >= ${yearStart}
+            AND start_time < ${yearEnd}
+            ORDER BY start_time
+        `;
+
+        let medianClockIn = null;
+        let medianClockOut = null;
+
+        if (timesResult.rows.length > 0) {
+            const startMins = timesResult.rows.map(r => parseFloat(r.start_minutes)).sort((a, b) => a - b);
+            const endMins = timesResult.rows.map(r => parseFloat(r.end_minutes)).sort((a, b) => a - b);
+
+            const midS = Math.floor(startMins.length / 2);
+            medianClockIn = startMins.length % 2 === 0
+                ? (startMins[midS - 1] + startMins[midS]) / 2
+                : startMins[midS];
+
+            const midE = Math.floor(endMins.length / 2);
+            medianClockOut = endMins.length % 2 === 0
+                ? (endMins[midE - 1] + endMins[midE]) / 2
+                : endMins[midE];
+        }
+
         return sendJson(response, 200, {
             year: currentYear,
             total_days: parseInt(daysResult.rows[0].total_days),
             total_hours: Math.floor(parseFloat(hoursResult.rows[0].total_hours)),
-            median_minutes: Math.round(medianMinutes)
+            median_minutes: Math.round(medianMinutes),
+            median_clock_in_minutes: medianClockIn !== null ? Math.round(medianClockIn) : null,
+            median_clock_out_minutes: medianClockOut !== null ? Math.round(medianClockOut) : null
         });
 
     } catch (error) {

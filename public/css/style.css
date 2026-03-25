@@ -1,20 +1,59 @@
 /* ============================================
    WHISTLE - STYLESHEET
    ============================================
-   A hyper-opinionated punch clock with Art Nouveau accents.
-
    Core Colors:
-   - Background: #EEE7D1 (light cream)
-   - Secondary surface: #E5CCA4 (warm sand)
-   - Borders: #8A9A7B (sage)
+   - Background: #FBDFC4 (slight pink)
+   - Secondary surface: #EEBC8B (warm)
+   - Borders & links: #B7822F (golden brown)
+   - Empty cell: #EDE9E2 (white-ish)
    - Muted text: #9D8F86 (warm grey)
    - Primary text: #36332E (deep charcoal)
 
    Highlight Colors:
-   - Steel blue: #4380A4 (links, interactive)
-   - Deep red: #8F3416 (danger, active states)
-   - Heatmap green: #6C7A61 (heatmap levels only)
+   - Deep red/terracotta: #8F3416 (buttons, danger, active)
+   - Green: #7D8F67 / #6C7A61 (clock-in, heatmap, accents)
    ============================================ */
+
+
+/* ============================================
+   FONT FACES
+   ============================================ */
+
+@font-face {
+    font-family: 'Kalice';
+    src: url('/fonts/Kalice-Regular.woff2') format('woff2'),
+         url('/fonts/Kalice-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kalice';
+    src: url('/fonts/Kalice-Medium.woff2') format('woff2'),
+         url('/fonts/Kalice-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kalice';
+    src: url('/fonts/Kalice-Bold.woff2') format('woff2'),
+         url('/fonts/Kalice-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kalice';
+    src: url('/fonts/Kalice-Italic.woff2') format('woff2'),
+         url('/fonts/Kalice-Italic.woff') format('woff');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
 
 
 /* ============================================
@@ -31,15 +70,14 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-                 Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: 'Kalice', Georgia, serif;
     font-size: 16px;
     line-height: 1.6;
-    background-color: #EEE7D1;
+    background-color: #FBDFC4;
     color: #36332E;
     background-image:
-        radial-gradient(circle at 20% 80%, rgba(138, 154, 123, 0.02) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(138, 154, 123, 0.02) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(183, 130, 47, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(183, 130, 47, 0.03) 0%, transparent 50%);
     min-height: 100vh;
 }
 
@@ -49,13 +87,15 @@ body {
    ============================================ */
 
 h1, h2, h3, .logo {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-weight: 600;
+    font-family: 'Kalice', Georgia, serif;
+    font-weight: 700;
     color: #36332E;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 a {
-    color: #4380A4;
+    color: #B7822F;
     text-decoration: none;
 }
 
@@ -71,7 +111,7 @@ a:hover {
 .container {
     max-width: 920px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 16px;
 }
 
 
@@ -80,10 +120,10 @@ a:hover {
    ============================================ */
 
 .card {
-    background-color: #E5CCA4;
-    border: 2px solid #8A9A7B;
-    padding: 24px;
-    margin-bottom: 20px;
+    background-color: #EEBC8B;
+    border: 2px solid #B7822F;
+    padding: 20px;
+    margin-bottom: 16px;
 }
 
 
@@ -93,7 +133,8 @@ a:hover {
 
 .button {
     display: inline-block;
-    padding: 12px 24px;
+    padding: 10px 20px;
+    font-family: 'Kalice', Georgia, serif;
     font-size: 16px;
     font-weight: 500;
     text-align: center;
@@ -117,26 +158,26 @@ a:hover {
 }
 
 .button-primary {
-    background-color: #36332E;
-    color: #EEE7D1;
+    background-color: #8F3416;
+    color: #FBDFC4;
 }
 
 .button-primary:hover:not(:disabled) {
-    background-color: #4a454d;
+    background-color: #7a2b12;
 }
 
 .button-secondary {
-    background-color: #8A9A7B;
+    background-color: #B7822F;
     color: #36332E;
 }
 
 .button-secondary:hover:not(:disabled) {
-    background-color: #7a8a6b;
+    background-color: #a07328;
 }
 
 .button-danger {
     background-color: #8F3416;
-    color: #EEE7D1;
+    color: #FBDFC4;
 }
 
 .button-danger:hover:not(:disabled) {
@@ -146,8 +187,9 @@ a:hover {
 .button-link {
     background: none;
     border: none;
-    color: #4380A4;
+    color: #B7822F;
     padding: 0;
+    font-family: 'Kalice', Georgia, serif;
     font-size: inherit;
     cursor: pointer;
 }
@@ -162,12 +204,12 @@ a:hover {
    ============================================ */
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     font-weight: 500;
     color: #36332E;
 }
@@ -175,10 +217,11 @@ a:hover {
 .form-group input,
 .form-group select {
     width: 100%;
-    padding: 12px;
+    padding: 10px;
+    font-family: 'Kalice', Georgia, serif;
     font-size: 16px;
-    border: 1px solid #8A9A7B;
-    background-color: #EEE7D1;
+    border: 1px solid #B7822F;
+    background-color: #FBDFC4;
     color: #36332E;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -186,8 +229,8 @@ a:hover {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #4380A4;
-    box-shadow: 0 0 0 3px rgba(67, 128, 164, 0.15);
+    border-color: #8F3416;
+    box-shadow: 0 0 0 3px rgba(143, 52, 22, 0.15);
 }
 
 .form-group input::placeholder {
@@ -203,16 +246,16 @@ a:hover {
     background-color: rgba(143, 52, 22, 0.15);
     border: 2px solid #8F3416;
     color: #8F3416;
-    padding: 12px 16px;
-    margin-bottom: 20px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
 }
 
 .success-message {
-    background-color: rgba(143, 52, 22, 0.1);
-    border: 2px solid #8F3416;
-    color: #8F3416;
-    padding: 12px 16px;
-    margin-bottom: 20px;
+    background-color: rgba(108, 122, 97, 0.15);
+    border: 2px solid #6C7A61;
+    color: #6C7A61;
+    padding: 10px 14px;
+    margin-bottom: 16px;
 }
 
 
@@ -231,7 +274,7 @@ a:hover {
 
 .auth-header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
 }
 
 .auth-header .logo {
@@ -244,6 +287,7 @@ a:hover {
     font-size: 18px;
     color: #9D8F86;
     font-style: italic;
+    text-transform: none;
 }
 
 .auth-card {
@@ -253,15 +297,16 @@ a:hover {
 
 .auth-tabs {
     display: flex;
-    margin-bottom: 24px;
-    border-bottom: 1px solid #8A9A7B;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #B7822F;
 }
 
 .tab-button {
     flex: 1;
-    padding: 12px;
+    padding: 10px;
     background: none;
     border: none;
+    font-family: 'Kalice', Georgia, serif;
     font-size: 16px;
     font-weight: 500;
     color: #9D8F86;
@@ -277,7 +322,7 @@ a:hover {
 
 .tab-button.active {
     color: #36332E;
-    border-bottom-color: #4380A4;
+    border-bottom-color: #B7822F;
 }
 
 .auth-form .button {
@@ -287,19 +332,19 @@ a:hover {
 
 .forgot-password {
     text-align: center;
-    margin-top: 24px;
+    margin-top: 20px;
     font-size: 14px;
     color: #9D8F86;
 }
 
 .auth-footer {
-    margin-top: 40px;
+    margin-top: 32px;
 }
 
 .ornament {
     text-align: center;
     font-size: 24px;
-    color: #8A9A7B;
+    color: #B7822F;
 }
 
 
@@ -308,17 +353,17 @@ a:hover {
    ============================================ */
 
 .app-container {
-    padding-top: 20px;
-    padding-bottom: 24px;
+    padding-top: 16px;
+    padding-bottom: 20px;
 }
 
 .app-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #8A9A7B;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #B7822F;
 }
 
 .app-header .logo {
@@ -334,12 +379,12 @@ a:hover {
 
 .app-nav {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     align-items: center;
 }
 
 .nav-link {
-    color: #4380A4;
+    color: #B7822F;
     font-weight: 500;
 }
 
@@ -350,17 +395,17 @@ a:hover {
 
 .punch-section {
     text-align: center;
-    padding: 24px 20px;
-    margin-bottom: 24px;
-}
-
-.status-display {
+    padding: 20px 16px;
     margin-bottom: 20px;
 }
 
+.status-display {
+    margin-bottom: 16px;
+}
+
 .status-text {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 24px;
+    font-family: 'Kalice', Georgia, serif;
+    font-size: 22px;
     margin-bottom: 8px;
 }
 
@@ -373,8 +418,7 @@ a:hover {
 }
 
 .status-text .restriction-link {
-    color: #4380A4;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #B7822F;
     font-size: 14px;
     display: block;
     margin-top: 8px;
@@ -384,16 +428,37 @@ a:hover {
     font-size: 48px;
     font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
-    color: #36332E;
+    color: #6C7A61;
     letter-spacing: 2px;
+}
+
+.punch-timestamps {
+    margin-top: 12px;
+    font-size: 15px;
+    color: #9D8F86;
+    line-height: 1.8;
+}
+
+.punch-timestamps .timestamp-value {
+    color: #36332E;
+    font-weight: 500;
+}
+
+.punch-completed-message {
+    margin-top: 16px;
+    font-size: 16px;
+    font-style: italic;
+    color: #9D8F86;
 }
 
 .punch-button {
     display: inline-block;
-    padding: 24px 64px;
+    padding: 20px 56px;
     font-size: 20px;
-    font-weight: 600;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-family: 'Kalice', Georgia, serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     cursor: pointer;
     border: 2px solid;
     transition: all 0.2s;
@@ -407,7 +472,7 @@ a:hover {
 .punch-button.not-working {
     background-color: #7D8F67;
     border-color: #6C7A61;
-    color: #EEE7D1;
+    color: #FBDFC4;
 }
 
 .punch-button.not-working:hover:not(:disabled) {
@@ -417,7 +482,7 @@ a:hover {
 .punch-button.working {
     background-color: #8F3416;
     border-color: #7a2b12;
-    color: #EEE7D1;
+    color: #FBDFC4;
 }
 
 .punch-button.working:hover:not(:disabled) {
@@ -430,55 +495,54 @@ a:hover {
    ============================================ */
 
 .stats-section {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .stat-card {
-    background-color: #E5CCA4;
-    border: 2px solid #8A9A7B;
-    padding: 24px;
+    background-color: #EEBC8B;
+    border: 2px solid #B7822F;
+    padding: 20px;
     text-align: center;
 }
 
 .stat-label {
-    font-size: 14px;
+    font-size: 13px;
     color: #9D8F86;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .stat-value {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Kalice', Georgia, serif;
     font-size: 48px;
     font-weight: 700;
-    color: #36332E;
+    color: #6C7A61;
 }
 
 .progress-container {
     width: 100%;
     max-width: 200px;
     height: 4px;
-    background-color: #8A9A7B;
+    background-color: #B7822F;
     border-radius: 2px;
     overflow: hidden;
 }
 
 .progress-bar {
     height: 100%;
-    background-color: #4380A4;
+    background-color: #6C7A61;
     border-radius: 2px;
     transition: width 0.3s ease;
     width: 0%;
 }
 
-/* Progress bar container with info icon */
 .progress-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-top: 12px;
+    margin-top: 10px;
 }
 
 
@@ -487,12 +551,12 @@ a:hover {
    ============================================ */
 
 .heatmap-section {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .section-title {
-    font-size: 20px;
-    margin-bottom: 20px;
+    font-size: 18px;
+    margin-bottom: 16px;
     color: #36332E;
 }
 
@@ -500,7 +564,7 @@ a:hover {
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    padding-bottom: 12px;
+    padding-bottom: 10px;
 }
 
 .heatmap-days {
@@ -543,7 +607,7 @@ a:hover {
 .heatmap-cell {
     width: 12px;
     height: 12px;
-    background-color: #EEE7D1;
+    background-color: #EDE9E2;
 }
 
 .heatmap-cell.empty {
@@ -551,29 +615,29 @@ a:hover {
 }
 
 .heatmap-cell.future {
-    background-color: #EEE7D1;
+    background-color: #EDE9E2;
     opacity: 0.5;
 }
 
 /* Heatmap color levels — green at varying opacity */
 .heatmap-cell.level-0,
 .legend-box.level-0 {
-    background-color: #EEE7D1;
+    background-color: #EDE9E2;
 }
 
 .heatmap-cell.level-1,
 .legend-box.level-1 {
-    background-color: rgba(108, 122, 97, 0.2);
+    background-color: rgba(108, 122, 97, 0.25);
 }
 
 .heatmap-cell.level-2,
 .legend-box.level-2 {
-    background-color: rgba(108, 122, 97, 0.45);
+    background-color: rgba(108, 122, 97, 0.5);
 }
 
 .heatmap-cell.level-3,
 .legend-box.level-3 {
-    background-color: rgba(108, 122, 97, 0.7);
+    background-color: rgba(108, 122, 97, 0.75);
 }
 
 .heatmap-cell.level-4,
@@ -581,9 +645,9 @@ a:hover {
     background-color: #6C7A61;
 }
 
-/* Sunday cells — uniformly greyed out */
+/* Sunday cells */
 .heatmap-cell.sunday {
-    background-color: #E5CCA4 !important;
+    background-color: #EEBC8B !important;
     opacity: 1 !important;
 }
 
@@ -592,7 +656,7 @@ a:hover {
     align-items: center;
     justify-content: flex-end;
     gap: 4px;
-    margin-top: 12px;
+    margin-top: 10px;
     font-size: 11px;
     color: #9D8F86;
 }
@@ -609,7 +673,7 @@ a:hover {
 /* Heatmap hover text */
 .heatmap-hover-text {
     font-size: 13px;
-    color: #4380A4;
+    color: #9D8F86;
     margin-top: 8px;
     min-height: 20px;
 }
@@ -624,7 +688,7 @@ a:hover {
 .danger-section,
 .sessions-section,
 .password-section {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 }
 
 .profile-card,
@@ -632,13 +696,13 @@ a:hover {
 .danger-card,
 .sessions-card,
 .password-card {
-    background-color: #E5CCA4;
-    border: 2px solid #8A9A7B;
-    padding: 24px;
+    background-color: #EEBC8B;
+    border: 2px solid #B7822F;
+    padding: 20px;
 }
 
 .profile-info {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .profile-info label {
@@ -647,7 +711,7 @@ a:hover {
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #9D8F86;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .profile-info p {
@@ -662,23 +726,23 @@ a:hover {
 
 .cute-id {
     font-family: 'Courier New', Courier, monospace;
-    color: #4380A4;
+    color: #B7822F;
     font-size: 14px;
 }
 
 /* Statistics sentence */
 .stats-sentence {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 20px;
+    font-family: 'Kalice', Georgia, serif;
+    font-size: 19px;
     line-height: 1.8;
     color: #36332E;
-    padding: 24px;
-    background-color: #E5CCA4;
-    border: 2px solid #8A9A7B;
+    padding: 20px;
+    background-color: #EEBC8B;
+    border: 2px solid #B7822F;
 }
 
 .stats-sentence .stat-highlight {
-    color: #4380A4;
+    color: #6C7A61;
     font-weight: 700;
 }
 
@@ -686,15 +750,15 @@ a:hover {
 .sessions-list {
     max-height: 400px;
     overflow-y: auto;
-    margin-top: 16px;
+    margin-top: 12px;
 }
 
 .session-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #8A9A7B;
+    padding: 10px 0;
+    border-bottom: 1px solid #B7822F;
 }
 
 .session-item:last-child {
@@ -713,15 +777,16 @@ a:hover {
 
 .session-duration {
     font-weight: 500;
-    color: #36332E;
+    color: #6C7A61;
     white-space: nowrap;
 }
 
 .session-edit-btn {
     background: none;
     border: none;
-    color: #4380A4;
+    color: #B7822F;
     cursor: pointer;
+    font-family: 'Kalice', Georgia, serif;
     font-size: 13px;
     padding: 4px 8px;
     margin-left: 8px;
@@ -748,25 +813,26 @@ a:hover {
 
 /* Edit modal */
 .edit-form {
-    margin-top: 16px;
+    margin-top: 12px;
 }
 
 .edit-form .form-group {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .edit-form .form-group input[type="datetime-local"] {
     width: 100%;
-    padding: 10px;
+    padding: 8px;
+    font-family: 'Kalice', Georgia, serif;
     font-size: 14px;
-    border: 1px solid #8A9A7B;
-    background-color: #EEE7D1;
+    border: 1px solid #B7822F;
+    background-color: #FBDFC4;
     color: #36332E;
 }
 
 .export-description,
 .danger-description {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     color: #36332E;
 }
 
@@ -802,21 +868,21 @@ a:hover {
 }
 
 .modal-content {
-    background-color: #EEE7D1;
-    padding: 32px;
+    background-color: #FBDFC4;
+    padding: 28px;
     max-width: 450px;
     width: 100%;
-    border: 2px solid #8A9A7B;
+    border: 2px solid #B7822F;
 }
 
 .modal-title {
-    font-size: 24px;
-    margin-bottom: 16px;
+    font-size: 22px;
+    margin-bottom: 12px;
     color: #8F3416;
 }
 
 .modal-text {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     color: #36332E;
 }
 
@@ -829,14 +895,14 @@ a:hover {
 .modal-warning {
     background-color: rgba(143, 52, 22, 0.1);
     border: 1px solid rgba(143, 52, 22, 0.3);
-    padding: 12px;
-    margin-bottom: 16px;
+    padding: 10px;
+    margin-bottom: 12px;
     font-size: 14px;
     color: #8F3416;
 }
 
 .modal-csv-option {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .modal-csv-option .button {
@@ -849,35 +915,29 @@ a:hover {
    ============================================ */
 
 .leaderboard-section {
-    margin-bottom: 32px;
-}
-
-.leaderboard-tabs {
-    display: flex;
     margin-bottom: 24px;
-    border-bottom: 1px solid #8A9A7B;
 }
 
 .leaderboard-table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #E5CCA4;
-    border: 2px solid #8A9A7B;
+    background-color: #EEBC8B;
+    border: 2px solid #B7822F;
 }
 
 .leaderboard-table th {
     text-align: left;
-    padding: 12px 16px;
+    padding: 10px 14px;
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #9D8F86;
-    border-bottom: 1px solid #8A9A7B;
+    border-bottom: 1px solid #B7822F;
 }
 
 .leaderboard-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(138, 154, 123, 0.5);
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(183, 130, 47, 0.4);
     color: #36332E;
 }
 
@@ -886,7 +946,7 @@ a:hover {
 }
 
 .leaderboard-rank {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Kalice', Georgia, serif;
     font-weight: 700;
     color: #9D8F86;
     width: 50px;
@@ -905,9 +965,10 @@ a:hover {
 }
 
 .leaderboard-hours {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Kalice', Georgia, serif;
     font-weight: 700;
     font-size: 18px;
+    color: #6C7A61;
     width: 140px;
 }
 
@@ -917,35 +978,9 @@ a:hover {
     min-width: 140px;
 }
 
-.leaderboard-sessions {
-    color: #9D8F86;
-    font-size: 14px;
-}
-
-.active-indicator {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #8F3416;
-    margin-right: 6px;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-}
-
-.active-timer {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 14px;
-    color: #8F3416;
-}
-
 .leaderboard-empty {
     text-align: center;
-    padding: 40px 20px;
+    padding: 32px 16px;
     color: #9D8F86;
     font-style: italic;
 }
@@ -955,7 +990,7 @@ a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .leaderboard-toggle {
@@ -964,11 +999,12 @@ a:hover {
 }
 
 .toggle-btn {
-    padding: 6px 16px;
+    padding: 5px 14px;
+    font-family: 'Kalice', Georgia, serif;
     font-size: 14px;
     font-weight: 500;
     background: none;
-    border: 2px solid #8A9A7B;
+    border: 2px solid #B7822F;
     color: #9D8F86;
     cursor: pointer;
     transition: all 0.2s;
@@ -977,7 +1013,7 @@ a:hover {
 .toggle-btn.active {
     background-color: #36332E;
     border-color: #36332E;
-    color: #EEE7D1;
+    color: #FBDFC4;
 }
 
 .toggle-btn:hover:not(.active) {
@@ -990,9 +1026,9 @@ a:hover {
    ============================================ */
 
 .app-footer {
-    margin-top: 60px;
-    padding-top: 20px;
-    border-top: 1px solid #8A9A7B;
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #B7822F;
 }
 
 
@@ -1010,7 +1046,7 @@ a:hover {
     }
 
     .punch-button {
-        padding: 20px 48px;
+        padding: 16px 40px;
         font-size: 18px;
     }
 
@@ -1020,7 +1056,7 @@ a:hover {
 
     .app-header {
         flex-direction: column;
-        gap: 16px;
+        gap: 12px;
         text-align: center;
     }
 
@@ -1038,7 +1074,7 @@ a:hover {
     }
 
     .stats-sentence {
-        font-size: 17px;
+        font-size: 16px;
     }
 
     .leaderboard-table th,
@@ -1059,21 +1095,21 @@ a:hover {
     background: linear-gradient(
         90deg,
         transparent 0%,
-        #8A9A7B 15%,
-        #8A9A7B 50%,
-        #8A9A7B 85%,
+        #B7822F 15%,
+        #B7822F 50%,
+        #B7822F 85%,
         transparent 100%
     );
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .stat-card::after {
     content: '\2766';
     display: block;
     text-align: center;
-    font-size: 20px;
-    color: #8A9A7B;
-    margin-top: 16px;
+    font-size: 18px;
+    color: #B7822F;
+    margin-top: 12px;
 }
 
 .profile-card,
@@ -1088,7 +1124,7 @@ a:hover {
     top: 8px;
     right: 12px;
     font-size: 16px;
-    color: #8A9A7B;
+    color: #B7822F;
 }
 
 
@@ -1097,13 +1133,13 @@ a:hover {
    ============================================ */
 
 .about-section {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 }
 
 .about-card {
-    background-color: #E5CCA4;
-    border: 2px solid #8A9A7B;
-    padding: 24px;
+    background-color: #EEBC8B;
+    border: 2px solid #B7822F;
+    padding: 20px;
     position: relative;
 }
 
@@ -1113,17 +1149,30 @@ a:hover {
     top: 8px;
     right: 12px;
     font-size: 16px;
-    color: #8A9A7B;
+    color: #B7822F;
 }
 
 .about-content p {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     color: #36332E;
     line-height: 1.7;
 }
 
 .about-content p:last-child {
     margin-bottom: 0;
+}
+
+.about-content h1,
+.about-content h2,
+.about-content h3 {
+    margin-bottom: 10px;
+    margin-top: 16px;
+}
+
+.about-content h1:first-child,
+.about-content h2:first-child,
+.about-content h3:first-child {
+    margin-top: 0;
 }
 
 
@@ -1133,20 +1182,26 @@ a:hover {
 
 .sunday-section {
     text-align: center;
-    padding: 40px 20px;
+    padding: 32px 16px;
 }
 
 .sunday-quote {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 24px;
+    font-family: 'Kalice', Georgia, serif;
+    font-size: 22px;
     font-style: italic;
     color: #36332E;
-    margin-bottom: 32px;
+    margin-bottom: 12px;
     line-height: 1.6;
 }
 
+.sunday-link {
+    display: block;
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
 .sunday-image {
-    max-width: 400px;
+    max-width: 250px;
     width: 100%;
     opacity: 0.9;
 }
@@ -1154,25 +1209,25 @@ a:hover {
 /* Sunday poem (leaderboard) */
 .sunday-poem {
     max-width: 600px;
-    margin: 40px auto;
-    text-align: center;
+    margin: 32px 0;
+    text-align: left;
 }
 
 .sunday-poem .poem-title {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 24px;
-    font-weight: 600;
+    font-family: 'Kalice', Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
     color: #36332E;
     margin-bottom: 8px;
 }
 
 .sunday-poem .poem-text {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 17px;
+    font-family: 'Kalice', Georgia, serif;
+    font-size: 16px;
     line-height: 1.9;
     color: #36332E;
     white-space: pre-line;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .sunday-poem .poem-attribution {
@@ -1188,7 +1243,7 @@ a:hover {
 
 .profile-header-image-container {
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .profile-header-image {
@@ -1196,7 +1251,7 @@ a:hover {
     height: 140px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #8A9A7B;
+    border: 2px solid #B7822F;
 }
 
 
@@ -1214,7 +1269,7 @@ a:hover {
 }
 
 .info-icon:hover {
-    color: #4380A4;
+    color: #B7822F;
     text-decoration: none;
 }
 
@@ -1236,7 +1291,7 @@ a:hover {
 
 .loading-state {
     text-align: center;
-    padding: 20px;
+    padding: 16px;
     color: #9D8F86;
     font-style: italic;
 }
