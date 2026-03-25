@@ -2,14 +2,14 @@
    WHISTLE - STYLESHEET
    ============================================
    Palette:
-   - Background:  #FBDFC4
-   - Surface:     #EEBC8B
-   - Border:      #B7822F
+   - Background:  #F5DCC3
+   - Surface:     #EBCAA0
+   - Border:      #C4956A
    - Empty cell:  #EDE9E2
-   - Muted text:  #9D8F86
-   - Primary text: #36332E
+   - Muted text:  #8A7D73
+   - Primary text: #1A1714
    - Accent red:  #8F3416
-   - Accent green: #6C7A61 / #7D8F67
+   - Accent green: #5E7252 / #6C7A61
    ============================================ */
 
 
@@ -32,7 +32,7 @@
 
     --leading-tight: 1.2;
     --leading-snug: 1.4;
-    --leading-normal: 1.65;
+    --leading-normal: 1.7;
 
     --space-1: 0.25rem;
     --space-2: 0.5rem;
@@ -46,17 +46,17 @@
     --space-20: 5rem;
     --space-24: 6rem;
 
-    --color-bg: #FBDFC4;
-    --color-surface: #EEBC8B;
-    --color-border: #B7822F;
-    --color-border-light: rgba(183, 130, 47, 0.35);
+    --color-bg: #F5DCC3;
+    --color-surface: #EBCAA0;
+    --color-border: #C4956A;
+    --color-border-light: rgba(196, 149, 106, 0.3);
     --color-empty: #EDE9E2;
-    --color-muted: #9D8F86;
-    --color-text: #36332E;
+    --color-muted: #8A7D73;
+    --color-text: #1A1714;
     --color-accent: #8F3416;
     --color-accent-hover: #7a2b12;
-    --color-green: #6C7A61;
-    --color-green-light: #7D8F67;
+    --color-green: #5E7252;
+    --color-green-light: #6C7A61;
 
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
@@ -127,6 +127,7 @@ body {
     color: var(--color-text);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 
@@ -143,13 +144,16 @@ h1, h2, h3, .logo {
 }
 
 a {
-    color: var(--color-border);
-    text-decoration: none;
-    transition: color var(--duration-fast) var(--ease-out);
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-color: var(--color-border);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: text-decoration-color var(--duration-normal) var(--ease-out);
 }
 
 a:hover {
-    color: var(--color-accent);
+    text-decoration-color: var(--color-text);
 }
 
 
@@ -170,7 +174,7 @@ a:hover {
 
 .card {
     background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-light);
     padding: var(--space-8);
 }
 
@@ -208,7 +212,7 @@ a:hover {
 
 .button-primary {
     background-color: var(--color-accent);
-    color: var(--color-bg);
+    color: #F5F0EB;
 }
 
 .button-primary:hover:not(:disabled) {
@@ -226,7 +230,7 @@ a:hover {
 
 .button-danger {
     background-color: var(--color-accent);
-    color: var(--color-bg);
+    color: #F5F0EB;
 }
 
 .button-danger:hover:not(:disabled) {
@@ -236,16 +240,17 @@ a:hover {
 .button-link {
     background: none;
     border: none;
-    color: var(--color-border);
+    color: var(--color-muted);
     padding: 0;
     font-family: var(--font-main);
     font-size: inherit;
     cursor: pointer;
+    text-decoration: none;
     transition: color var(--duration-fast) var(--ease-out);
 }
 
 .button-link:hover {
-    color: var(--color-accent);
+    color: var(--color-text);
 }
 
 
@@ -332,6 +337,7 @@ a:hover {
     margin-bottom: var(--space-3);
     color: var(--color-text);
     letter-spacing: -0.02em;
+    text-decoration: none;
 }
 
 .auth-header .tagline {
@@ -388,15 +394,25 @@ a:hover {
     color: var(--color-muted);
 }
 
+.forgot-password a {
+    color: var(--color-muted);
+    text-decoration-color: var(--color-border-light);
+}
+
+.forgot-password a:hover {
+    color: var(--color-text);
+    text-decoration-color: var(--color-text);
+}
+
 .auth-footer {
     margin-top: var(--space-12);
 }
 
 .ornament {
     text-align: center;
-    font-size: 18px;
+    font-size: 16px;
     color: var(--color-border);
-    opacity: 0.6;
+    opacity: 0.4;
 }
 
 
@@ -423,11 +439,12 @@ a:hover {
     color: var(--color-text);
     text-decoration: none;
     letter-spacing: -0.02em;
+    transition: opacity var(--duration-normal) var(--ease-out);
 }
 
 .app-header .logo:hover {
     text-decoration: none;
-    color: var(--color-accent);
+    opacity: 0.6;
 }
 
 .app-nav {
@@ -440,11 +457,13 @@ a:hover {
     color: var(--color-muted);
     font-weight: 400;
     font-size: var(--text-sm);
-    transition: color var(--duration-fast) var(--ease-out);
+    text-decoration: none;
+    transition: color var(--duration-normal) var(--ease-out);
 }
 
 .nav-link:hover {
     color: var(--color-text);
+    text-decoration: none;
 }
 
 
@@ -477,10 +496,11 @@ a:hover {
 }
 
 .status-text .restriction-link {
-    color: var(--color-border);
+    color: var(--color-muted);
     font-size: var(--text-sm);
     display: block;
     margin-top: var(--space-3);
+    text-decoration-color: var(--color-border-light);
 }
 
 .elapsed-time {
@@ -518,7 +538,7 @@ a:hover {
     font-family: var(--font-main);
     letter-spacing: 0.02em;
     cursor: pointer;
-    border: 1px solid;
+    border: none;
     transition: all var(--duration-normal) var(--ease-out);
 }
 
@@ -529,8 +549,7 @@ a:hover {
 
 .punch-button.not-working {
     background-color: var(--color-green-light);
-    border-color: var(--color-green);
-    color: var(--color-bg);
+    color: #F5F0EB;
 }
 
 .punch-button.not-working:hover:not(:disabled) {
@@ -539,8 +558,7 @@ a:hover {
 
 .punch-button.working {
     background-color: var(--color-accent);
-    border-color: var(--color-accent-hover);
-    color: var(--color-bg);
+    color: #F5F0EB;
 }
 
 .punch-button.working:hover:not(:disabled) {
@@ -558,7 +576,7 @@ a:hover {
 
 .stat-card {
     background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-light);
     padding: var(--space-10);
     text-align: center;
 }
@@ -753,7 +771,7 @@ a:hover {
 .sessions-card,
 .password-card {
     background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-light);
     padding: var(--space-8);
 }
 
@@ -786,7 +804,7 @@ a:hover {
 
 .cute-id {
     font-family: var(--font-mono);
-    color: var(--color-border);
+    color: var(--color-muted);
     font-size: var(--text-sm);
 }
 
@@ -797,7 +815,7 @@ a:hover {
     color: var(--color-text);
     padding: var(--space-8);
     background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-light);
 }
 
 .stats-sentence .stat-highlight {
@@ -842,17 +860,17 @@ a:hover {
 .session-edit-btn {
     background: none;
     border: none;
-    color: var(--color-border);
+    color: var(--color-muted);
     cursor: pointer;
     font-family: var(--font-main);
     font-size: var(--text-sm);
     padding: var(--space-1) var(--space-2);
     margin-left: var(--space-2);
-    transition: color var(--duration-fast) var(--ease-out);
+    transition: color var(--duration-normal) var(--ease-out);
 }
 
 .session-edit-btn:hover {
-    color: var(--color-accent);
+    color: var(--color-text);
 }
 
 .session-edit-btn:disabled {
@@ -899,7 +917,7 @@ a:hover {
 }
 
 .danger-card {
-    border-color: rgba(143, 52, 22, 0.4);
+    border-color: rgba(143, 52, 22, 0.25);
 }
 
 
@@ -930,7 +948,8 @@ a:hover {
     padding: var(--space-10);
     max-width: 420px;
     width: 100%;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-light);
+    box-shadow: 0 20px 40px rgba(26, 23, 20, 0.15);
 }
 
 .modal-title {
@@ -981,7 +1000,7 @@ a:hover {
     width: 100%;
     border-collapse: collapse;
     background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-light);
 }
 
 .leaderboard-table th {
@@ -991,7 +1010,7 @@ a:hover {
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--color-muted);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border-light);
     font-weight: 500;
 }
 
@@ -1063,7 +1082,7 @@ a:hover {
     font-size: var(--text-sm);
     font-weight: 500;
     background: none;
-    border: 1px solid var(--color-border-light);
+    border: 1px solid transparent;
     color: var(--color-muted);
     cursor: pointer;
     transition: all var(--duration-normal) var(--ease-out);
@@ -1077,7 +1096,6 @@ a:hover {
 
 .toggle-btn:hover:not(.active) {
     color: var(--color-text);
-    border-color: var(--color-border);
 }
 
 
@@ -1102,7 +1120,7 @@ a:hover {
 
 .about-card {
     background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-light);
     padding: var(--space-10);
 }
 
@@ -1152,6 +1170,13 @@ a:hover {
     display: block;
     margin-bottom: var(--space-10);
     font-size: var(--text-sm);
+    color: var(--color-muted);
+    text-decoration-color: var(--color-border-light);
+}
+
+.sunday-link:hover {
+    color: var(--color-text);
+    text-decoration-color: var(--color-text);
 }
 
 .sunday-image {
@@ -1219,11 +1244,12 @@ a:hover {
     margin-left: var(--space-2);
     text-decoration: none;
     vertical-align: middle;
-    transition: color var(--duration-fast) var(--ease-out);
+    transition: color var(--duration-normal) var(--ease-out);
 }
 
 .info-icon:hover {
-    color: var(--color-border);
+    color: var(--color-text);
+    text-decoration: none;
 }
 
 
