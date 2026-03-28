@@ -29,6 +29,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     checkAuth();
 
+    // Re-fetch status when the tab becomes visible again
+    // This ensures the server auto-closes stale sessions and the UI reflects reality
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && sessionStartTime) {
+            loadStatus();
+            loadHeatmap();
+        }
+    });
+
     async function checkAuth() {
         try {
             const response = await fetch('/api/auth/me');
@@ -287,8 +296,29 @@ document.addEventListener('DOMContentLoaded', function() {
         var now = new Date();
         var diffMs = now - sessionStartTime;
         if (diffMs < 0) diffMs = 0;
-        var diffSeconds = Math.floor(diffMs / 1000);
 
+        // Calculate the cap: min(12 hours, 9pm today)
+        var maxMs = MAX_DAILY_HOURS * 60 * 60 * 1000;
+        var ninePm = new Date(sessionStartTime);
+        ninePm.setHours(WORK_END_HOUR, 0, 0, 0);
+        if (ninePm <= sessionStartTime) {
+            // Session started after midnight calculation — use next day 9pm
+            ninePm.setDate(ninePm.getDate() + 1);
+        }
+        var ninePmMs = ninePm - sessionStartTime;
+        if (ninePmMs > 0 && ninePmMs < maxMs) {
+            maxMs = ninePmMs;
+        }
+
+        // If past the cap, the server should have auto-closed — re-fetch
+        if (diffMs >= maxMs) {
+            stopElapsedTimer();
+            loadStatus();
+            loadHeatmap();
+            return;
+        }
+
+        var diffSeconds = Math.floor(diffMs / 1000);
         var hours = Math.floor(diffSeconds / 3600);
         var minutes = Math.floor((diffSeconds % 3600) / 60);
         var seconds = diffSeconds % 60;
