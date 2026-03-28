@@ -4,6 +4,7 @@
 
 const ANNUAL_HOURS_GOAL = 2333;
 const WORK_END_HOUR = 21;
+const MAX_DAILY_HOURS = 12;
 
 let elapsedTimer = null;
 let sessionStartTime = null;

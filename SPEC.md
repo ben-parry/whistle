@@ -80,7 +80,7 @@ Sundays have a completely different experience across the app.
 - **Hide entirely**: The clock-in/out button, year-at-a-glance heatmap, year total / hours worked, and progress bar
 - **Show instead**: A centered quote: "It is Sunday, let us seize the means of relaxation."
 - **Below the quote**: A link to https://lavitalenta.substack.com/
-- **Below the link**: The image `pics/sunday.png` (smaller size, max-width 250px)
+- **Below the link**: The image `pics/sunday.png` (smaller size, max-width 220px)
 - The navigation bar remains visible and functional
 
 ### Leaderboard Page (Sundays)
@@ -127,7 +127,7 @@ A hardcoded list of email addresses in `api/_helpers.js` (`HIDDEN_USERS`). These
 
 - Main working interface — one session per day
 - Big clock in/out button with elapsed time display
-- **Clock In button color**: `#7D8F67` (muted green)
+- **Clock In button color**: `#6C7A61` (muted green)
 - **After clock-in**: Shows clock-in timestamp below the timer
 - **After clock-out**: Shows both timestamps (in and out), hides button, shows "See you tomorrow."
 - **Already completed today**: Shows the completed record with timestamps, no button
@@ -142,7 +142,7 @@ A hardcoded list of email addresses in `api/_helpers.js` (`HIDDEN_USERS`). These
 
 ### Profile (`profile.html`)
 
-- **Profile header image**: Mucha Art Nouveau image as circular crop, ~140px diameter. Images are resized to 300px for fast loading. Random image selected on each page load.
+- **Profile header image**: Mucha Art Nouveau image as circular crop, ~120px diameter. Images are resized to 300px for fast loading. Random image selected on each page load.
 - User info: name, email, cute ID
 - **Statistics section** (in its own boxed card):
   - Inline prose with highlighted dynamic values (highlight color: `#6C7A61` green):
@@ -195,36 +195,36 @@ All time-of-day rules are evaluated in the user's timezone:
 
 | Color | Hex | Usage |
 |---|---|---|
-| Slight pink | `#FBDFC4` | Page background |
-| Warm | `#EEBC8B` | Card backgrounds, boxed content |
-| Golden brown | `#B7822F` | Borders, links, interactive elements |
+| Warm pink | `#F5DCC3` | Page background |
+| Warm surface | `#EBCAA0` | Card backgrounds, boxed content |
+| Golden brown | `#C4956A` | Borders (light/transparent), links, interactive elements |
 | White-ish | `#EDE9E2` | Heatmap empty cells |
-| Warm grey | `#9D8F86` | Secondary text, muted elements |
-| Deep charcoal | `#36332E` | Primary text |
+| Warm grey | `#8A7D73` | Secondary text, muted elements |
+| Near-black | `#1A1714` | Primary text |
 
 ### Highlight Colors
 
 | Color | Hex | Usage |
 |---|---|---|
 | Terracotta | `#8F3416` | Buttons, danger zone, active/working state on leaderboard |
-| Green | `#7D8F67` | Clock In button |
-| Dark green | `#6C7A61` | Heatmap levels, stat highlights, accent numbers/metrics |
+| Green | `#5E7252` | Heatmap level 4, hover states |
+| Light green | `#6C7A61` | Clock In button, stat highlights, accent numbers/metrics |
 
 ### Heatmap (Green scheme)
 
 Fixed thresholds using `#6C7A61` at varying opacity:
 
-- Level 4 (10+ hours): `#6C7A61` at 100%
-- Level 3 (6–10 hours): 75% opacity
-- Level 2 (3–6 hours): 50% opacity
-- Level 1 (0.1–3 hours): 25% opacity
+- Level 4 (10+ hours): `#5E7252` at 100%
+- Level 3 (6–10 hours): `rgba(108, 122, 97, 0.75)`
+- Level 2 (3–6 hours): `rgba(108, 122, 97, 0.5)`
+- Level 1 (0.1–3 hours): `rgba(108, 122, 97, 0.25)`
 - Level 0 (no work): `#EDE9E2`
-- Sundays: `#EEBC8B`
+- Sundays: `#EBCAA0`
 
 ### Typography
 
 - **Font**: Kalice (self-hosted, woff2/woff files in `public/fonts/`)
-- **Headings**: Uppercase, letter-spacing 1px
+- **Headings**: Negative letter-spacing (-0.01em) for a tighter feel
 - **Body**: Standard case
 
 ### Decorative Accents
@@ -235,11 +235,11 @@ Art Nouveau aesthetic: decorative ornaments, elegant card layouts, warm tones.
 
 ### Box Borders
 
-All card and box borders are **2px solid** `#B7822F`.
+All card and box borders are **1px solid** `rgba(196, 149, 106, 0.3)` (light, transparent golden brown).
 
 ### Content Width
 
-Primary content column: ~920px max-width.
+Primary content column: ~720px max-width.
 
 ### Spacing & Padding
 
@@ -254,7 +254,7 @@ Compact spacing throughout. The punch clock page should fit on screen without sc
 | POST | `/api/auth/login` | Log in |
 | POST | `/api/auth/logout` | Log out |
 | GET | `/api/auth/me` | Get current user info |
-| POST | `/api/auth/change-password` | Change password |
+| POST | `/api/auth/me` | Change password |
 
 ### Time
 | Method | Path | Description |
@@ -345,8 +345,7 @@ whistle/
 │   │   ├── register.js
 │   │   ├── login.js
 │   │   ├── logout.js
-│   │   ├── me.js
-│   │   └── change-password.js
+│   │   └── me.js              # GET: user info, POST: change password
 │   ├── time/
 │   │   ├── clock-in.js         # One session per day
 │   │   ├── clock-out.js
