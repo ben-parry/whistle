@@ -123,7 +123,8 @@ body {
     font-family: var(--font-main);
     font-size: var(--text-base);
     line-height: var(--leading-normal);
-    background-color: var(--color-bg);
+    background: var(--color-bg);
+    background-image: radial-gradient(ellipse at center top, #f0e6d6 0%, var(--color-bg) 50%, #e8d5be 100%);
     color: var(--color-text);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -413,6 +414,15 @@ a:hover {
     font-size: 16px;
     color: var(--color-border);
     opacity: 0.4;
+}
+
+.footer-illustration {
+    width: 100%;
+    max-width: 900px;
+    margin: var(--space-8) auto 0;
+    display: block;
+    opacity: 0.85;
+    mix-blend-mode: multiply;
 }
 
 
@@ -1106,7 +1116,6 @@ a:hover {
 .app-footer {
     margin-top: var(--space-16);
     padding-top: var(--space-6);
-    border-top: 1px solid var(--color-border-light);
 }
 
 
