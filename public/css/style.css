@@ -2,10 +2,10 @@
    WHISTLE - STYLESHEET
    ============================================
    Palette:
-   - Background:  #F5DCC3
-   - Surface:     #EBCAA0
-   - Border:      #C4956A
-   - Empty cell:  #EDE9E2
+   - Background:  #ede1d5
+   - Surface:     #e0d0c2
+   - Border:      #b8977a
+   - Empty cell:  #e8e2db
    - Muted text:  #8A7D73
    - Primary text: #1A1714
    - Accent red:  #8F3416
@@ -46,11 +46,11 @@
     --space-20: 5rem;
     --space-24: 6rem;
 
-    --color-bg: #F5DCC3;
-    --color-surface: #EBCAA0;
-    --color-border: #C4956A;
-    --color-border-light: rgba(196, 149, 106, 0.3);
-    --color-empty: #EDE9E2;
+    --color-bg: #ede1d5;
+    --color-surface: #e0d0c2;
+    --color-border: #b8977a;
+    --color-border-light: rgba(184, 151, 122, 0.3);
+    --color-empty: #e8e2db;
     --color-muted: #8A7D73;
     --color-text: #1A1714;
     --color-accent: #8F3416;
@@ -124,7 +124,7 @@ body {
     font-size: var(--text-base);
     line-height: var(--leading-normal);
     background: var(--color-bg);
-    background-image: radial-gradient(ellipse at center top, #f0e6d6 0%, var(--color-bg) 50%, #e8d5be 100%);
+    background-image: radial-gradient(ellipse at center top, #f5eae3 0%, var(--color-bg) 50%, #dac9c1 100%);
     color: var(--color-text);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
