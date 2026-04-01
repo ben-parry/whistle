@@ -15,12 +15,12 @@ struct LoginView: View {
             // Logo
             VStack(spacing: 8) {
                 Text("Whistle")
-                    .font(.custom("PlayfairDisplay-Bold", size: 48, relativeTo: .largeTitle))
-                    .foregroundColor(Color(hex: "332F35"))
+                    .font(.system(size: 48, weight: .bold, design: .serif))
+                    .foregroundColor(Color(hex: "1A1714"))
 
                 Text("Your Personal Punch Clock")
                     .font(.subheadline)
-                    .foregroundColor(Color(hex: "9D8F86"))
+                    .foregroundColor(Color(hex: "8A7D73"))
                     .italic()
             }
             .padding(.bottom, 40)
@@ -30,13 +30,13 @@ struct LoginView: View {
                 if let error = errorMessage {
                     Text(error)
                         .font(.footnote)
-                        .foregroundColor(Color(hex: "D38370"))
+                        .foregroundColor(Color(hex: "8F3416"))
                         .padding(12)
                         .frame(maxWidth: .infinity)
-                        .background(Color(hex: "D38370").opacity(0.1))
+                        .background(Color(hex: "8F3416").opacity(0.08))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 0)
-                                .stroke(Color(hex: "D38370").opacity(0.3), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color(hex: "8F3416").opacity(0.25), lineWidth: 1)
                         )
                 }
 
@@ -44,16 +44,17 @@ struct LoginView: View {
                     Text("Email")
                         .font(.footnote)
                         .fontWeight(.medium)
-                        .foregroundColor(Color(hex: "332F35"))
+                        .foregroundColor(Color(hex: "1A1714"))
                     TextField("you@example.com", text: $email)
                         .textContentType(.emailAddress)
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                         .padding(12)
-                        .background(Color(hex: "F5F0E3"))
+                        .background(Color(hex: "F5DCC3"))
                         .overlay(
-                            Rectangle().stroke(Color(hex: "C2CDCD"), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color(hex: "C4956A").opacity(0.5), lineWidth: 1)
                         )
                 }
 
@@ -61,64 +62,67 @@ struct LoginView: View {
                     Text("Password")
                         .font(.footnote)
                         .fontWeight(.medium)
-                        .foregroundColor(Color(hex: "332F35"))
+                        .foregroundColor(Color(hex: "1A1714"))
                     SecureField("Your password", text: $password)
                         .textContentType(.password)
                         .padding(12)
-                        .background(Color(hex: "F5F0E3"))
+                        .background(Color(hex: "F5DCC3"))
                         .overlay(
-                            Rectangle().stroke(Color(hex: "C2CDCD"), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color(hex: "C4956A").opacity(0.5), lineWidth: 1)
                         )
                 }
 
                 Button(action: login) {
                     if isLoading {
                         ProgressView()
-                            .tint(Color(hex: "F5F0E3"))
+                            .tint(.white)
                             .frame(maxWidth: .infinity)
                             .padding(12)
                     } else {
                         Text("Sign In")
-                            .fontWeight(.medium)
+                            .font(.system(size: 16, weight: .semibold, design: .serif))
                             .frame(maxWidth: .infinity)
                             .padding(12)
                     }
                 }
-                .background(Color(hex: "332F35"))
-                .foregroundColor(Color(hex: "F5F0E3"))
+                .background(Color(hex: "8F3416"))
+                .foregroundColor(.white)
+                .cornerRadius(4)
                 .disabled(isLoading || email.isEmpty || password.isEmpty)
                 .opacity((isLoading || email.isEmpty || password.isEmpty) ? 0.6 : 1)
             }
             .padding(24)
-            .background(Color(hex: "EBE3D0"))
+            .background(Color(hex: "EBCAA0"))
+            .cornerRadius(6)
             .overlay(
-                Rectangle().stroke(Color(hex: "C2CDCD"), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color(hex: "C4956A").opacity(0.4), lineWidth: 1)
             )
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
 
             // Create account link
-            VStack(spacing: 8) {
+            VStack(spacing: 6) {
                 Text("Don't have an account?")
                     .font(.footnote)
-                    .foregroundColor(Color(hex: "9D8F86"))
+                    .foregroundColor(Color(hex: "8A7D73"))
 
-                Link("Create one at whistle on the web",
+                Link("Create one on the web",
                      destination: URL(string: "\(APIConfig.baseURL)")!)
                     .font(.footnote)
-                    .foregroundColor(Color(hex: "D38370"))
+                    .foregroundColor(Color(hex: "8F3416"))
             }
             .padding(.top, 24)
 
             Spacer()
 
-            // Ornament
             Text("\u{2726}")
                 .font(.title2)
-                .foregroundColor(Color(hex: "C2CDCD"))
+                .foregroundColor(Color(hex: "C4956A").opacity(0.5))
                 .padding(.bottom, 20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(hex: "F5F0E3"))
+        .background(Color(hex: "F5DCC3"))
     }
 
     private func login() {

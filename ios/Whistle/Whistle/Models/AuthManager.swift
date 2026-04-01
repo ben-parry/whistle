@@ -25,8 +25,8 @@ class AuthManager: ObservableObject {
 
     func checkSession() async {
         guard let token = sessionToken else { return }
-
         guard let url = URL(string: "\(APIConfig.baseURL)/api/auth/me") else { return }
+
         var request = URLRequest(url: url)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
@@ -64,26 +64,21 @@ class AuthManager: ObservableObject {
 
         let (data, httpResponse) = try await URLSession.shared.data(for: request)
 
-        // Extract session token from Set-Cookie header
-        if let response = httpResponse as? HTTPURLResponse,
-           let setCookie = response.value(forHTTPHeaderField: "Set-Cookie") {
-            let parts = setCookie.split(separator: ";")
-            if let sessionPart = parts.first {
-                let keyValue = sessionPart.split(separator: "=", maxSplits: 1)
-                if keyValue.count == 2 && keyValue[0] == "session" {
-                    let token = String(keyValue[1])
-                    await MainActor.run {
-                        self.sessionToken = token
-                    }
-                    await checkSession()
-                    return nil // Success
-                }
-            }
+        guard let response = httpResponse as? HTTPURLResponse else {
+            return "Login failed. Please try again."
         }
 
-        // Try to parse error response
-        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let error = json["error"] as? String {
+        let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+
+        if response.statusCode == 200, let token = json?["session_token"] as? String {
+            await MainActor.run {
+                self.sessionToken = token
+            }
+            await checkSession()
+            return nil
+        }
+
+        if let error = json?["error"] as? String {
             return error
         }
 

@@ -46,7 +46,8 @@ module.exports = async function handler(request, response) {
 
         return sendJson(response, 200, {
             year: currentYear,
-            days: days
+            days: days,
+            shift_length: user.shift_length
         });
 
     } catch (error) {

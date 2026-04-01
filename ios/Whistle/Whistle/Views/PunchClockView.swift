@@ -3,12 +3,10 @@ import SwiftUI
 struct PunchClockView: View {
     @EnvironmentObject var authManager: AuthManager
     @StateObject private var timeManager: TimeManager
-
     @State private var showLogoutConfirm = false
 
-    init() {
-        // We'll set the actual token in onAppear
-        _timeManager = StateObject(wrappedValue: TimeManager(sessionToken: ""))
+    init(sessionToken: String) {
+        _timeManager = StateObject(wrappedValue: TimeManager(sessionToken: sessionToken))
     }
 
     var body: some View {
@@ -16,125 +14,41 @@ struct PunchClockView: View {
             // Header
             HStack {
                 Text("Whistle")
-                    .font(.custom("PlayfairDisplay-Bold", size: 24, relativeTo: .title))
-                    .foregroundColor(Color(hex: "332F35"))
+                    .font(.system(size: 24, weight: .bold, design: .serif))
+                    .foregroundColor(Color(hex: "1A1714"))
 
                 Spacer()
 
                 Button("Sign Out") {
                     showLogoutConfirm = true
                 }
-                .font(.subheadline)
-                .foregroundColor(Color(hex: "D38370"))
+                .font(.footnote)
+                .foregroundColor(Color(hex: "8A7D73"))
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
             .overlay(
                 Rectangle()
                     .frame(height: 1)
-                    .foregroundColor(Color(hex: "C2CDCD")),
+                    .foregroundColor(Color(hex: "C4956A").opacity(0.3)),
                 alignment: .bottom
             )
 
-            Spacer()
-
             if timeManager.isLoading {
+                Spacer()
                 ProgressView()
-                    .tint(Color(hex: "9D8F86"))
+                    .tint(Color(hex: "8A7D73"))
                 Spacer()
+            } else if timeManager.isSunday {
+                sundayView
             } else {
-                // Status display
-                VStack(spacing: 12) {
-                    if let restriction = timeManager.currentRestriction {
-                        Text(timeManager.currentRestrictionMessage ?? "")
-                            .font(.custom("PlayfairDisplay-Regular", size: 20, relativeTo: .title3))
-                            .foregroundColor(Color(hex: "9D8F86"))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 20)
-
-                        if restriction == "sunday" {
-                            Link("@lavitalenta", destination: URL(string: "https://x.com/lavitalenta")!)
-                                .font(.footnote)
-                                .foregroundColor(Color(hex: "D38370"))
-                        }
-                    } else if timeManager.isWorking {
-                        Text("Currently Working")
-                            .font(.custom("PlayfairDisplay-SemiBold", size: 22, relativeTo: .title3))
-                            .foregroundColor(Color(hex: "D38370"))
-
-                        Text(timeManager.elapsedFormatted)
-                            .font(.system(size: 44, weight: .bold, design: .monospaced))
-                            .foregroundColor(Color(hex: "332F35"))
-                            .tracking(2)
-                    } else {
-                        Text("Not Working")
-                            .font(.custom("PlayfairDisplay-Regular", size: 22, relativeTo: .title3))
-                            .foregroundColor(Color(hex: "9D8F86"))
-                    }
-                }
-                .padding(.bottom, 32)
-
-                // Punch button
-                Button(action: punch) {
-                    Text(timeManager.isWorking ? "Clock Out" : "Clock In")
-                        .font(.custom("PlayfairDisplay-SemiBold", size: 20, relativeTo: .title3))
-                        .foregroundColor(Color(hex: "F5F0E3"))
-                        .frame(width: 200, height: 60)
-                        .background(timeManager.isWorking
-                            ? Color(hex: "D38370")
-                            : Color(hex: "D38370"))
-                }
-                .disabled(!timeManager.canPunch)
-                .opacity(timeManager.canPunch ? 1 : 0.6)
-
-                if let error = timeManager.errorMessage {
-                    Text(error)
-                        .font(.footnote)
-                        .foregroundColor(Color(hex: "D38370"))
-                        .padding(.top, 16)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 20)
-                }
-
-                Spacer()
-
-                // Web prompt
-                VStack(spacing: 8) {
-                    Rectangle()
-                        .frame(height: 1)
-                        .foregroundColor(Color(hex: "C2CDCD"))
-                        .padding(.horizontal, 40)
-
-                    Text("Visit Whistle on the web for stats, history, and more.")
-                        .font(.footnote)
-                        .foregroundColor(Color(hex: "9D8F86"))
-                        .multilineTextAlignment(.center)
-
-                    Link(APIConfig.baseURL.replacingOccurrences(of: "https://", with: ""),
-                         destination: URL(string: APIConfig.baseURL)!)
-                        .font(.footnote)
-                        .foregroundColor(Color(hex: "D38370"))
-                }
-                .padding(.bottom, 20)
-
-                // Ornament
-                Text("\u{2726}")
-                    .font(.title2)
-                    .foregroundColor(Color(hex: "C2CDCD"))
-                    .padding(.bottom, 20)
+                clockView
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(hex: "F5F0E3"))
+        .background(Color(hex: "F5DCC3"))
         .onAppear {
-            if let token = authManager.sessionToken {
-                let manager = TimeManager(sessionToken: token)
-                // We need to replace the timeManager — but since it's a @StateObject
-                // we initialized with empty token, so we load status via a task
-                Task {
-                    await loadWithToken(token)
-                }
-            }
+            Task { await timeManager.loadStatus() }
         }
         .alert("Sign Out?", isPresented: $showLogoutConfirm) {
             Button("Cancel", role: .cancel) {}
@@ -144,73 +58,219 @@ struct PunchClockView: View {
         }
     }
 
-    private func loadWithToken(_ token: String) async {
-        // Create a new time manager with the correct token and load
-        let manager = TimeManager(sessionToken: token)
-        await manager.loadStatus()
+    // MARK: - Sunday view
 
-        await MainActor.run {
-            // Since we can't reassign @StateObject, we need a different approach
-            // We'll work around this by making TimeManager update from token
+    private var sundayView: some View {
+        VStack(spacing: 16) {
+            Spacer()
+
+            Text("It is Sunday, let us seize\nthe means of relaxation.")
+                .font(.system(size: 20, weight: .regular, design: .serif))
+                .foregroundColor(Color(hex: "8A7D73"))
+                .multilineTextAlignment(.center)
+                .lineSpacing(4)
+
+            Link("lavitalenta.substack.com",
+                 destination: URL(string: "https://lavitalenta.substack.com/")!)
+                .font(.footnote)
+                .foregroundColor(Color(hex: "8F3416"))
+
+            Spacer()
+
+            ornament
         }
     }
 
-    private func punch() {
-        guard let token = authManager.sessionToken else { return }
-        let manager = TimeManager(sessionToken: token)
+    // MARK: - Clock view
 
-        Task {
-            if timeManager.isWorking {
-                await manager.clockOut()
-            } else {
-                await manager.clockIn()
-            }
-            // Reload status in the actual timeManager
-            await reloadStatus()
-        }
-    }
+    private var clockView: some View {
+        VStack(spacing: 0) {
+            Spacer()
 
-    private func reloadStatus() async {
-        guard let token = authManager.sessionToken else { return }
-        guard let url = URL(string: "\(APIConfig.baseURL)/api/time/status") else { return }
-
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-        do {
-            let (data, _) = try await URLSession.shared.data(for: request)
-            let response = try JSONDecoder().decode(StatusResponse.self, from: data)
-
-            await MainActor.run {
-                timeManager.isWorking = response.is_working
-                timeManager.yearTotalHours = response.year_total_hours
-                timeManager.restriction = response.restriction
-                timeManager.restrictionMessage = response.restriction_message
-                timeManager.isLoading = false
-                timeManager.errorMessage = nil
-
-                if response.is_working, let session = response.current_session {
-                    let formatter = ISO8601DateFormatter()
-                    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                    if let start = formatter.date(from: session.start_time) {
-                        timeManager.sessionStartTime = start
-                        timeManager.startTimer()
-                    } else {
-                        formatter.formatOptions = [.withInternetDateTime]
-                        if let start = formatter.date(from: session.start_time) {
-                            timeManager.sessionStartTime = start
-                            timeManager.startTimer()
-                        }
-                    }
-                } else {
-                    timeManager.sessionStartTime = nil
-                    timeManager.stopTimer()
+            // Restriction message
+            if let restriction = timeManager.currentRestriction {
+                VStack(spacing: 8) {
+                    Text(timeManager.currentRestrictionMessage ?? "")
+                        .font(.system(size: 18, weight: .regular, design: .serif))
+                        .foregroundColor(Color(hex: "8A7D73"))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
                 }
             }
-        } catch {
-            await MainActor.run {
-                timeManager.isLoading = false
+            // Currently working
+            else if timeManager.isWorking {
+                workingView
+            }
+            // Completed for today
+            else if timeManager.completedToday {
+                completedView
+            }
+            // Ready to clock in
+            else {
+                readyView
+            }
+
+            Spacer()
+
+            // Year progress
+            if timeManager.currentRestriction == nil {
+                yearProgressView
+                    .padding(.bottom, 16)
+            }
+
+            // Error message
+            if let error = timeManager.errorMessage {
+                Text(error)
+                    .font(.footnote)
+                    .foregroundColor(Color(hex: "8F3416"))
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 12)
+                    .multilineTextAlignment(.center)
+            }
+
+            // Web link
+            HStack(spacing: 4) {
+                Text("Stats & history on")
+                    .font(.caption2)
+                    .foregroundColor(Color(hex: "8A7D73"))
+                Link("the web", destination: URL(string: APIConfig.baseURL)!)
+                    .font(.caption2)
+                    .foregroundColor(Color(hex: "8F3416"))
+            }
+            .padding(.bottom, 12)
+
+            ornament
+        }
+    }
+
+    // MARK: - Working state
+
+    private var workingView: some View {
+        VStack(spacing: 16) {
+            Text(timeManager.elapsedFormatted)
+                .font(.system(size: 52, weight: .light, design: .monospaced))
+                .foregroundColor(Color(hex: "1A1714"))
+                .tracking(2)
+
+            if let start = timeManager.sessionStartTime {
+                Text("Clocked in at \(TimeManager.formatTime(start))")
+                    .font(.footnote)
+                    .foregroundColor(Color(hex: "8A7D73"))
+            }
+
+            Button(action: { Task { await timeManager.clockOut() } }) {
+                Text("Clock Out")
+                    .font(.system(size: 17, weight: .semibold, design: .serif))
+                    .foregroundColor(.white)
+                    .frame(width: 200, height: 52)
+                    .background(Color(hex: "8F3416"))
+                    .cornerRadius(6)
+            }
+            .padding(.top, 8)
+        }
+    }
+
+    // MARK: - Completed state
+
+    private var completedView: some View {
+        VStack(spacing: 16) {
+            Text("See you tomorrow")
+                .font(.system(size: 22, weight: .regular, design: .serif))
+                .foregroundColor(Color(hex: "1A1714"))
+
+            if let start = timeManager.sessionStartTime,
+               let end = timeManager.sessionEndTime {
+                HStack(spacing: 16) {
+                    VStack(spacing: 2) {
+                        Text("In")
+                            .font(.caption2)
+                            .foregroundColor(Color(hex: "8A7D73"))
+                        Text(TimeManager.formatTime(start))
+                            .font(.system(size: 15, weight: .medium, design: .monospaced))
+                            .foregroundColor(Color(hex: "1A1714"))
+                    }
+
+                    Rectangle()
+                        .frame(width: 1, height: 28)
+                        .foregroundColor(Color(hex: "C4956A").opacity(0.3))
+
+                    VStack(spacing: 2) {
+                        Text("Out")
+                            .font(.caption2)
+                            .foregroundColor(Color(hex: "8A7D73"))
+                        Text(TimeManager.formatTime(end))
+                            .font(.system(size: 15, weight: .medium, design: .monospaced))
+                            .foregroundColor(Color(hex: "1A1714"))
+                    }
+                }
+                .padding(16)
+                .background(Color(hex: "EBCAA0"))
+                .cornerRadius(6)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color(hex: "C4956A").opacity(0.3), lineWidth: 1)
+                )
             }
         }
+    }
+
+    // MARK: - Ready state
+
+    private var readyView: some View {
+        VStack(spacing: 20) {
+            if timeManager.dailyLimitReached {
+                Text("Daily limit reached (12 hours)")
+                    .font(.system(size: 16, weight: .regular, design: .serif))
+                    .foregroundColor(Color(hex: "8A7D73"))
+            } else {
+                Button(action: { Task { await timeManager.clockIn() } }) {
+                    Text("Clock In")
+                        .font(.system(size: 17, weight: .semibold, design: .serif))
+                        .foregroundColor(.white)
+                        .frame(width: 200, height: 52)
+                        .background(Color(hex: "7D8F67"))
+                        .cornerRadius(6)
+                }
+            }
+        }
+    }
+
+    // MARK: - Year progress
+
+    private var yearProgressView: some View {
+        VStack(spacing: 6) {
+            HStack {
+                Text(String(format: "%.0f hours", timeManager.yearTotalHours))
+                    .font(.caption)
+                    .foregroundColor(Color(hex: "1A1714"))
+                Spacer()
+                Text(String(format: "%.0f goal", TimeManager.annualGoal))
+                    .font(.caption)
+                    .foregroundColor(Color(hex: "8A7D73"))
+            }
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color(hex: "EBCAA0"))
+                        .frame(height: 6)
+
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color(hex: "6C7A61"))
+                        .frame(width: geo.size.width * timeManager.yearProgress, height: 6)
+                }
+            }
+            .frame(height: 6)
+        }
+        .padding(.horizontal, 32)
+    }
+
+    // MARK: - Ornament
+
+    private var ornament: some View {
+        Text("\u{2726}")
+            .font(.title2)
+            .foregroundColor(Color(hex: "C4956A").opacity(0.4))
+            .padding(.bottom, 20)
     }
 }

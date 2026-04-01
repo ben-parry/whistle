@@ -88,6 +88,7 @@ module.exports = async function handler(request, response) {
 
         return sendJson(response, 200, {
             success: true,
+            session_token: sessionToken,
             user: {
                 id: user.id,
                 email: user.email

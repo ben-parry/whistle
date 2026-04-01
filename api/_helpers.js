@@ -41,6 +41,10 @@ const WORK_START_HOUR = 5;   // 5:00 AM
 const WORK_END_HOUR = 21;    // 9:00 PM
 const MAX_DAILY_HOURS = 12;
 const ANNUAL_HOURS_GOAL = 2333;
+const MIN_SHIFT_LENGTH = 4;
+const MAX_SHIFT_LENGTH = 10;
+const DEFAULT_SHIFT_LENGTH = 8;
+const MAX_SHIFT_CHANGES_PER_MONTH = 2;
 
 // ============================================
 // CUTE ID WORD LISTS
@@ -373,7 +377,7 @@ async function getCurrentUser(request) {
     }
 
     const result = await sql`
-        SELECT id, email, name, cute_id, created_at
+        SELECT id, email, name, cute_id, shift_length, created_at
         FROM users
         WHERE session_token = ${sessionToken}
     `;
@@ -442,6 +446,10 @@ module.exports = {
     MAX_DAILY_HOURS,
     ANNUAL_HOURS_GOAL,
     HIDDEN_USERS,
+    MIN_SHIFT_LENGTH,
+    MAX_SHIFT_LENGTH,
+    DEFAULT_SHIFT_LENGTH,
+    MAX_SHIFT_CHANGES_PER_MONTH,
     generateUniqueCuteId,
     isValidName,
     validateNameWithLLM,

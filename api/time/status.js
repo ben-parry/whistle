@@ -119,6 +119,7 @@ module.exports = async function handler(request, response) {
             current_session: currentSession,
             today_session: todaySession,
             year_total_hours: Math.round(yearTotalHours * 100) / 100,
+            shift_length: user.shift_length,
             restriction: restriction,
             restriction_message: restrictionMessage
         });

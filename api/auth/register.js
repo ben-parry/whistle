@@ -18,7 +18,10 @@ const {
     isValidEmail,
     isValidName,
     validateNameWithLLM,
-    generateUniqueCuteId
+    generateUniqueCuteId,
+    MIN_SHIFT_LENGTH,
+    MAX_SHIFT_LENGTH,
+    DEFAULT_SHIFT_LENGTH
 } = require('../_helpers');
 
 module.exports = async function handler(request, response) {
@@ -27,7 +30,7 @@ module.exports = async function handler(request, response) {
     }
 
     try {
-        const { email, password, name } = request.body;
+        const { email, password, name, shift_length } = request.body;
 
         // ----------------------------------------
         // Validate email
@@ -84,6 +87,14 @@ module.exports = async function handler(request, response) {
         }
 
         // ----------------------------------------
+        // Validate shift length (optional, defaults to 8)
+        // ----------------------------------------
+        const shiftLength = shift_length ? parseInt(shift_length, 10) : DEFAULT_SHIFT_LENGTH;
+        if (isNaN(shiftLength) || shiftLength < MIN_SHIFT_LENGTH || shiftLength > MAX_SHIFT_LENGTH) {
+            return sendError(response, 400, `Shift length must be between ${MIN_SHIFT_LENGTH} and ${MAX_SHIFT_LENGTH} hours.`);
+        }
+
+        // ----------------------------------------
         // Hash password and generate IDs
         // ----------------------------------------
         const passwordHash = await bcrypt.hash(password, 10);
@@ -94,9 +105,9 @@ module.exports = async function handler(request, response) {
         // Create the user
         // ----------------------------------------
         const result = await sql`
-            INSERT INTO users (email, name, password_hash, session_token, cute_id)
-            VALUES (${cleanEmail}, ${cleanName}, ${passwordHash}, ${sessionToken}, ${cuteId})
-            RETURNING id, email, name, cute_id, created_at
+            INSERT INTO users (email, name, password_hash, session_token, cute_id, shift_length)
+            VALUES (${cleanEmail}, ${cleanName}, ${passwordHash}, ${sessionToken}, ${cuteId}, ${shiftLength})
+            RETURNING id, email, name, cute_id, shift_length, created_at
         `;
 
         const newUser = result.rows[0];
@@ -112,7 +123,8 @@ module.exports = async function handler(request, response) {
                 id: newUser.id,
                 email: newUser.email,
                 name: newUser.name,
-                cute_id: newUser.cute_id
+                cute_id: newUser.cute_id,
+                shift_length: newUser.shift_length
             }
         });
 

@@ -3,15 +3,20 @@ import Foundation
 class TimeManager: ObservableObject {
     @Published var isWorking = false
     @Published var sessionStartTime: Date?
+    @Published var sessionEndTime: Date?
+    @Published var completedToday = false
     @Published var elapsedSeconds: Int = 0
     @Published var yearTotalHours: Double = 0
     @Published var restriction: String?
     @Published var restrictionMessage: String?
+    @Published var dailyLimitReached = false
     @Published var isLoading = true
     @Published var errorMessage: String?
 
     private var timer: Timer?
     private let sessionToken: String
+
+    static let annualGoal: Double = 2333
 
     init(sessionToken: String) {
         self.sessionToken = sessionToken
@@ -41,8 +46,16 @@ class TimeManager: ObservableObject {
         }
     }
 
+    var isSunday: Bool {
+        currentRestriction == "sunday"
+    }
+
     var canPunch: Bool {
-        return currentRestriction == nil && !isLoading
+        currentRestriction == nil && !isLoading && !completedToday && !dailyLimitReached
+    }
+
+    var yearProgress: Double {
+        min(yearTotalHours / Self.annualGoal, 1.0)
     }
 
     // MARK: - Load status
@@ -62,24 +75,24 @@ class TimeManager: ObservableObject {
                 self.yearTotalHours = response.year_total_hours
                 self.restriction = response.restriction
                 self.restrictionMessage = response.restriction_message
+                self.dailyLimitReached = response.daily_limit_reached ?? false
                 self.isLoading = false
+                self.errorMessage = nil
 
                 if response.is_working, let session = response.current_session {
-                    let formatter = ISO8601DateFormatter()
-                    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                    if let start = formatter.date(from: session.start_time) {
-                        self.sessionStartTime = start
-                        self.startTimer()
-                    } else {
-                        // Try without fractional seconds
-                        formatter.formatOptions = [.withInternetDateTime]
-                        if let start = formatter.date(from: session.start_time) {
-                            self.sessionStartTime = start
-                            self.startTimer()
-                        }
-                    }
+                    self.sessionStartTime = Self.parseISO8601(session.start_time)
+                    self.sessionEndTime = nil
+                    self.completedToday = false
+                    self.startTimer()
+                } else if let today = response.today_session {
+                    self.sessionStartTime = Self.parseISO8601(today.start_time)
+                    self.sessionEndTime = today.end_time.flatMap { Self.parseISO8601($0) }
+                    self.completedToday = self.sessionEndTime != nil
+                    self.stopTimer()
                 } else {
                     self.sessionStartTime = nil
+                    self.sessionEndTime = nil
+                    self.completedToday = false
                     self.stopTimer()
                 }
             }
@@ -130,8 +143,7 @@ class TimeManager: ObservableObject {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(sessionToken)", forHTTPHeaderField: "Authorization")
 
-        let body: [String: Any] = [:]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        request.httpBody = try? JSONSerialization.data(withJSONObject: [:] as [String: String])
 
         do {
             let (data, httpResponse) = try await URLSession.shared.data(for: request)
@@ -174,11 +186,30 @@ class TimeManager: ObservableObject {
         let s = elapsedSeconds % 60
         return String(format: "%02d:%02d:%02d", h, m, s)
     }
+
+    // MARK: - Helpers
+
+    static func parseISO8601(_ string: String) -> Date? {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: string) { return date }
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.date(from: string)
+    }
+
+    static func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return formatter.string(from: date)
+    }
 }
+
+// MARK: - Response types
 
 struct StatusResponse: Codable {
     let is_working: Bool
     let current_session: CurrentSession?
+    let today_session: TodaySession?
     let year_total_hours: Double
     let restriction: String?
     let restriction_message: String?
@@ -189,5 +220,11 @@ struct CurrentSession: Codable {
     let id: Int
     let start_time: String
     let timezone: String
-    let elapsed_seconds: Int
+}
+
+struct TodaySession: Codable {
+    let id: Int
+    let start_time: String
+    let end_time: String?
+    let timezone: String
 }

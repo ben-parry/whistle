@@ -30,7 +30,10 @@ module.exports = async function handler(request, response) {
     if (request.method === 'PUT') {
         return handleEdit(request, response);
     }
-    return sendError(response, 405, 'Method not allowed. Use GET or PUT.');
+    if (request.method === 'DELETE') {
+        return handleDelete(request, response);
+    }
+    return sendError(response, 405, 'Method not allowed. Use GET, PUT, or DELETE.');
 };
 
 // ============================================
@@ -63,6 +66,17 @@ async function handleList(request, response) {
         const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
         const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
+        // Compute daily totals for shift_met
+        const dailyTotals = {};
+        result.rows.forEach(row => {
+            const dateKey = new Date(row.start_time).toISOString().split('T')[0];
+            const durationMs = new Date(row.end_time) - new Date(row.start_time);
+            const durationHours = durationMs / (1000 * 60 * 60);
+            dailyTotals[dateKey] = (dailyTotals[dateKey] || 0) + durationHours;
+        });
+
+        const shiftLength = user.shift_length;
+
         const sessions = result.rows.map(row => {
             const startDate = new Date(row.start_time);
             const endDate = new Date(row.end_time);
@@ -76,13 +90,17 @@ async function handleList(request, response) {
             const durationMs = endDate - startDate;
             const durationHours = durationMs / (1000 * 60 * 60);
 
+            const dateKey = startDate.toISOString().split('T')[0];
+            const dayTotal = dailyTotals[dateKey] || 0;
+
             return {
                 id: row.id,
                 start_time: row.start_time,
                 end_time: row.end_time,
                 timezone: row.start_timezone,
                 duration_hours: Math.round(durationHours * 100) / 100,
-                editable: editable
+                editable: editable,
+                shift_met: dayTotal >= shiftLength
             };
         });
 
@@ -101,6 +119,7 @@ async function handleList(request, response) {
 
         return sendJson(response, 200, {
             sessions: sessions,
+            shift_length: shiftLength,
             edits_used_this_month: editsUsed,
             edits_remaining: MAX_EDITS_PER_MONTH - editsUsed
         });
@@ -340,6 +359,48 @@ async function handleEdit(request, response) {
 
     } catch (error) {
         console.error('Edit session error:', error);
+        return sendError(response, 500, 'Something went wrong. Please try again.');
+    }
+}
+
+// ============================================
+// DELETE A SESSION (DELETE)
+// ============================================
+
+async function handleDelete(request, response) {
+    try {
+        const user = await getCurrentUser(request);
+        if (!user) {
+            return sendError(response, 401, 'You must be logged in to delete sessions.');
+        }
+
+        const { entry_id } = request.body;
+
+        if (!entry_id) {
+            return sendError(response, 400, 'Entry ID is required.');
+        }
+
+        // Verify the entry exists and belongs to the user
+        const entryResult = await sql`
+            SELECT id FROM time_entries
+            WHERE id = ${entry_id}
+            AND user_id = ${user.id}
+            AND end_time IS NOT NULL
+        `;
+
+        if (entryResult.rows.length === 0) {
+            return sendError(response, 404, 'Session not found.');
+        }
+
+        // Hard delete
+        await sql`
+            DELETE FROM time_entries WHERE id = ${entry_id} AND user_id = ${user.id}
+        `;
+
+        return sendJson(response, 200, { success: true });
+
+    } catch (error) {
+        console.error('Delete session error:', error);
         return sendError(response, 500, 'Something went wrong. Please try again.');
     }
 }

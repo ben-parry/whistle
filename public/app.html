@@ -25,11 +25,18 @@
             <div id="status-display" class="status-display">
                 <p id="status-text" class="status-text">Loading...</p>
                 <p id="elapsed-time" class="elapsed-time" hidden>00:00:00</p>
+            <div id="shift-progress-wrapper" class="shift-progress-wrapper" hidden>
+                <div class="shift-progress-container">
+                    <div class="shift-progress-bar" id="shift-progress-bar"></div>
+                </div>
+                <span id="shift-progress-label" class="shift-progress-label"></span>
+            </div>
             </div>
             <button id="punch-button" class="punch-button" hidden disabled>
                 <span id="punch-button-text">Loading...</span>
             </button>
             <div id="punch-timestamps" class="punch-timestamps" hidden></div>
+            <p id="shift-complete-text" class="shift-complete-text" hidden>Shift complete!</p>
             <p id="punch-completed" class="punch-completed-message" hidden></p>
         </section>
 

@@ -7,6 +7,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const userName = document.getElementById('user-name');
     const userEmail = document.getElementById('user-email');
     const userCuteId = document.getElementById('user-cute-id');
+    const userShiftLength = document.getElementById('user-shift-length');
+    const shiftChangeBtn = document.getElementById('shift-change-btn');
+    const shiftEditForm = document.getElementById('shift-edit-form');
+    const shiftLengthSelect = document.getElementById('shift-length-select');
+    const shiftSaveBtn = document.getElementById('shift-save-btn');
+    const shiftCancelBtn = document.getElementById('shift-cancel-btn');
+    const shiftChangesRemaining = document.getElementById('shift-changes-remaining');
     const statsSentence = document.getElementById('stats-text');
     const sessionsList = document.getElementById('sessions-list');
     const editsInfo = document.getElementById('edits-info');
@@ -24,8 +31,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const passwordForm = document.getElementById('password-form');
     const passwordMessage = document.getElementById('password-message');
     const logoutButton = document.getElementById('logout-button');
+    const deleteSessionModal = document.getElementById('delete-session-modal');
+    const cancelDeleteSession = document.getElementById('cancel-delete-session');
+    const confirmDeleteSession = document.getElementById('confirm-delete-session');
 
     let currentEditsRemaining = 3;
+    let currentShiftLength = 8;
+    let deleteSessionEntryId = null;
 
     // ============================================
     // CHECK AUTH AND LOAD DATA
@@ -47,6 +59,18 @@ document.addEventListener('DOMContentLoaded', function() {
             userEmail.textContent = data.user.email;
             userCuteId.textContent = data.user.cute_id;
 
+            currentShiftLength = data.user.shift_length || 8;
+            userShiftLength.textContent = currentShiftLength + ' hours';
+            shiftLengthSelect.value = currentShiftLength;
+
+            var changesRemaining = data.user.shift_changes_remaining;
+            if (changesRemaining !== undefined) {
+                shiftChangesRemaining.textContent = changesRemaining + ' change' + (changesRemaining !== 1 ? 's' : '') + ' remaining this month';
+                if (changesRemaining > 0) {
+                    shiftChangeBtn.hidden = false;
+                }
+            }
+
             const imgNum = Math.floor(Math.random() * 9) + 1;
             document.getElementById('profile-header-img').src = '/pics/profile-headers/mucha-' + imgNum + '.png';
 
@@ -58,6 +82,64 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = '/index.html';
         }
     }
+
+
+    // ============================================
+    // SHIFT LENGTH CHANGE
+    // ============================================
+
+    shiftChangeBtn.addEventListener('click', function() {
+        shiftLengthSelect.value = currentShiftLength;
+        shiftEditForm.hidden = false;
+        shiftChangeBtn.hidden = true;
+    });
+
+    shiftCancelBtn.addEventListener('click', function() {
+        shiftEditForm.hidden = true;
+        shiftChangeBtn.hidden = false;
+    });
+
+    shiftSaveBtn.addEventListener('click', async function() {
+        var newLength = parseInt(shiftLengthSelect.value, 10);
+        if (newLength === currentShiftLength) {
+            shiftEditForm.hidden = true;
+            shiftChangeBtn.hidden = false;
+            return;
+        }
+
+        shiftSaveBtn.disabled = true;
+        try {
+            const response = await fetch('/api/auth/me', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ shift_length: newLength })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                currentShiftLength = data.shift_length;
+                userShiftLength.textContent = currentShiftLength + ' hours';
+                shiftChangesRemaining.textContent = data.changes_remaining + ' change' + (data.changes_remaining !== 1 ? 's' : '') + ' remaining this month';
+                shiftEditForm.hidden = true;
+                if (data.changes_remaining > 0) {
+                    shiftChangeBtn.hidden = false;
+                } else {
+                    shiftChangeBtn.hidden = true;
+                }
+                // Refresh heatmap and sessions to reflect new shift length
+                loadProfileHeatmap();
+                loadSessions();
+            } else {
+                alert(data.error || 'Failed to change shift length.');
+            }
+        } catch (error) {
+            console.error('Shift length change error:', error);
+            alert('Something went wrong. Please try again.');
+        } finally {
+            shiftSaveBtn.disabled = false;
+        }
+    });
 
 
     // ============================================
@@ -123,6 +205,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.edits_remaining < 3) {
                 editsInfo.hidden = false;
                 editsInfo.textContent = data.edits_remaining + ' edit' + (data.edits_remaining !== 1 ? 's' : '') + ' remaining this month.';
+            } else {
+                editsInfo.hidden = true;
             }
 
             if (data.sessions.length === 0) {
@@ -152,14 +236,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const durationStr = session.duration_hours.toFixed(1) + 'h';
 
+                // Star icon for shift met
+                var starHtml = '';
+                if (session.shift_met) {
+                    starHtml = '<span class="session-star" title="Shift goal met">&#9733;</span>';
+                }
+
+                // Edit button: only when editable AND edits remaining
                 let editButton = '';
                 if (session.editable && currentEditsRemaining > 0) {
                     editButton = '<button class="session-edit-btn" data-id="' + session.id +
                         '" data-start="' + session.start_time +
                         '" data-end="' + session.end_time + '">Edit</button>';
-                } else if (session.editable && currentEditsRemaining <= 0) {
-                    editButton = '<button class="session-edit-btn" disabled title="No edits remaining this month">Edit</button>';
                 }
+
+                // Delete button: always shown
+                var deleteButton = '<button class="session-delete-btn" data-id="' + session.id + '">Delete</button>';
 
                 item.innerHTML =
                     '<div>' +
@@ -167,17 +259,27 @@ document.addEventListener('DOMContentLoaded', function() {
                         '<span class="session-times">' + startTimeStr + ' – ' + endTimeStr + '</span>' +
                     '</div>' +
                     '<div style="text-align: right;">' +
+                        starHtml +
                         '<span class="session-duration">' + durationStr + '</span>' +
                         editButton +
+                        deleteButton +
                     '</div>';
 
                 sessionsList.appendChild(item);
             });
 
             // Bind edit buttons
-            sessionsList.querySelectorAll('.session-edit-btn:not(:disabled)').forEach(function(btn) {
+            sessionsList.querySelectorAll('.session-edit-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     openEditModal(btn.dataset.id, btn.dataset.start, btn.dataset.end);
+                });
+            });
+
+            // Bind delete buttons
+            sessionsList.querySelectorAll('.session-delete-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    deleteSessionEntryId = parseInt(btn.dataset.id, 10);
+                    deleteSessionModal.hidden = false;
                 });
             });
 
@@ -186,6 +288,56 @@ document.addEventListener('DOMContentLoaded', function() {
             sessionsList.innerHTML = '<p class="error-message">Failed to load sessions.</p>';
         }
     }
+
+
+    // ============================================
+    // DELETE SESSION MODAL
+    // ============================================
+
+    cancelDeleteSession.addEventListener('click', function() {
+        deleteSessionModal.hidden = true;
+        deleteSessionEntryId = null;
+    });
+
+    deleteSessionModal.addEventListener('click', function(event) {
+        if (event.target === deleteSessionModal) {
+            deleteSessionModal.hidden = true;
+            deleteSessionEntryId = null;
+        }
+    });
+
+    confirmDeleteSession.addEventListener('click', async function() {
+        if (!deleteSessionEntryId) return;
+
+        confirmDeleteSession.disabled = true;
+        confirmDeleteSession.textContent = 'Deleting...';
+
+        try {
+            const response = await fetch('/api/time/sessions', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ entry_id: deleteSessionEntryId })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                deleteSessionModal.hidden = true;
+                deleteSessionEntryId = null;
+                loadSessions();
+                loadStats();
+                loadProfileHeatmap();
+            } else {
+                alert(data.error || 'Failed to delete session.');
+            }
+        } catch (error) {
+            console.error('Delete session error:', error);
+            alert('Something went wrong. Please try again.');
+        } finally {
+            confirmDeleteSession.disabled = false;
+            confirmDeleteSession.textContent = 'Yes, Delete';
+        }
+    });
 
 
     // ============================================
@@ -425,7 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('/api/time/heatmap');
             const data = await response.json();
-            renderProfileHeatmap(data.year, data.days);
+            renderProfileHeatmap(data.year, data.days, data.shift_length || currentShiftLength);
         } catch (error) {
             console.error('Load heatmap error:', error);
         }
@@ -445,7 +597,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return 4;
     }
 
-    function renderProfileHeatmap(year, daysData) {
+    function renderProfileHeatmap(year, daysData, heatmapShiftLength) {
         const heatmapGrid = document.getElementById('profile-heatmap-grid');
         const heatmapMonths = document.getElementById('profile-heatmap-months');
         heatmapGrid.innerHTML = '';
@@ -518,6 +670,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     var level = getHeatLevel(day.hours);
                     cell.style.backgroundColor = heatColors[level];
+                    if (day.hours >= heatmapShiftLength && day.hours > 0) {
+                        cell.classList.add('shift-met');
+                    }
                     cell.title = day.date + ': ' + day.hours + ' hours';
 
                     // Add hover interaction for cells with data

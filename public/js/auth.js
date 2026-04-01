@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const name = document.getElementById('register-name').value;
         const email = document.getElementById('register-email').value;
         const password = document.getElementById('register-password').value;
+        const shiftLength = parseInt(document.getElementById('register-shift-length').value, 10);
         // Client-side name validation
         if (/\d/.test(name)) {
             showError('Names cannot contain numbers.');
@@ -92,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, name })
+                body: JSON.stringify({ email, password, name, shift_length: shiftLength })
             });
 
             const data = await response.json();

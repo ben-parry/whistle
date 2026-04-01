@@ -8,6 +8,8 @@ const MAX_DAILY_HOURS = 12;
 
 let elapsedTimer = null;
 let sessionStartTime = null;
+let shiftLength = 8;
+let shiftCompleted = false;
 
 // ============================================
 // WAIT FOR PAGE TO LOAD
@@ -27,6 +29,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoutButton = document.getElementById('logout-button');
     const heatmapGrid = document.getElementById('heatmap-grid');
     const heatmapMonths = document.getElementById('heatmap-months');
+    const shiftProgressWrapper = document.getElementById('shift-progress-wrapper');
+    const shiftProgressBar = document.getElementById('shift-progress-bar');
+    const shiftProgressLabel = document.getElementById('shift-progress-label');
+    const shiftCompleteText = document.getElementById('shift-complete-text');
 
     checkAuth();
 
@@ -74,6 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('/api/time/status');
             const data = await response.json();
+
+            shiftLength = data.shift_length || 8;
 
             currentYearSpan.textContent = new Date().getFullYear();
             yearTotal.textContent = formatHoursDisplay(data.year_total_hours);
@@ -129,6 +137,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             if (punchButton.classList.contains('working')) {
+                // Warn if clocking out before shift is complete
+                if (sessionStartTime && !shiftCompleted) {
+                    var elapsedHours = (new Date() - sessionStartTime) / (1000 * 60 * 60);
+                    if (elapsedHours < shiftLength) {
+                        var remaining = shiftLength - elapsedHours;
+                        var remH = Math.floor(remaining);
+                        var remM = Math.round((remaining - remH) * 60);
+                        var remStr = '';
+                        if (remH > 0) remStr += remH + ' hour' + (remH !== 1 ? 's' : '');
+                        if (remH > 0 && remM > 0) remStr += ' and ';
+                        if (remM > 0 || remH === 0) remStr += remM + ' minute' + (remM !== 1 ? 's' : '');
+                        if (!confirm('You still have ' + remStr + ' left on your shift. Clock out anyway?')) {
+                            punchButton.disabled = false;
+                            return;
+                        }
+                    }
+                }
                 await clockOut();
             } else {
                 await clockIn();
@@ -206,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
         punchButton.className = 'punch-button working';
 
         elapsedTime.hidden = false;
+        shiftProgressWrapper.hidden = false;
         punchCompleted.hidden = true;
 
         // Show clock-in timestamp
@@ -225,6 +251,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         punchButton.hidden = true;
         elapsedTime.hidden = true;
+        shiftProgressWrapper.hidden = true;
+        shiftCompleteText.hidden = true;
+        document.body.classList.remove('shift-complete');
+        shiftCompleted = false;
 
         punchTimestamps.innerHTML =
             'Clocked in at <span class="timestamp-value">' + formatTime(start) + '</span><br>' +
@@ -247,8 +277,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         punchButton.hidden = true;
         elapsedTime.hidden = true;
+        shiftProgressWrapper.hidden = true;
+        shiftCompleteText.hidden = true;
         punchTimestamps.hidden = true;
         punchCompleted.hidden = true;
+        document.body.classList.remove('shift-complete');
+        shiftCompleted = false;
     }
 
     function showReadyState() {
@@ -261,8 +295,12 @@ document.addEventListener('DOMContentLoaded', function() {
         punchButton.className = 'punch-button not-working';
 
         elapsedTime.hidden = true;
+        shiftProgressWrapper.hidden = true;
+        shiftCompleteText.hidden = true;
         punchTimestamps.hidden = true;
         punchCompleted.hidden = true;
+        document.body.classList.remove('shift-complete');
+        shiftCompleted = false;
     }
 
     function formatTime(date) {
@@ -328,6 +366,19 @@ document.addEventListener('DOMContentLoaded', function() {
             String(hours).padStart(2, '0') + ':' +
             String(minutes).padStart(2, '0') + ':' +
             String(seconds).padStart(2, '0');
+
+        // Update shift progress bar
+        var elapsedHours = diffMs / (1000 * 60 * 60);
+        var shiftPercent = Math.min((elapsedHours / shiftLength) * 100, 100);
+        shiftProgressBar.style.width = shiftPercent + '%';
+        shiftProgressLabel.textContent = formatHoursDisplay(elapsedHours) + ' / ' + shiftLength + 'h';
+
+        // Shift completion detection
+        if (elapsedHours >= shiftLength && !shiftCompleted) {
+            shiftCompleted = true;
+            document.body.classList.add('shift-complete');
+            shiftCompleteText.hidden = false;
+        }
     }
 
 
@@ -351,13 +402,13 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             var response = await fetch('/api/time/heatmap');
             var data = await response.json();
-            renderHeatmap(data.year, data.days);
+            renderHeatmap(data.year, data.days, data.shift_length || shiftLength);
         } catch (error) {
             console.error('Load heatmap error:', error);
         }
     }
 
-    function renderHeatmap(year, daysData) {
+    function renderHeatmap(year, daysData, heatmapShiftLength) {
         heatmapGrid.innerHTML = '';
         heatmapMonths.innerHTML = '';
 
@@ -419,6 +470,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     var level = getHeatLevel(day.hours);
                     cell.classList.add('level-' + level);
+                    if (day.hours >= heatmapShiftLength && day.hours > 0) {
+                        cell.classList.add('shift-met');
+                    }
                     cell.title = day.date + ': ' + formatHoursDisplay(day.hours) + ' hours';
                 }
 

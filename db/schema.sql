@@ -31,6 +31,9 @@ CREATE TABLE IF NOT EXISTS users (
     -- Unique three-word identifier (e.g., "Steady-Wright-Oak")
     cute_id VARCHAR(100) UNIQUE NOT NULL,
 
+    -- Desired shift length in hours (4-10, default 8)
+    shift_length INTEGER NOT NULL DEFAULT 8 CHECK (shift_length >= 4 AND shift_length <= 10),
+
     -- When the account was created
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -112,6 +115,39 @@ CREATE TABLE IF NOT EXISTS session_edits (
 
 -- Index to quickly count edits per user per month
 CREATE INDEX IF NOT EXISTS idx_session_edits_user ON session_edits(user_id, edited_at);
+
+
+-- ============================================
+-- SHIFT LENGTH CHANGES TABLE
+-- ============================================
+-- Tracks changes to a user's shift length for rate limiting
+-- Users are limited to 2 changes per calendar month
+
+CREATE TABLE IF NOT EXISTS shift_length_changes (
+    id SERIAL PRIMARY KEY,
+
+    -- Which user changed their shift length
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+    -- The old and new values
+    old_length INTEGER NOT NULL,
+    new_length INTEGER NOT NULL,
+
+    -- When the change was made
+    changed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Index to quickly count changes per user per month
+CREATE INDEX IF NOT EXISTS idx_shift_changes_user ON shift_length_changes(user_id, changed_at);
+
+
+-- ============================================
+-- MIGRATION: Add shift_length to existing users table
+-- ============================================
+-- Run this if you have an existing database from before the shift length update.
+--
+-- ALTER TABLE users ADD COLUMN IF NOT EXISTS shift_length INTEGER NOT NULL DEFAULT 8;
+-- ALTER TABLE users ADD CONSTRAINT shift_length_range CHECK (shift_length >= 4 AND shift_length <= 10);
 
 
 -- ============================================
