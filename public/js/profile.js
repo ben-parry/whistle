@@ -8,13 +8,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const userEmail = document.getElementById('user-email');
     const userCuteId = document.getElementById('user-cute-id');
     const userShiftLength = document.getElementById('user-shift-length');
-    const shiftChangeBtn = document.getElementById('shift-change-btn');
-    const shiftEditForm = document.getElementById('shift-edit-form');
-    const shiftLengthSelect = document.getElementById('shift-length-select');
-    const shiftSaveBtn = document.getElementById('shift-save-btn');
-    const shiftCancelBtn = document.getElementById('shift-cancel-btn');
-    const shiftChangesRemaining = document.getElementById('shift-changes-remaining');
     const statsSentence = document.getElementById('stats-text');
+    const userLink = document.getElementById('user-link');
+    const userLinkEmpty = document.getElementById('user-link-empty');
+    const linkEditBtn = document.getElementById('link-edit-btn');
+    const linkEditForm = document.getElementById('link-edit-form');
+    const linkInput = document.getElementById('link-input');
+    const linkSaveBtn = document.getElementById('link-save-btn');
+    const linkCancelBtn = document.getElementById('link-cancel-btn');
     const sessionsList = document.getElementById('sessions-list');
     const editsInfo = document.getElementById('edits-info');
     const exportButton = document.getElementById('export-button');
@@ -61,15 +62,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             currentShiftLength = data.user.shift_length || 8;
             userShiftLength.textContent = currentShiftLength + ' hours';
-            shiftLengthSelect.value = currentShiftLength;
 
-            var changesRemaining = data.user.shift_changes_remaining;
-            if (changesRemaining !== undefined) {
-                shiftChangesRemaining.textContent = changesRemaining + ' change' + (changesRemaining !== 1 ? 's' : '') + ' remaining this month';
-                if (changesRemaining > 0) {
-                    shiftChangeBtn.hidden = false;
-                }
-            }
+            // Display link
+            var linkVal = data.user.link || '';
+            displayLink(linkVal);
 
             const imgNum = Math.floor(Math.random() * 9) + 1;
             document.getElementById('profile-header-img').src = '/pics/profile-headers/mucha-' + imgNum + '.png';
@@ -85,59 +81,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // ============================================
-    // SHIFT LENGTH CHANGE
+    // LINK EDITING
     // ============================================
 
-    shiftChangeBtn.addEventListener('click', function() {
-        shiftLengthSelect.value = currentShiftLength;
-        shiftEditForm.hidden = false;
-        shiftChangeBtn.hidden = true;
-    });
-
-    shiftCancelBtn.addEventListener('click', function() {
-        shiftEditForm.hidden = true;
-        shiftChangeBtn.hidden = false;
-    });
-
-    shiftSaveBtn.addEventListener('click', async function() {
-        var newLength = parseInt(shiftLengthSelect.value, 10);
-        if (newLength === currentShiftLength) {
-            shiftEditForm.hidden = true;
-            shiftChangeBtn.hidden = false;
-            return;
+    function displayLink(linkVal) {
+        if (linkVal) {
+            userLink.href = linkVal;
+            userLink.textContent = linkVal;
+            userLink.hidden = false;
+            userLinkEmpty.hidden = true;
+        } else {
+            userLink.hidden = true;
+            userLinkEmpty.hidden = false;
         }
+    }
 
-        shiftSaveBtn.disabled = true;
+    linkEditBtn.addEventListener('click', function() {
+        linkInput.value = userLink.hidden ? '' : userLink.href;
+        linkEditForm.hidden = false;
+        linkEditBtn.hidden = true;
+    });
+
+    linkCancelBtn.addEventListener('click', function() {
+        linkEditForm.hidden = true;
+        linkEditBtn.hidden = false;
+    });
+
+    linkSaveBtn.addEventListener('click', async function() {
+        var newLink = linkInput.value.trim();
+
+        linkSaveBtn.disabled = true;
         try {
             const response = await fetch('/api/auth/me', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ shift_length: newLength })
+                body: JSON.stringify({ link: newLink })
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                currentShiftLength = data.shift_length;
-                userShiftLength.textContent = currentShiftLength + ' hours';
-                shiftChangesRemaining.textContent = data.changes_remaining + ' change' + (data.changes_remaining !== 1 ? 's' : '') + ' remaining this month';
-                shiftEditForm.hidden = true;
-                if (data.changes_remaining > 0) {
-                    shiftChangeBtn.hidden = false;
-                } else {
-                    shiftChangeBtn.hidden = true;
-                }
-                // Refresh heatmap and sessions to reflect new shift length
-                loadProfileHeatmap();
-                loadSessions();
+                displayLink(data.link || '');
+                linkEditForm.hidden = true;
+                linkEditBtn.hidden = false;
             } else {
-                alert(data.error || 'Failed to change shift length.');
+                alert(data.error || 'Failed to save link.');
             }
         } catch (error) {
-            console.error('Shift length change error:', error);
+            console.error('Link save error:', error);
             alert('Something went wrong. Please try again.');
         } finally {
-            shiftSaveBtn.disabled = false;
+            linkSaveBtn.disabled = false;
         }
     });
 
@@ -727,6 +721,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     logoutButton.addEventListener('click', async function() {
         try {
+            var statusRes = await fetch('/api/time/status');
+            var statusData = await statusRes.json();
+            if (statusData.is_working) {
+                if (!confirm('Signing out will clock you out. Continue?')) return;
+            }
             await fetch('/api/auth/logout', { method: 'POST' });
             window.location.href = '/index.html';
         } catch (error) {

@@ -32,9 +32,19 @@ module.exports = async function handler(request, response) {
         const user = await getCurrentUser(request);
 
         // ----------------------------------------
-        // STEP 2: Clear the session in the database
+        // STEP 2: Close any open time entry at current time
         // ----------------------------------------
-        // Only do this if we found a logged-in user
+        if (user) {
+            await sql`
+                UPDATE time_entries
+                SET end_time = NOW()
+                WHERE user_id = ${user.id} AND end_time IS NULL
+            `;
+        }
+
+        // ----------------------------------------
+        // STEP 3: Clear the session in the database
+        // ----------------------------------------
         if (user) {
             await sql`
                 UPDATE users
@@ -44,7 +54,7 @@ module.exports = async function handler(request, response) {
         }
 
         // ----------------------------------------
-        // STEP 3: Clear the session cookie
+        // STEP 4: Clear the session cookie
         // ----------------------------------------
         // This deletes the cookie from the browser
         response.setHeader('Set-Cookie', createLogoutCookie());

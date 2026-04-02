@@ -124,6 +124,7 @@ async function handleToday(request, response) {
             SELECT
                 u.name,
                 u.cute_id,
+                u.link,
                 COALESCE(
                     SUM(
                         CASE WHEN te.end_time IS NOT NULL THEN
@@ -140,13 +141,14 @@ async function handleToday(request, response) {
                 (te.end_time IS NOT NULL AND te.start_time >= ${todayStart.toISOString()} AND te.start_time < ${todayEnd.toISOString()})
                 OR te.end_time IS NULL
             )
-            GROUP BY u.id, u.name, u.cute_id
+            GROUP BY u.id, u.name, u.cute_id, u.link
             ORDER BY completed_hours DESC
         `;
 
         const entries = result.rows.map(row => ({
             name: row.name,
             cute_id: row.cute_id,
+            link: row.link || '',
             total_hours_today: Math.round(parseFloat(row.completed_hours) * 100) / 100,
             is_active: row.active_since !== null,
             active_since: row.active_since

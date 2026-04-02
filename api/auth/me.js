@@ -58,7 +58,8 @@ async function handleGetUser(request, response) {
                     name: user.name,
                     cute_id: user.cute_id,
                     shift_length: user.shift_length,
-                    shift_changes_remaining: MAX_SHIFT_CHANGES_PER_MONTH - changesUsed
+                    shift_changes_remaining: MAX_SHIFT_CHANGES_PER_MONTH - changesUsed,
+                    link: user.link || ''
                 }
             });
         } else {
@@ -127,10 +128,20 @@ async function handleChangeShiftLength(request, response) {
     try {
         const user = await getCurrentUser(request);
         if (!user) {
-            return sendError(response, 401, 'You must be logged in to change shift length.');
+            return sendError(response, 401, 'You must be logged in to update your profile.');
         }
 
-        const { shift_length } = request.body;
+        const { shift_length, link } = request.body;
+
+        // Handle link update
+        if (link !== undefined) {
+            const linkValue = typeof link === 'string' ? link.trim().slice(0, 500) : '';
+            await sql`
+                UPDATE users SET link = ${linkValue || null} WHERE id = ${user.id}
+            `;
+            return sendJson(response, 200, { success: true, link: linkValue });
+        }
+
         const newLength = parseInt(shift_length, 10);
 
         if (isNaN(newLength) || newLength < MIN_SHIFT_LENGTH || newLength > MAX_SHIFT_LENGTH) {

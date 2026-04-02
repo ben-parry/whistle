@@ -14,18 +14,22 @@ Whistle enforces boundaries like a Victorian factory punch clock. Work happens b
 
 - **Simple punch clock** — One button to clock in/out, one session per day
 - **Timestamps** — Clock-in and clock-out timestamps displayed below the timer
-- **Year total** — Hours worked this year with progress bar toward 2,333 hours
-- **Heatmap visualization** — GitHub-style calendar showing daily work (Sundays greyed out)
-- **Public leaderboard** — Unified table with year/today toggle, realtime ticking for active users
-- **Session history** — View and edit recent sessions (with limits)
+- **Year total** — Hours worked this year with compact progress bar toward 2,333 hours
+- **Shift progress** — Inline progress bar showing shift completion with hours label
+- **Heatmap visualization** — GitHub-style calendar on profile page (Sundays greyed out)
+- **Factory Floor** — Public today-only table showing who is working, with realtime ticking
+- **Profile link** — Each user can set one personal link, displayed as their name on Factory Floor
+- **Shift length** — Configurable daily shift target (4–10 hours, default 8)
+- **Session history** — View, edit, and delete recent sessions (with limits)
 - **Statistics** — Inline prose summary of your year including median clock-in/out times
-- **CSV export** — Download all your time entries
+- **CSV export** — Download all your time entries (as JSON for client-side CSV generation)
 - **Change password** — Self-service password changes
 - **Native iOS app** — Minimal companion for clock in/out on the go
 - **Multi-user** — Each person gets a name, a cute three-word ID, and their own account
 - **Sunday experience** — Special quote, image, poetry, and link on Sundays
-- **Hidden users** — Specific users can be excluded from the public leaderboard
+- **Hidden users** — Specific users can be excluded from the Factory Floor
 - **About page** — Content served from an ABOUT.md markdown file
+- **Sign-out safety** — Signing out while clocked in shows a warning and auto-clocks out
 
 ## Tech Stack
 
@@ -36,6 +40,7 @@ Whistle enforces boundaries like a Victorian factory punch clock. Work happens b
 - **Hosting**: Vercel
 - **Font**: Kalice (self-hosted woff2/woff)
 - **AI**: Anthropic Claude API (for name validation on registration)
+- **Email**: Resend API (for account deletion notifications)
 
 ### Dependencies
 
@@ -53,14 +58,14 @@ These rules are enforced server-side:
 | **Daily maximum** | 12 hours per calendar day |
 | **One session per day** | Only one clock-in and one clock-out allowed per day |
 | **Sundays** | No work allowed. Full Sunday experience displayed |
-| **Auto-close** | Stale open sessions are closed server-side at min(start + 12h, 9pm). Enforced on every status check and leaderboard API call. |
+| **Auto-close** | Stale open sessions are closed server-side at min(start + 12h, 9pm). Enforced on every status check and Factory Floor API call. |
 
 ### Server-Side Auto-Close
 
 Stale sessions are closed proactively server-side:
 
 - When the **status API** is called: auto-close the user's open session if past the cap
-- When the **leaderboard API** is called: auto-close all open sessions before computing data
+- When the **Factory Floor API** is called: auto-close all open sessions before computing data
 - End time = min(start_time + 12 hours, 9pm in start_timezone)
 
 ### Client-Side Behavior
@@ -69,7 +74,7 @@ The frontend trusts the server completely:
 
 - Do **not** display elapsed time or working state until the first status API response
 - Show a loading/neutral state on page load
-- Same applies to the leaderboard: do not render live timers until the first API response
+- Same applies to the Factory Floor: do not render live timers until the first API response
 
 ## Sunday Behavior
 
@@ -83,9 +88,9 @@ Sundays have a completely different experience across the app.
 - **Below the link**: The image `pics/sunday.png` (smaller size, max-width 220px)
 - The navigation bar remains visible and functional
 
-### Leaderboard Page (Sundays)
+### Factory Floor Page (Sundays)
 
-- **Hide entirely**: The leaderboard table AND the Year/Today toggle buttons
+- **Hide entirely**: The Factory Floor table
 - **Show instead**: A poem from the curated poetry collection, **left-aligned**
 - Attribution format: poet name, year
 
@@ -101,7 +106,7 @@ Every user must provide a real name at registration. Names are validated:
 - Must contain only Unicode letters (no numbers)
 - No more than one consecutive space between parts
 - Validated by Claude API as a plausible real name (fails open)
-- Displayed on the leaderboard (email is never shown publicly)
+- Displayed on the Factory Floor (email is never shown publicly)
 
 ### Cute ID
 
@@ -111,31 +116,29 @@ Examples: `Steady-Wright-Oak`, `Bold-Weaver-Fern`, `Keen-Cooper-Lark`
 
 ### Hidden Users
 
-A hardcoded list of email addresses in `api/_helpers.js` (`HIDDEN_USERS`). These users are excluded from all leaderboard queries but can still use the app normally.
+A hardcoded list of email addresses in `api/_helpers.js` (`HIDDEN_USERS`). These users are excluded from all Factory Floor queries but can still use the app normally.
 
 ## Pages
 
 ### Login / Register (`index.html`)
 
 - Tabbed form for Sign In and Create Account
-- Registration requires: email, password (8+ chars), and name (validated)
+- Registration requires: email, password (8+ chars), name (validated), and shift length (4–10 hours, default 8)
 - **No password confirmation field** — single password entry only
 - "Forgot password?" links to admin email
 - Link to About page
 
 ### Punch Clock (`app.html`)
 
-- Main working interface — one session per day
+- Main working interface — one session per day, minimal UI
 - Big clock in/out button with elapsed time display
 - **Clock In button color**: `#6C7A61` (muted green)
-- **After clock-in**: Shows clock-in timestamp below the timer
-- **After clock-out**: Shows both timestamps (in and out), hides button, shows "See you tomorrow."
-- **Already completed today**: Shows the completed record with timestamps, no button
-- Year total with progress bar (goal: 2,333 hours)
+- **No status text** — no "Currently Working" or "Not Working" labels
+- **When clocked in**: Timer, shift progress bar (with shift hours inline), Clock Out button, clock-in timestamp
+- **After clock-out**: Timestamps only (in and out), shift progress bar (filled), and annual progress bar. No button, no extra text.
+- **Compact year total** with progress bar (goal: 2,333 hours), smaller text and padding
   - **(i) icon** next to the progress bar that links to the About page
-- GitHub-style heatmap titled **"Calendar"**
-  - Sundays are uniformly greyed out regardless of data
-  - Heatmap uses green color scheme
+- **No heatmap** on clock page — heatmap is only on the profile page
 - Clicking the "Whistle" wordmark navigates here
 - On Sundays: all of the above is hidden, replaced with Sunday experience
 - **Loading state**: Do not show elapsed time or working status until the first API response
@@ -144,6 +147,8 @@ A hardcoded list of email addresses in `api/_helpers.js` (`HIDDEN_USERS`). These
 
 - **Profile header image**: Mucha Art Nouveau image as circular crop, ~120px diameter. Images are resized to 300px for fast loading. Random image selected on each page load.
 - User info: name, email, cute ID
+- **Shift length display** (read-only on profile)
+- **Link field** — editable, with subtitle "Share a link to a personal website, social media, or just something you love"
 - **Statistics section** (in its own boxed card):
   - Inline prose with highlighted dynamic values (highlight color: `#6C7A61` green):
     > "In **2026** you have clocked in on **47 days** and completed **312 hours** of work. On a median day you worked **6 hours and 38 minutes**."
@@ -151,17 +156,19 @@ A hardcoded list of email addresses in `api/_helpers.js` (`HIDDEN_USERS`). These
 - **Heatmap** immediately below the statistics card
   - Hover interaction shows details below the heatmap
 - **Session history**: Scrollable list of all sessions
-  - Sessions from current/previous month can be edited (max 3 edits/month)
+  - Sessions from current/previous month can be edited (max 3 edits/month) or deleted
+  - Shows duration and shift-met status per session
 - **Change password**, **Export to CSV**, **Delete account**
 
-### Leaderboard (`leaderboard.html`)
+### Factory Floor (`leaderboard.html`)
 
 - **Public page** — no authentication required
-- **Single unified table** with year/today toggle
-- **On Sundays**: Table AND toggle are both hidden. Left-aligned poem displayed instead.
+- **Today-only table** — no year view, no toggle
+- **On Sundays**: Table is hidden. Left-aligned poem displayed instead.
 - Hidden users are excluded from all queries
+- Names link to the user's profile link (if set), otherwise plain text
 
-**Table columns:** Rank, Name (with cute ID), Year Hours, Today Hours
+**Table columns:** Rank, Name (with cute ID), Today Hours
 
 **Today column behavior:**
 - Active users: cell shaded `#8F3416`, value ticks in realtime
@@ -177,7 +184,9 @@ A hardcoded list of email addresses in `api/_helpers.js` (`HIDDEN_USERS`). These
 
 ## Navigation
 
-All authenticated pages show: **Leaderboard** · **About** · **Profile** · **Sign Out**
+All authenticated pages show: **Factory Floor** · **About** · **Profile** · **Sign Out**
+
+**Sign Out behavior**: If the user is currently clocked in, a warning is shown ("Signing out will clock you out. Continue?"). The server auto-closes any open session on logout.
 
 The "Whistle" wordmark always links to `app.html`.
 
@@ -187,7 +196,7 @@ All time-of-day rules are evaluated in the user's timezone:
 - On clock-in, the frontend sends the user's IANA timezone
 - Stored as `start_timezone` on the time entry
 - Server-side auto-close uses the stored timezone
-- "Today" leaderboard accepts viewer's timezone as query parameter
+- "Today" Factory Floor accepts viewer's timezone as query parameter
 
 ## Color Scheme
 
@@ -206,7 +215,7 @@ All time-of-day rules are evaluated in the user's timezone:
 
 | Color | Hex | Usage |
 |---|---|---|
-| Terracotta | `#8F3416` | Buttons, danger zone, active/working state on leaderboard |
+| Terracotta | `#8F3416` | Buttons, danger zone, active/working state on Factory Floor |
 | Green | `#5E7252` | Heatmap level 4, hover states |
 | Light green | `#6C7A61` | Clock In button, stat highlights, accent numbers/metrics |
 
@@ -229,7 +238,7 @@ Fixed thresholds using `#6C7A61` at varying opacity:
 
 ### Decorative Accents
 
-Art Nouveau aesthetic: decorative ornaments, elegant card layouts, warm tones.
+Art Nouveau aesthetic: decorative ornaments, elegant card layouts, warm tones. Footer illustration links to the About page.
 
 ## UI Specifications
 
@@ -252,9 +261,10 @@ Compact spacing throughout. The punch clock page should fit on screen without sc
 |---|---|---|
 | POST | `/api/auth/register` | Create account |
 | POST | `/api/auth/login` | Log in |
-| POST | `/api/auth/logout` | Log out |
-| GET | `/api/auth/me` | Get current user info |
+| POST | `/api/auth/logout` | Log out (auto-clocks out any open session) |
+| GET | `/api/auth/me` | Get current user info (includes link, shift_changes_remaining) |
 | POST | `/api/auth/me` | Change password |
+| PUT | `/api/auth/me` | Update profile link or change shift length |
 
 ### Time
 | Method | Path | Description |
@@ -266,18 +276,19 @@ Compact spacing throughout. The punch clock page should fit on screen without sc
 | GET | `/api/time/stats` | Statistics including median clock times |
 | GET | `/api/time/sessions` | Session history for profile |
 | PUT | `/api/time/sessions` | Edit a session |
-| GET | `/api/time/sessions?export=csv` | Export entries for CSV |
+| DELETE | `/api/time/sessions` | Delete a session |
+| GET | `/api/time/sessions?export=csv` | Export entries as JSON for CSV |
 
-### Leaderboard
+### Factory Floor
 | Method | Path | Description |
 |---|---|---|
 | GET | `/api/leaderboard?view=year` | Yearly rankings (excludes hidden users) |
-| GET | `/api/leaderboard?view=today` | Today's activity (excludes hidden users) |
+| GET | `/api/leaderboard?view=today` | Today's activity with links (excludes hidden users) |
 
 ### Account
 | Method | Path | Description |
 |---|---|---|
-| DELETE | `/api/account/delete` | Delete account |
+| DELETE | `/api/account/delete` | Delete account (sends notification email via Resend) |
 
 ## Database Schema
 
@@ -289,6 +300,8 @@ name            VARCHAR(255) NOT NULL
 password_hash   VARCHAR(255) NOT NULL
 session_token   VARCHAR(255)
 cute_id         VARCHAR(100) UNIQUE NOT NULL
+shift_length    INTEGER NOT NULL DEFAULT 8  -- 4 to 10 hours
+link            VARCHAR(500)               -- optional personal link
 created_at      TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 ```
 
@@ -314,6 +327,15 @@ new_start_time  TIMESTAMP WITH TIME ZONE NOT NULL
 new_end_time    TIMESTAMP WITH TIME ZONE NOT NULL
 ```
 
+### `shift_length_changes` table
+```sql
+id              SERIAL PRIMARY KEY
+user_id         INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE
+old_length      INTEGER NOT NULL
+new_length      INTEGER NOT NULL
+changed_at      TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+```
+
 ## iOS App
 
 Located at `ios/Whistle/` within the monorepo.
@@ -328,7 +350,7 @@ Located at `ios/Whistle/` within the monorepo.
 
 ### What the iOS app does NOT include
 - No registration flow (website only)
-- No stats, heatmap, leaderboard, or session history
+- No stats, heatmap, Factory Floor, or session history
 - No profile management, password change, or account deletion
 
 ### Tech
@@ -353,7 +375,7 @@ whistle/
 │   │   ├── heatmap.js
 │   │   ├── stats.js            # Includes median clock-in/out times
 │   │   └── sessions.js         # List, edit, export
-│   ├── leaderboard.js          # Excludes hidden users
+│   ├── leaderboard.js          # Factory Floor API, excludes hidden users
 │   └── account/
 │       └── delete.js
 ├── public/                     # Frontend files
@@ -399,6 +421,7 @@ whistle/
 |---|---|
 | `POSTGRES_URL` | Vercel Postgres connection string |
 | `ANTHROPIC_API_KEY` | Claude API key for name validation |
+| `RESEND_API_KEY` | Resend API key for account deletion notification emails |
 
 ## Setup Instructions
 

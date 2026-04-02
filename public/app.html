@@ -13,7 +13,7 @@
         <header class="app-header">
             <a href="/app.html" class="logo">Whistle</a>
             <nav class="app-nav">
-                <a href="/leaderboard.html" class="nav-link">Leaderboard</a>
+                <a href="/leaderboard.html" class="nav-link">Factory Floor</a>
                 <a href="/about.html" class="nav-link">About</a>
                 <a href="/profile.html" class="nav-link">Profile</a>
                 <button id="logout-button" class="nav-link button-link">Sign Out</button>
@@ -29,7 +29,7 @@
                 <div class="shift-progress-container">
                     <div class="shift-progress-bar" id="shift-progress-bar"></div>
                 </div>
-                <span id="shift-progress-label" class="shift-progress-label"></span>
+                <span id="shift-progress-label" class="shift-progress-label-inline"></span>
             </div>
             </div>
             <button id="punch-button" class="punch-button" hidden disabled>
@@ -52,33 +52,6 @@
             </div>
         </section>
 
-        <!-- HEATMAP SECTION -->
-        <section class="heatmap-section">
-            <h2 class="section-title">Calendar</h2>
-            <div class="heatmap-months" id="heatmap-months"></div>
-            <div class="heatmap-container">
-                <div class="heatmap-days">
-                    <span></span>
-                    <span>Mon</span>
-                    <span></span>
-                    <span>Wed</span>
-                    <span></span>
-                    <span>Fri</span>
-                    <span></span>
-                </div>
-                <div id="heatmap-grid" class="heatmap-grid"></div>
-            </div>
-            <div class="heatmap-legend">
-                <span class="legend-label">Less</span>
-                <span class="legend-box level-0"></span>
-                <span class="legend-box level-1"></span>
-                <span class="legend-box level-2"></span>
-                <span class="legend-box level-3"></span>
-                <span class="legend-box level-4"></span>
-                <span class="legend-label">More</span>
-            </div>
-        </section>
-
         <section id="sunday-content" class="sunday-section" hidden>
             <p class="sunday-quote">&ldquo;It is Sunday, let us seize the means of relaxation.&rdquo;</p>
             <a href="https://lavitalenta.substack.com/" target="_blank" rel="noopener" class="sunday-link">lavitalenta.substack.com</a>
@@ -86,7 +59,7 @@
         </section>
 
         <footer class="app-footer">
-            <img src="/pics/footer.png" alt="" class="footer-illustration">
+            <a href="/about.html"><img src="/pics/footer.png" alt="" class="footer-illustration"></a>
         </footer>
 
     </div>

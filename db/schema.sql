@@ -34,6 +34,9 @@ CREATE TABLE IF NOT EXISTS users (
     -- Desired shift length in hours (4-10, default 8)
     shift_length INTEGER NOT NULL DEFAULT 8 CHECK (shift_length >= 4 AND shift_length <= 10),
 
+    -- Optional personal link (website, social media, etc.)
+    link VARCHAR(500),
+
     -- When the account was created
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -162,3 +165,11 @@ CREATE INDEX IF NOT EXISTS idx_shift_changes_user ON shift_length_changes(user_i
 -- UPDATE users SET name = 'Your Name', cute_id = 'Some-Artisan-Word' WHERE name IS NULL;
 -- ALTER TABLE users ALTER COLUMN name SET NOT NULL;
 -- ALTER TABLE users ALTER COLUMN cute_id SET NOT NULL;
+
+
+-- ============================================
+-- MIGRATION: Add link column to users table
+-- ============================================
+-- Run this if you have an existing database.
+--
+-- ALTER TABLE users ADD COLUMN IF NOT EXISTS link VARCHAR(500);

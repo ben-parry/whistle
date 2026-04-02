@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaderboard - Whistle</title>
+    <title>Factory Floor - Whistle</title>
 
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -19,11 +19,7 @@
 
         <section class="leaderboard-section">
             <div class="leaderboard-header">
-                <h2 class="section-title">Leaderboard</h2>
-                <div class="leaderboard-toggle" id="leaderboard-toggle">
-                    <button id="sort-year" class="toggle-btn active" onclick="setSort('year')">This Year</button>
-                    <button id="sort-today" class="toggle-btn" onclick="setSort('today')">Today</button>
-                </div>
+                <h2 class="section-title">Factory Floor</h2>
             </div>
 
             <!-- Sunday poem container (hidden unless Sunday) -->
@@ -40,18 +36,17 @@
                     <tr>
                         <th>#</th>
                         <th>Name</th>
-                        <th>This Year</th>
                         <th>Today</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboard-body">
-                    <tr><td colspan="4" class="leaderboard-empty">Loading...</td></tr>
+                    <tr><td colspan="3" class="leaderboard-empty">Loading...</td></tr>
                 </tbody>
             </table>
         </section>
 
         <footer class="app-footer">
-            <img src="/pics/footer.png" alt="" class="footer-illustration">
+            <a href="/about.html"><img src="/pics/footer.png" alt="" class="footer-illustration"></a>
         </footer>
 
     </div>

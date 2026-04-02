@@ -10,6 +10,7 @@ let elapsedTimer = null;
 let sessionStartTime = null;
 let shiftLength = 8;
 let shiftCompleted = false;
+let isWorking = false;
 
 // ============================================
 // WAIT FOR PAGE TO LOAD
@@ -27,8 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentYearSpan = document.getElementById('current-year');
     const progressBar = document.getElementById('progress-bar');
     const logoutButton = document.getElementById('logout-button');
-    const heatmapGrid = document.getElementById('heatmap-grid');
-    const heatmapMonths = document.getElementById('heatmap-months');
     const shiftProgressWrapper = document.getElementById('shift-progress-wrapper');
     const shiftProgressBar = document.getElementById('shift-progress-bar');
     const shiftProgressLabel = document.getElementById('shift-progress-label');
@@ -37,11 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
     checkAuth();
 
     // Re-fetch status when the tab becomes visible again
-    // This ensures the server auto-closes stale sessions and the UI reflects reality
     document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'visible' && sessionStartTime) {
             loadStatus();
-            loadHeatmap();
         }
     });
 
@@ -58,13 +55,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (new Date().getDay() === 0) {
                 document.querySelector('.punch-section').hidden = true;
                 document.querySelector('.stats-section').hidden = true;
-                document.querySelector('.heatmap-section').hidden = true;
                 document.getElementById('sunday-content').hidden = false;
                 return;
             }
 
             loadStatus();
-            loadHeatmap();
         } catch (error) {
             console.error('Auth check error:', error);
             window.location.href = '/index.html';
@@ -91,19 +86,16 @@ document.addEventListener('DOMContentLoaded', function() {
             progressBar.title = formatHoursDisplay(data.year_total_hours) + ' of ' + ANNUAL_HOURS_GOAL + ' hours (' + Math.round(progressPercent) + '%)';
 
             if (data.is_working && data.current_session) {
-                // Currently clocked in
                 sessionStartTime = new Date(data.current_session.start_time);
+                isWorking = true;
                 showWorkingState();
                 startElapsedTimer();
                 scheduleAutoCloseCheck();
             } else if (data.today_session) {
-                // Already clocked in and out today
                 showCompletedState(data.today_session);
             } else if (data.restriction) {
-                // Time restriction active
                 showRestrictionState(data.restriction);
             } else {
-                // Ready to clock in
                 showReadyState();
             }
 
@@ -120,9 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var ninePm = new Date(now);
             ninePm.setHours(WORK_END_HOUR, 0, 0, 0);
             setTimeout(function() {
-                // Re-fetch status — server will have auto-closed
                 loadStatus();
-                loadHeatmap();
             }, ninePm - now + 2000);
         }
     }
@@ -183,6 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (response.ok) {
             sessionStartTime = new Date(data.entry.start_time);
+            isWorking = true;
             showWorkingState();
             startElapsedTimer();
             scheduleAutoCloseCheck();
@@ -203,13 +194,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (response.ok) {
             stopElapsedTimer();
+            isWorking = false;
             showCompletedState({
                 start_time: data.entry.start_time,
                 end_time: data.entry.end_time
             });
-            // Refresh year total and heatmap
+            // Refresh year total
             loadStatus();
-            loadHeatmap();
         } else {
             alert(data.error || 'Failed to clock out');
             punchButton.disabled = false;
@@ -222,8 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
 
     function showWorkingState() {
-        statusText.textContent = 'Currently Working';
-        statusText.className = 'status-text working';
+        statusText.hidden = true;
 
         punchButton.hidden = false;
         punchButton.disabled = false;
@@ -243,26 +233,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showCompletedState(session) {
         stopElapsedTimer();
+        isWorking = false;
         var start = new Date(session.start_time);
         var end = new Date(session.end_time);
 
-        statusText.textContent = 'Done for today';
-        statusText.className = 'status-text not-working';
-
+        statusText.hidden = true;
         punchButton.hidden = true;
         elapsedTime.hidden = true;
-        shiftProgressWrapper.hidden = true;
         shiftCompleteText.hidden = true;
         document.body.classList.remove('shift-complete');
         shiftCompleted = false;
+        punchCompleted.hidden = true;
 
+        // Show timestamps
         punchTimestamps.innerHTML =
             'Clocked in at <span class="timestamp-value">' + formatTime(start) + '</span><br>' +
             'Clocked out at <span class="timestamp-value">' + formatTime(end) + '</span>';
         punchTimestamps.hidden = false;
 
-        punchCompleted.textContent = 'See you tomorrow.';
-        punchCompleted.hidden = false;
+        // Show shift progress bar with final hours
+        var durationHours = (end - start) / (1000 * 60 * 60);
+        var shiftPercent = Math.min((durationHours / shiftLength) * 100, 100);
+        shiftProgressBar.style.width = shiftPercent + '%';
+        shiftProgressLabel.textContent = shiftLength + 'h';
+        shiftProgressWrapper.hidden = false;
     }
 
     function showRestrictionState(restriction) {
@@ -274,6 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
             statusText.textContent = 'Clock in/out is not available after 9:00 PM.';
         }
         statusText.className = 'status-text not-working';
+        statusText.hidden = false;
 
         punchButton.hidden = true;
         elapsedTime.hidden = true;
@@ -286,8 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showReadyState() {
-        statusText.textContent = 'Not Working';
-        statusText.className = 'status-text not-working';
+        statusText.hidden = true;
 
         punchButton.hidden = false;
         punchButton.disabled = false;
@@ -341,7 +335,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var ninePm = new Date(sessionStartTime);
         ninePm.setHours(WORK_END_HOUR, 0, 0, 0);
         if (ninePm <= sessionStartTime) {
-            // Session started after midnight calculation — use next day 9pm
             ninePm.setDate(ninePm.getDate() + 1);
         }
         var ninePmMs = ninePm - sessionStartTime;
@@ -353,7 +346,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (diffMs >= maxMs) {
             stopElapsedTimer();
             loadStatus();
-            loadHeatmap();
             return;
         }
 
@@ -371,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var elapsedHours = diffMs / (1000 * 60 * 60);
         var shiftPercent = Math.min((elapsedHours / shiftLength) * 100, 100);
         shiftProgressBar.style.width = shiftPercent + '%';
-        shiftProgressLabel.textContent = formatHoursDisplay(elapsedHours) + ' / ' + shiftLength + 'h';
+        shiftProgressLabel.textContent = shiftLength + 'h';
 
         // Shift completion detection
         if (elapsedHours >= shiftLength && !shiftCompleted) {
@@ -395,130 +387,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // ============================================
-    // HEATMAP
-    // ============================================
-
-    async function loadHeatmap() {
-        try {
-            var response = await fetch('/api/time/heatmap');
-            var data = await response.json();
-            renderHeatmap(data.year, data.days, data.shift_length || shiftLength);
-        } catch (error) {
-            console.error('Load heatmap error:', error);
-        }
-    }
-
-    function renderHeatmap(year, daysData, heatmapShiftLength) {
-        heatmapGrid.innerHTML = '';
-        heatmapMonths.innerHTML = '';
-
-        var firstDay = new Date(year, 0, 1);
-        var lastDay = new Date(year, 11, 31);
-        var today = new Date();
-
-        var startOffset = firstDay.getDay();
-        var weeks = [];
-        var currentWeek = [];
-
-        for (var i = 0; i < startOffset; i++) {
-            currentWeek.push(null);
-        }
-
-        var currentDate = new Date(firstDay);
-        while (currentDate <= lastDay) {
-            var dateString = currentDate.toISOString().split('T')[0];
-            var hours = daysData[dateString] || 0;
-            var isFuture = currentDate > today;
-            var dayOfWeek = currentDate.getDay();
-
-            currentWeek.push({
-                date: dateString,
-                hours: hours,
-                isFuture: isFuture,
-                isSunday: dayOfWeek === 0
-            });
-
-            if (currentWeek.length === 7) {
-                weeks.push(currentWeek);
-                currentWeek = [];
-            }
-
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-
-        if (currentWeek.length > 0) {
-            while (currentWeek.length < 7) {
-                currentWeek.push(null);
-            }
-            weeks.push(currentWeek);
-        }
-
-        for (var weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
-            for (var d = 0; d < 7; d++) {
-                var day = weeks[weekIndex][d];
-                var cell = document.createElement('div');
-                cell.className = 'heatmap-cell';
-
-                if (day === null) {
-                    cell.classList.add('empty');
-                } else if (day.isSunday) {
-                    cell.classList.add('sunday');
-                    cell.title = day.date + ' (Sunday)';
-                } else if (day.isFuture) {
-                    cell.classList.add('future');
-                    cell.title = day.date;
-                } else {
-                    var level = getHeatLevel(day.hours);
-                    cell.classList.add('level-' + level);
-                    if (day.hours >= heatmapShiftLength && day.hours > 0) {
-                        cell.classList.add('shift-met');
-                    }
-                    cell.title = day.date + ': ' + formatHoursDisplay(day.hours) + ' hours';
-                }
-
-                heatmapGrid.appendChild(cell);
-            }
-        }
-
-        renderMonthLabels(weeks);
-    }
-
-    function getHeatLevel(hours) {
-        if (hours === 0) return 0;
-        if (hours < 3) return 1;
-        if (hours < 6) return 2;
-        if (hours < 10) return 3;
-        return 4;
-    }
-
-    function renderMonthLabels(weeks) {
-        var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        var lastMonth = -1;
-
-        for (var weekIndex = 0; weekIndex < weeks.length; weekIndex++) {
-            var firstDayInWeek = weeks[weekIndex].find(function(d) { return d !== null; });
-            if (firstDayInWeek) {
-                var month = parseInt(firstDayInWeek.date.split('-')[1], 10) - 1;
-                if (month !== lastMonth) {
-                    var label = document.createElement('span');
-                    label.className = 'month-label';
-                    label.textContent = monthNames[month];
-                    label.style.gridColumn = weekIndex + 1;
-                    heatmapMonths.appendChild(label);
-                    lastMonth = month;
-                }
-            }
-        }
-    }
-
-
-    // ============================================
     // LOGOUT
     // ============================================
 
     logoutButton.addEventListener('click', async function() {
         try {
+            if (isWorking) {
+                if (!confirm('Signing out will clock you out. Continue?')) return;
+            }
             await fetch('/api/auth/logout', { method: 'POST' });
         } catch (error) {
             console.error('Logout error:', error);

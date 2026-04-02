@@ -40,7 +40,6 @@ async function sql(strings, ...values) {
 const WORK_START_HOUR = 5;   // 5:00 AM
 const WORK_END_HOUR = 21;    // 9:00 PM
 const MAX_DAILY_HOURS = 12;
-const ANNUAL_HOURS_GOAL = 2333;
 const MIN_SHIFT_LENGTH = 4;
 const MAX_SHIFT_LENGTH = 10;
 const DEFAULT_SHIFT_LENGTH = 8;
@@ -221,35 +220,6 @@ function getRestrictionMessage(restrictionType) {
         default:
             return 'Clock in/out is currently unavailable.';
     }
-}
-
-// Calculate total hours worked on a given date in the user's timezone
-async function getHoursWorkedOnDate(userId, date, timezone) {
-    // Get the start and end of the given date in the user's timezone
-    // date should be a Date object representing the day we want to check
-    const dayStart = getTimezoneDateTime(date, timezone, WORK_START_HOUR, 0);
-    const dayEnd = getTimezoneDateTime(date, timezone, WORK_END_HOUR, 0);
-
-    if (!dayStart || !dayEnd) return 0;
-
-    const result = await sql`
-        SELECT COALESCE(
-            SUM(
-                EXTRACT(EPOCH FROM (
-                    LEAST(end_time, ${dayEnd.toISOString()}) -
-                    GREATEST(start_time, ${dayStart.toISOString()})
-                )) / 3600
-            ),
-            0
-        ) as total_hours
-        FROM time_entries
-        WHERE user_id = ${userId}
-        AND end_time IS NOT NULL
-        AND start_time < ${dayEnd.toISOString()}
-        AND end_time > ${dayStart.toISOString()}
-    `;
-
-    return parseFloat(result.rows[0].total_hours);
 }
 
 // Get a specific time on a specific date in a timezone, returned as UTC Date
@@ -440,11 +410,9 @@ function isValidEmail(email) {
 
 module.exports = {
     sql,
-    pool,
     WORK_START_HOUR,
     WORK_END_HOUR,
     MAX_DAILY_HOURS,
-    ANNUAL_HOURS_GOAL,
     HIDDEN_USERS,
     MIN_SHIFT_LENGTH,
     MAX_SHIFT_LENGTH,
@@ -453,15 +421,12 @@ module.exports = {
     generateUniqueCuteId,
     isValidName,
     validateNameWithLLM,
-    getTimeInTimezone,
     checkTimeRestrictions,
     getRestrictionMessage,
-    getHoursWorkedOnDate,
     getTimezoneDateTime,
     get9pmCutoff,
     autoCloseStaleSession,
     autoCloseAllStaleSessions,
-    parseCookies,
     getCurrentUser,
     createSessionCookie,
     createLogoutCookie,
