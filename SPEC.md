@@ -455,11 +455,9 @@ Add `ANTHROPIC_API_KEY` in Vercel dashboard → Settings → Environment Variabl
 vercel dev
 ```
 
-### Step 7: Deploy
+### Deployment
 
-```bash
-vercel --prod
-```
+Production deploys automatically when changes are pushed to `main` on GitHub (via Vercel's Git integration). **Do not run `vercel --prod` manually** — it is not needed and may conflict with the automatic setup.
 
 ## License
 

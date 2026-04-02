@@ -4,8 +4,7 @@
   "description": "A hyper-opinionated punch clock app with Art Nouveau aesthetics",
   "private": true,
   "scripts": {
-    "dev": "vercel dev",
-    "deploy": "vercel --prod"
+    "dev": "vercel dev"
   },
   "dependencies": {
     "pg": "^8.11.3",
