@@ -51,10 +51,15 @@ async function handleGetUser(request, response) {
             `;
             const changesUsed = parseInt(changeCount.rows[0].count);
 
-            const linkResult = await sql`
-                SELECT link FROM users WHERE id = ${user.id}
-            `;
-            const userLink = linkResult.rows[0]?.link || '';
+            let userLink = '';
+            try {
+                const linkResult = await sql`
+                    SELECT link FROM users WHERE id = ${user.id}
+                `;
+                userLink = linkResult.rows[0]?.link || '';
+            } catch (e) {
+                // link column may not exist yet
+            }
 
             return sendJson(response, 200, {
                 user: {
