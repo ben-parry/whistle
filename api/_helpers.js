@@ -347,7 +347,7 @@ async function getCurrentUser(request) {
     }
 
     const result = await sql`
-        SELECT id, email, name, cute_id, shift_length, link, created_at
+        SELECT id, email, name, cute_id, shift_length, created_at
         FROM users
         WHERE session_token = ${sessionToken}
     `;

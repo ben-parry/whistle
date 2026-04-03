@@ -51,6 +51,11 @@ async function handleGetUser(request, response) {
             `;
             const changesUsed = parseInt(changeCount.rows[0].count);
 
+            const linkResult = await sql`
+                SELECT link FROM users WHERE id = ${user.id}
+            `;
+            const userLink = linkResult.rows[0]?.link || '';
+
             return sendJson(response, 200, {
                 user: {
                     id: user.id,
@@ -59,7 +64,7 @@ async function handleGetUser(request, response) {
                     cute_id: user.cute_id,
                     shift_length: user.shift_length,
                     shift_changes_remaining: MAX_SHIFT_CHANGES_PER_MONTH - changesUsed,
-                    link: user.link || ''
+                    link: userLink
                 }
             });
         } else {
