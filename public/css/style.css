@@ -817,6 +817,13 @@ a:hover {
     color: var(--color-text);
 }
 
+.shift-changes-info {
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    margin-top: var(--space-1);
+    opacity: 0.8;
+}
+
 .user-email {
     font-size: var(--text-lg);
     color: var(--color-text);
@@ -1480,9 +1487,21 @@ body.shift-complete .elapsed-time {
 }
 
 .link-empty {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--color-muted);
     font-style: italic;
+    opacity: 0.7;
+}
+
+.link-empty-clickable {
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: var(--color-border-light);
+    text-underline-offset: 3px;
+}
+
+.link-empty-clickable:hover {
+    opacity: 1;
 }
 
 .link-edit-form {
@@ -1500,6 +1519,12 @@ body.shift-complete .elapsed-time {
     border: 1px solid var(--color-border-light);
     background-color: var(--color-bg);
     color: var(--color-text);
+}
+
+.link-input::placeholder {
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    opacity: 0.6;
 }
 
 .link-save-btn {

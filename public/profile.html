@@ -57,17 +57,18 @@
                         <div class="profile-info">
                             <label>Shift Length</label>
                             <p id="user-shift-length">Loading...</p>
+                            <p id="shift-changes-info" class="shift-changes-info" hidden></p>
                         </div>
                         <div class="profile-info">
                             <label>Link</label>
                             <p class="profile-link-subtitle">Share a link to a personal website, social media, or just something you love</p>
                             <div id="link-display" class="link-display">
                                 <a id="user-link" href="" target="_blank" rel="noopener" hidden></a>
-                                <span id="user-link-empty" class="link-empty">No link set</span>
-                                <button id="link-edit-btn" class="shift-change-link">Edit</button>
+                                <span id="user-link-empty" class="link-empty link-empty-clickable">No link set</span>
+                                <button id="link-edit-btn" class="shift-change-link" hidden>Edit</button>
                             </div>
                             <div id="link-edit-form" class="link-edit-form" hidden>
-                                <input type="url" id="link-input" class="link-input" placeholder="">
+                                <input type="url" id="link-input" class="link-input" placeholder="https://example.com">
                                 <button id="link-save-btn" class="button button-green link-save-btn">Save</button>
                                 <button id="link-cancel-btn" class="shift-change-link">Cancel</button>
                             </div>

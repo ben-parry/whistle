@@ -63,6 +63,18 @@ document.addEventListener('DOMContentLoaded', function() {
             currentShiftLength = data.user.shift_length || 8;
             userShiftLength.textContent = currentShiftLength + ' hours';
 
+            // Display shift changes info
+            var shiftChangesInfo = document.getElementById('shift-changes-info');
+            var remaining = data.user.shift_changes_remaining;
+            if (remaining !== undefined) {
+                shiftChangesInfo.hidden = false;
+                if (remaining > 0) {
+                    shiftChangesInfo.textContent = remaining + ' change' + (remaining !== 1 ? 's' : '') + ' remaining this month';
+                } else {
+                    shiftChangesInfo.textContent = 'You can change your shift length at the start of next month';
+                }
+            }
+
             // Display link
             var linkVal = data.user.link || '';
             displayLink(linkVal);
@@ -90,9 +102,11 @@ document.addEventListener('DOMContentLoaded', function() {
             userLink.textContent = linkVal;
             userLink.hidden = false;
             userLinkEmpty.hidden = true;
+            linkEditBtn.hidden = false;
         } else {
             userLink.hidden = true;
             userLinkEmpty.hidden = false;
+            linkEditBtn.hidden = true;
         }
     }
 
@@ -102,9 +116,19 @@ document.addEventListener('DOMContentLoaded', function() {
         linkEditBtn.hidden = true;
     });
 
+    userLinkEmpty.addEventListener('click', function() {
+        linkInput.value = '';
+        linkEditForm.hidden = false;
+        userLinkEmpty.hidden = true;
+    });
+
     linkCancelBtn.addEventListener('click', function() {
         linkEditForm.hidden = true;
-        linkEditBtn.hidden = false;
+        if (userLink.hidden) {
+            userLinkEmpty.hidden = false;
+        } else {
+            linkEditBtn.hidden = false;
+        }
     });
 
     linkSaveBtn.addEventListener('click', async function() {

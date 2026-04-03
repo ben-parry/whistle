@@ -315,7 +315,7 @@ async function autoCloseAllStaleSessions() {
 }
 
 // Hidden users — these users are excluded from the public leaderboard
-const HIDDEN_USERS = ['ben@benparry.ca'];
+const HIDDEN_USERS = [];
 
 // ============================================
 // PARSE COOKIES FROM REQUEST
@@ -347,7 +347,7 @@ async function getCurrentUser(request) {
     }
 
     const result = await sql`
-        SELECT id, email, name, cute_id, shift_length, created_at
+        SELECT id, email, name, cute_id, shift_length, link, created_at
         FROM users
         WHERE session_token = ${sessionToken}
     `;
