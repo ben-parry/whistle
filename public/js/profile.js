@@ -100,23 +100,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
 
     function displayLink(linkVal) {
+        var subtitle = document.querySelector('.profile-link-subtitle');
         if (linkVal) {
             userLink.href = linkVal;
             userLink.textContent = linkVal;
             userLink.hidden = false;
             userLinkEmpty.hidden = true;
             linkEditBtn.hidden = false;
+            subtitle.hidden = true;
         } else {
             userLink.hidden = true;
             userLinkEmpty.hidden = false;
             linkEditBtn.hidden = true;
+            subtitle.hidden = false;
         }
     }
 
     linkEditBtn.addEventListener('click', function() {
-        linkInput.value = userLink.hidden ? '' : userLink.href;
+        linkInput.value = userLink.hidden ? '' : userLink.textContent;
         linkEditForm.hidden = false;
         linkEditBtn.hidden = true;
+        userLink.hidden = true;
     });
 
     userLinkEmpty.addEventListener('click', function() {
@@ -127,10 +131,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     linkCancelBtn.addEventListener('click', function() {
         linkEditForm.hidden = true;
-        if (userLink.hidden) {
-            userLinkEmpty.hidden = false;
-        } else {
+        if (userLink.textContent && userLink.href) {
+            userLink.hidden = false;
             linkEditBtn.hidden = false;
+        } else {
+            userLinkEmpty.hidden = false;
         }
     });
 
@@ -176,11 +181,13 @@ document.addEventListener('DOMContentLoaded', function() {
         shiftInput.value = currentShiftLength;
         shiftEditForm.hidden = false;
         this.hidden = true;
+        userShiftLength.hidden = true;
     });
 
     shiftCancelBtn.addEventListener('click', function() {
         shiftEditForm.hidden = true;
         document.getElementById('shift-edit-btn').hidden = false;
+        userShiftLength.hidden = false;
     });
 
     shiftSaveBtn.addEventListener('click', async function() {
@@ -204,6 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 currentShiftLength = data.shift_length;
                 userShiftLength.textContent = currentShiftLength + ' hours';
+                userShiftLength.hidden = false;
                 shiftEditForm.hidden = true;
                 document.getElementById('shift-edit-btn').hidden = false;
 
