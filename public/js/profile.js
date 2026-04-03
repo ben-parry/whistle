@@ -65,13 +65,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Display shift changes info
             var shiftChangesInfo = document.getElementById('shift-changes-info');
+            var shiftEditBtn = document.getElementById('shift-edit-btn');
             var remaining = data.user.shift_changes_remaining;
             if (remaining !== undefined) {
                 shiftChangesInfo.hidden = false;
                 if (remaining > 0) {
                     shiftChangesInfo.textContent = remaining + ' change' + (remaining !== 1 ? 's' : '') + ' remaining this month';
+                    shiftEditBtn.hidden = false;
                 } else {
                     shiftChangesInfo.textContent = 'You can change your shift length at the start of next month';
+                    shiftEditBtn.hidden = true;
                 }
             }
 
@@ -156,6 +159,70 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Something went wrong. Please try again.');
         } finally {
             linkSaveBtn.disabled = false;
+        }
+    });
+
+
+    // ============================================
+    // SHIFT LENGTH EDITING
+    // ============================================
+
+    var shiftEditForm = document.getElementById('shift-edit-form');
+    var shiftInput = document.getElementById('shift-input');
+    var shiftSaveBtn = document.getElementById('shift-save-btn');
+    var shiftCancelBtn = document.getElementById('shift-cancel-btn');
+
+    document.getElementById('shift-edit-btn').addEventListener('click', function() {
+        shiftInput.value = currentShiftLength;
+        shiftEditForm.hidden = false;
+        this.hidden = true;
+    });
+
+    shiftCancelBtn.addEventListener('click', function() {
+        shiftEditForm.hidden = true;
+        document.getElementById('shift-edit-btn').hidden = false;
+    });
+
+    shiftSaveBtn.addEventListener('click', async function() {
+        var newLength = parseInt(shiftInput.value, 10);
+        if (newLength === currentShiftLength) {
+            shiftEditForm.hidden = true;
+            document.getElementById('shift-edit-btn').hidden = false;
+            return;
+        }
+
+        shiftSaveBtn.disabled = true;
+        try {
+            var response = await fetch('/api/auth/me', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ shift_length: newLength })
+            });
+
+            var data = await response.json();
+
+            if (response.ok) {
+                currentShiftLength = data.shift_length;
+                userShiftLength.textContent = currentShiftLength + ' hours';
+                shiftEditForm.hidden = true;
+                document.getElementById('shift-edit-btn').hidden = false;
+
+                var info = document.getElementById('shift-changes-info');
+                if (data.changes_remaining > 0) {
+                    info.textContent = data.changes_remaining + ' change' + (data.changes_remaining !== 1 ? 's' : '') + ' remaining this month';
+                    document.getElementById('shift-edit-btn').hidden = false;
+                } else {
+                    info.textContent = 'You can change your shift length at the start of next month';
+                    document.getElementById('shift-edit-btn').hidden = true;
+                }
+            } else {
+                alert(data.error || 'Failed to update shift length.');
+            }
+        } catch (error) {
+            console.error('Shift length error:', error);
+            alert('Something went wrong. Please try again.');
+        } finally {
+            shiftSaveBtn.disabled = false;
         }
     });
 

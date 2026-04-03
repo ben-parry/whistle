@@ -56,7 +56,23 @@
                         </div>
                         <div class="profile-info">
                             <label>Shift Length</label>
-                            <p id="user-shift-length">Loading...</p>
+                            <div id="shift-display" class="link-display">
+                                <p id="user-shift-length">Loading...</p>
+                                <button id="shift-edit-btn" class="shift-change-link" hidden>Edit</button>
+                            </div>
+                            <div id="shift-edit-form" class="link-edit-form" hidden>
+                                <select id="shift-input" class="link-input">
+                                    <option value="4">4 hours</option>
+                                    <option value="5">5 hours</option>
+                                    <option value="6">6 hours</option>
+                                    <option value="7">7 hours</option>
+                                    <option value="8">8 hours</option>
+                                    <option value="9">9 hours</option>
+                                    <option value="10">10 hours</option>
+                                </select>
+                                <button id="shift-save-btn" class="button button-green link-save-btn">Save</button>
+                                <button id="shift-cancel-btn" class="shift-change-link">Cancel</button>
+                            </div>
                             <p id="shift-changes-info" class="shift-changes-info" hidden></p>
                         </div>
                         <div class="profile-info">
