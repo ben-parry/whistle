@@ -3,26 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Factory Floor - Whistle</title>
-
+    <title>Factory Floor — Whistle</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="container app-container">
+    <div class="app">
 
-        <header class="app-header">
-            <a href="/app.html" class="logo">Whistle</a>
-            <nav class="app-nav" id="nav-links">
-                <!-- Set by JavaScript based on auth status -->
-            </nav>
+        <header class="masthead">
+            <div class="masthead__date" id="masthead-date"></div>
+            <a href="/app.html" class="masthead__title">
+                Whistle.
+                <small>Est. 2026</small>
+            </a>
+            <div class="masthead__motto"></div>
         </header>
 
-        <section class="leaderboard-section">
-            <div class="leaderboard-header">
-                <h2 class="section-title">Factory Floor</h2>
+        <nav class="nav">
+            <div class="nav__items" id="nav-items">
+                <a href="/leaderboard.html" class="nav__item is-active"><span class="nav__num">02</span>Factory Floor</a>
+                <a href="/about.html" class="nav__item"><span class="nav__num">04</span>About</a>
+            </div>
+            <div class="nav__user" id="nav-user"></div>
+        </nav>
+
+        <section>
+            <div class="section-head">
+                <div class="section-head__left">
+                    <span class="section-head__num">№ 02</span>
+                    <h2>The Factory Floor</h2>
+                </div>
+                <div class="section-head__num" id="floor-date"></div>
             </div>
 
-            <!-- Sunday poem container (hidden unless Sunday) -->
             <div id="sunday-content" hidden>
                 <div class="sunday-poem">
                     <h3 class="poem-title" id="poem-title"></h3>
@@ -31,22 +43,21 @@
                 </div>
             </div>
 
-            <table class="leaderboard-table" id="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Today</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-body">
-                    <tr><td colspan="3" class="leaderboard-empty">Loading...</td></tr>
-                </tbody>
-            </table>
+            <div class="floor" id="floor-table">
+                <div class="floor__head">
+                    <div>Rank</div>
+                    <div>Worker</div>
+                    <div>Today</div>
+                    <div>State</div>
+                </div>
+                <div id="floor-body">
+                    <div class="floor__empty">Loading…</div>
+                </div>
+            </div>
         </section>
 
-        <footer class="app-footer">
-            <a href="/about.html"><img src="/pics/footer.png" alt="" class="footer-illustration"></a>
+        <footer class="footer">
+            <a href="/about.html"><img src="/pics/footer.png" alt="" class="footer__img"></a>
         </footer>
 
     </div>

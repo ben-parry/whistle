@@ -3,65 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - Whistle</title>
-
+    <title>Set Up — Whistle</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="container app-container container-wide">
+    <div class="app">
 
-        <header class="app-header">
-            <a href="/app.html" class="logo">Whistle</a>
-            <nav class="app-nav">
-                <a href="/leaderboard.html" class="nav-link">Factory Floor</a>
-                <a href="/about.html" class="nav-link">About</a>
-                <a href="/profile.html" class="nav-link">Profile</a>
-                <button id="logout-button" class="nav-link button-link">Sign Out</button>
-            </nav>
+        <header class="masthead">
+            <div class="masthead__date" id="masthead-date"></div>
+            <a href="/app.html" class="masthead__title">
+                Whistle.
+                <small>Est. 2026</small>
+            </a>
+            <div class="masthead__motto"></div>
         </header>
 
-        <div class="profile-layout">
+        <nav class="nav">
+            <div class="nav__items">
+                <a href="/app.html" class="nav__item"><span class="nav__num">01</span>Punch Clock</a>
+                <a href="/leaderboard.html" class="nav__item"><span class="nav__num">02</span>Factory Floor</a>
+                <a href="/profile.html" class="nav__item is-active"><span class="nav__num">03</span>Set Up</a>
+                <a href="/about.html" class="nav__item"><span class="nav__num">04</span>About</a>
+            </div>
+            <div class="nav__user">
+                <button id="logout-button" type="button">Sign Out</button>
+            </div>
+        </nav>
 
-            <nav class="profile-sidebar">
-                <div class="profile-sidebar-inner">
-                    <a href="#profile">Profile</a>
-                    <a href="#stats">Statistics</a>
-                    <a href="#sessions">Sessions</a>
-                    <a href="#password">Password</a>
-                    <a href="#export">Export</a>
-                    <a href="#danger">Danger Zone</a>
-                </div>
+        <div class="setup">
+
+            <nav class="setup__nav">
+                <span class="setup__nav-num">№ Sections</span>
+                <a href="#profile" class="setup__nav-link is-active" data-section="profile">Profile</a>
+                <a href="#stats" class="setup__nav-link" data-section="stats">Statistics</a>
+                <a href="#sessions" class="setup__nav-link" data-section="sessions">Sessions</a>
+                <a href="#password" class="setup__nav-link" data-section="password">Password</a>
+                <a href="#export" class="setup__nav-link" data-section="export">Export</a>
+                <a href="#danger" class="setup__nav-link" data-section="danger">Danger Zone</a>
             </nav>
 
-            <div class="profile-content">
+            <div>
 
-                <!-- PROFILE SECTION -->
-                <section id="profile" class="profile-section">
-                    <div class="profile-header-image-container">
-                        <img id="profile-header-img" class="profile-header-image" alt="Profile decoration">
+                <div class="setup__head">
+                    <div id="setup-avatar" class="setup__avatar"></div>
+                    <div>
+                        <div class="setup__name" id="user-name">Loading…</div>
+                        <div class="setup__email" id="user-email"></div>
+                        <div class="setup__id-badge" id="user-cute-id"></div>
                     </div>
-                    <h2 class="section-title">Your Profile</h2>
-                    <div class="card profile-card">
-                        <div class="profile-info">
-                            <label>Name</label>
-                            <p id="user-name">Loading...</p>
+                </div>
+
+                <!-- PROFILE -->
+                <section id="profile" class="setup__section">
+                    <div class="section-head">
+                        <div class="section-head__left">
+                            <span class="section-head__num">№ 01</span>
+                            <h2>Your Profile</h2>
                         </div>
-                        <div class="profile-info">
-                            <label>Email</label>
-                            <p id="user-email" class="user-email">Loading...</p>
-                        </div>
-                        <div class="profile-info">
-                            <label>Your ID</label>
-                            <p id="user-cute-id" class="cute-id">Loading...</p>
-                        </div>
-                        <div class="profile-info">
-                            <label>Shift Length</label>
-                            <div id="shift-display" class="link-display">
-                                <p id="user-shift-length">Loading...</p>
-                                <button id="shift-edit-btn" class="shift-change-link" hidden>Edit</button>
+                        <div class="section-head__num">Personal details</div>
+                    </div>
+                    <div class="grid-2">
+                        <div>
+                            <div class="kv__label">Shift Length</div>
+                            <div id="shift-display" class="kv__row">
+                                <span class="kv__value" id="user-shift-length">—</span>
+                                <button id="shift-edit-btn" class="btn btn--ghost btn--sm" hidden type="button">Edit</button>
                             </div>
-                            <div id="shift-edit-form" class="link-edit-form" hidden>
-                                <select id="shift-input" class="link-input">
+                            <div id="shift-edit-form" class="kv__row kv__row--editing" hidden>
+                                <select id="shift-input" class="field__select" style="flex:1;">
                                     <option value="4">4 hours</option>
                                     <option value="5">5 hours</option>
                                     <option value="6">6 hours</option>
@@ -70,168 +79,193 @@
                                     <option value="9">9 hours</option>
                                     <option value="10">10 hours</option>
                                 </select>
-                                <button id="shift-save-btn" class="button button-green link-save-btn">Save</button>
-                                <button id="shift-cancel-btn" class="shift-change-link">Cancel</button>
+                                <button id="shift-save-btn" class="btn btn--green btn--sm" type="button">Save</button>
+                                <button id="shift-cancel-btn" class="btn btn--ghost btn--sm" type="button">Cancel</button>
                             </div>
-                            <p id="shift-changes-info" class="shift-changes-info" hidden></p>
+                            <div id="shift-changes-info" class="kv__sub" hidden></div>
                         </div>
-                        <div class="profile-info">
-                            <label>Link</label>
-                            <p class="profile-link-subtitle">Share a link to a personal website, social media, or just something you love</p>
-                            <div id="link-display" class="link-display">
-                                <a id="user-link" href="" target="_blank" rel="noopener" hidden></a>
-                                <span id="user-link-empty" class="link-empty link-empty-clickable">No link set</span>
-                                <button id="link-edit-btn" class="shift-change-link" hidden>Edit</button>
+                        <div>
+                            <div class="kv__label">Link</div>
+                            <div id="link-display" class="kv__row">
+                                <a id="user-link" class="kv__value" href="" target="_blank" rel="noopener" hidden></a>
+                                <span id="user-link-empty" class="kv__value" style="color:var(--muted); font-style:italic; cursor:pointer;">No link set</span>
+                                <button id="link-edit-btn" class="btn btn--ghost btn--sm" hidden type="button">Edit</button>
                             </div>
-                            <div id="link-edit-form" class="link-edit-form" hidden>
-                                <input type="url" id="link-input" class="link-input" placeholder="https://example.com">
-                                <button id="link-save-btn" class="button button-green link-save-btn">Save</button>
-                                <button id="link-cancel-btn" class="shift-change-link">Cancel</button>
+                            <div id="link-edit-form" class="kv__row kv__row--editing" hidden>
+                                <input type="url" id="link-input" class="field__input" style="flex:1;" placeholder="https://example.com">
+                                <button id="link-save-btn" class="btn btn--green btn--sm" type="button">Save</button>
+                                <button id="link-cancel-btn" class="btn btn--ghost btn--sm" type="button">Cancel</button>
                             </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- STATISTICS SECTION -->
-                <section id="stats" class="profile-section">
-                    <div id="stats-sentence" class="stats-sentence">
-                        <div id="stats-text">Loading your statistics...</div>
-                        <div class="heatmap-section profile-heatmap" style="margin-top: 20px; margin-bottom: 0;">
-                            <div class="heatmap-months" id="profile-heatmap-months"></div>
-                            <div class="heatmap-container">
-                                <div class="heatmap-days">
-                                    <span></span><span>Mon</span><span></span><span>Wed</span>
-                                    <span></span><span>Fri</span><span></span>
-                                </div>
-                                <div id="profile-heatmap-grid" class="heatmap-grid"></div>
-                            </div>
-                            <div class="heatmap-legend">
-                                <span class="legend-label">Less</span>
-                                <span class="legend-box level-0"></span>
-                                <span class="legend-box level-1"></span>
-                                <span class="legend-box level-2"></span>
-                                <span class="legend-box level-3"></span>
-                                <span class="legend-box level-4"></span>
-                                <span class="legend-label">More</span>
-                            </div>
-                            <div id="heatmap-hover-text" class="heatmap-hover-text">&nbsp;</div>
+                            <div class="kv__sub">Shown on the Factory Floor</div>
                         </div>
                     </div>
                 </section>
 
-                <!-- SESSION HISTORY SECTION -->
-                <section id="sessions" class="sessions-section">
-                    <h2 class="section-title">Session History</h2>
-                    <div class="card sessions-card">
-                        <div id="edits-info" class="edits-warning" hidden></div>
-                        <div id="sessions-list" class="sessions-list">
-                            Loading sessions...
+                <!-- STATISTICS -->
+                <section id="stats" class="setup__section">
+                    <div class="section-head">
+                        <div class="section-head__left">
+                            <span class="section-head__num">№ 02</span>
+                            <h2>Statistics</h2>
+                        </div>
+                        <div class="section-head__num" id="stats-year"></div>
+                    </div>
+                    <div class="panel" style="margin-bottom:24px;">
+                        <p id="stats-text" class="stats-prose">Loading your statistics…</p>
+                    </div>
+                    <div class="heatmap__panel">
+                        <div class="heatmap__row">
+                            <div class="heatmap__days">
+                                <span></span><span>M</span><span></span><span>W</span>
+                                <span></span><span>F</span><span></span>
+                            </div>
+                            <div class="heatmap__scroll">
+                                <div id="profile-heatmap-months" class="heatmap__months"></div>
+                                <div id="profile-heatmap-grid" class="heatmap__grid"></div>
+                            </div>
+                        </div>
+                        <div class="heatmap__legend">
+                            <span>Less</span>
+                            <span class="heatmap__legend-box heatmap__cell--lvl0"></span>
+                            <span class="heatmap__legend-box heatmap__cell--lvl1"></span>
+                            <span class="heatmap__legend-box heatmap__cell--lvl2"></span>
+                            <span class="heatmap__legend-box heatmap__cell--lvl3"></span>
+                            <span class="heatmap__legend-box heatmap__cell--lvl4"></span>
+                            <span>More</span>
+                        </div>
+                        <div id="profile-heatmap-hover" class="heatmap__hover">&nbsp;</div>
+                    </div>
+                </section>
+
+                <!-- SESSIONS -->
+                <section id="sessions" class="setup__section">
+                    <div class="section-head">
+                        <div class="section-head__left">
+                            <span class="section-head__num">№ 03</span>
+                            <h2>Session History</h2>
+                        </div>
+                        <div class="section-head__num" id="sessions-count"></div>
+                    </div>
+                    <div id="edits-info" class="edits-warning" hidden></div>
+                    <div class="sessions-table">
+                        <div class="session-row session-row--head">
+                            <div>Date</div>
+                            <div>In · Out</div>
+                            <div style="text-align:right;">Duration</div>
+                            <div style="text-align:center;">Met</div>
+                            <div></div>
+                        </div>
+                        <div id="sessions-list">
+                            <div class="sessions-empty">Loading sessions…</div>
                         </div>
                     </div>
                 </section>
 
-                <!-- CHANGE PASSWORD SECTION -->
-                <section id="password" class="password-section">
-                    <h2 class="section-title">Change Password</h2>
-                    <div class="card password-card">
+                <!-- PASSWORD -->
+                <section id="password" class="setup__section">
+                    <div class="section-head">
+                        <div class="section-head__left">
+                            <span class="section-head__num">№ 04</span>
+                            <h2>Change Password</h2>
+                        </div>
+                    </div>
+                    <div class="panel">
                         <div id="password-message" hidden></div>
                         <form id="password-form">
-                            <div class="form-group">
-                                <label for="current-password">Current Password</label>
-                                <input type="password" id="current-password" required
+                            <div class="field">
+                                <label class="field__label" for="current-password">Current Password</label>
+                                <input class="field__input" type="password" id="current-password" required
                                        placeholder="Your current password">
                             </div>
-                            <div class="form-group">
-                                <label for="new-password">New Password</label>
-                                <input type="password" id="new-password" required minlength="8"
+                            <div class="field">
+                                <label class="field__label" for="new-password">New Password</label>
+                                <input class="field__input" type="password" id="new-password" required minlength="8"
                                        placeholder="At least 8 characters">
                             </div>
-                            <div class="form-group">
-                                <label for="confirm-new-password">Confirm New Password</label>
-                                <input type="password" id="confirm-new-password" required minlength="8"
+                            <div class="field">
+                                <label class="field__label" for="confirm-new-password">Confirm New Password</label>
+                                <input class="field__input" type="password" id="confirm-new-password" required minlength="8"
                                        placeholder="Type new password again">
                             </div>
-                            <button type="submit" class="button button-green">Change Password</button>
+                            <button type="submit" class="btn btn--green">Change Password</button>
                         </form>
                     </div>
                 </section>
 
-                <!-- EXPORT SECTION -->
-                <section id="export" class="export-section">
-                    <h2 class="section-title">Export Data</h2>
-                    <div class="card export-card">
-                        <p class="export-description">
-                            Download all your time entries as a CSV file.
-                            This includes every session from all years.
-                        </p>
-                        <button id="export-button" class="button button-green">
-                            Export to CSV
-                        </button>
+                <!-- EXPORT -->
+                <section id="export" class="setup__section">
+                    <div class="section-head">
+                        <div class="section-head__left">
+                            <span class="section-head__num">№ 05</span>
+                            <h2>Export Data</h2>
+                        </div>
+                    </div>
+                    <div class="panel export__row">
+                        <div>
+                            <div class="export__title">Download your ledger</div>
+                            <div class="export__sub">Every session from every year, in CSV.</div>
+                        </div>
+                        <button id="export-button" class="btn" type="button">Export CSV</button>
                     </div>
                 </section>
 
-                <!-- DANGER ZONE -->
-                <section id="danger" class="danger-section">
-                    <h2 class="section-title danger-title">Danger Zone</h2>
-                    <div class="card danger-card">
-                        <p class="danger-description">
-                            Permanently delete your account and all your data.
-                            This action cannot be undone.
-                        </p>
-                        <button id="delete-button" class="button button-danger">
-                            Delete Account
-                        </button>
+                <!-- DANGER -->
+                <section id="danger" class="setup__section">
+                    <div class="section-head">
+                        <div class="section-head__left">
+                            <span class="section-head__num">№ 06</span>
+                            <h2>Danger Zone</h2>
+                        </div>
+                        <div class="section-head__num">Permanent actions</div>
+                    </div>
+                    <div class="danger danger__row">
+                        <div>
+                            <div class="danger__title">Delete account</div>
+                            <div class="danger__sub">Permanently delete your account and all your data. This cannot be undone.</div>
+                        </div>
+                        <button id="delete-button" class="btn btn--accent" type="button">Delete Account</button>
                     </div>
                 </section>
 
-            </div><!-- /profile-content -->
-
-        </div><!-- /profile-layout -->
+            </div>
+        </div>
 
         <!-- DELETE ACCOUNT MODAL -->
         <div id="delete-modal" class="modal" hidden>
-            <div class="modal-content">
-                <h3 class="modal-title">Delete Account?</h3>
-                <div class="modal-warning">
-                    This is permanent. All your time entries will be lost forever.
+            <div class="modal__content">
+                <h3 class="modal__title">Delete Account?</h3>
+                <div class="modal__warning">This is permanent. All your time entries will be lost forever.</div>
+                <div class="modal__option">
+                    <p class="modal__text">Before deleting, you can download your data. This is your last chance.</p>
+                    <button id="modal-export-button" class="btn btn--ghost" type="button">Download CSV First</button>
                 </div>
-                <div class="modal-csv-option">
-                    <p class="modal-text">
-                        Before deleting, you can download your data. This is your last chance.
-                    </p>
-                    <button id="modal-export-button" class="button button-secondary">
-                        Download CSV First
-                    </button>
-                </div>
-                <p class="modal-text">
-                    Are you sure you want to permanently delete your account?
-                </p>
-                <div class="modal-buttons">
-                    <button id="cancel-delete" class="button button-secondary">Cancel</button>
-                    <button id="confirm-delete" class="button button-danger">Yes, Delete My Account</button>
+                <p class="modal__text">Are you sure you want to permanently delete your account?</p>
+                <div class="modal__buttons">
+                    <button id="cancel-delete" class="btn btn--ghost" type="button">Cancel</button>
+                    <button id="confirm-delete" class="btn btn--accent" type="button">Yes, Delete My Account</button>
                 </div>
             </div>
         </div>
 
         <!-- EDIT SESSION MODAL -->
         <div id="edit-modal" class="modal" hidden>
-            <div class="modal-content">
-                <h3 class="modal-title" style="color: #36332E;">EDIT SESSION</h3>
+            <div class="modal__content">
+                <h3 class="modal__title">Edit Session</h3>
                 <div id="edit-warning" class="edits-warning"></div>
                 <div id="edit-error" class="error-message" hidden></div>
-                <form id="edit-form" class="edit-form">
+                <form id="edit-form">
                     <input type="hidden" id="edit-entry-id">
-                    <div class="form-group">
-                        <label for="edit-start-time">Start Time</label>
-                        <input type="datetime-local" id="edit-start-time" required>
+                    <div class="field">
+                        <label class="field__label" for="edit-start-time">Start Time</label>
+                        <input class="field__input" type="datetime-local" id="edit-start-time" required>
                     </div>
-                    <div class="form-group">
-                        <label for="edit-end-time">End Time</label>
-                        <input type="datetime-local" id="edit-end-time" required>
+                    <div class="field">
+                        <label class="field__label" for="edit-end-time">End Time</label>
+                        <input class="field__input" type="datetime-local" id="edit-end-time" required>
                     </div>
-                    <div class="modal-buttons">
-                        <button type="button" id="cancel-edit" class="button button-secondary">Cancel</button>
-                        <button type="submit" class="button button-primary">Save Changes</button>
+                    <div class="modal__buttons">
+                        <button type="button" id="cancel-edit" class="btn btn--ghost">Cancel</button>
+                        <button type="submit" class="btn btn--green">Save Changes</button>
                     </div>
                 </form>
             </div>
@@ -239,23 +273,23 @@
 
         <!-- DELETE SESSION MODAL -->
         <div id="delete-session-modal" class="modal" hidden>
-            <div class="modal-content">
-                <p class="modal-text">
-                    This will permanently remove this time entry and reduce your total hours. Are you sure you want to delete this session?
-                </p>
-                <div class="modal-buttons">
-                    <button id="cancel-delete-session" class="button button-secondary">Cancel</button>
-                    <button id="confirm-delete-session" class="button button-danger">Yes, Delete</button>
+            <div class="modal__content">
+                <h3 class="modal__title">Delete Session?</h3>
+                <p class="modal__text">This will permanently remove this time entry and reduce your total hours.</p>
+                <div class="modal__buttons">
+                    <button id="cancel-delete-session" class="btn btn--ghost" type="button">Cancel</button>
+                    <button id="confirm-delete-session" class="btn btn--accent" type="button">Yes, Delete</button>
                 </div>
             </div>
         </div>
 
-        <footer class="app-footer">
-            <a href="/about.html"><img src="/pics/footer.png" alt="" class="footer-illustration"></a>
+        <footer class="footer">
+            <a href="/about.html"><img src="/pics/footer.png" alt="" class="footer__img"></a>
         </footer>
 
     </div>
 
+    <script src="/js/heatmap.js"></script>
     <script src="/js/profile.js"></script>
 </body>
 </html>

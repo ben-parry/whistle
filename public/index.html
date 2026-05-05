@@ -3,68 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Whistle - Punch Clock</title>
-
+    <title>Whistle</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="container auth-container">
+    <div class="auth">
 
-        <header class="auth-header">
-            <h1 class="logo">Whistle</h1>
-            <p class="tagline">Your Personal Punch Clock</p>
-        </header>
+        <div class="auth__hero">
+            <div>
+                <div class="auth__masthead-num">№ 00 · Vol. I · Established MMXXIV</div>
+                <h1 class="auth__title">Whistle.</h1>
+                <p class="auth__tagline">
+                    An opinionated punch clock for people who believe work has its hours, and rest has its own.
+                </p>
+            </div>
+            <div>
+                <div class="auth__rules">
+                    <div>
+                        <div class="auth__rule-label">Hours</div>
+                        <div class="auth__rule-value">5:00 → 21:00</div>
+                    </div>
+                    <div>
+                        <div class="auth__rule-label">Maximum</div>
+                        <div class="auth__rule-value">12h per day</div>
+                    </div>
+                    <div>
+                        <div class="auth__rule-label">Sundays</div>
+                        <div class="auth__rule-value">Forbidden</div>
+                    </div>
+                    <div>
+                        <div class="auth__rule-label">Sessions</div>
+                        <div class="auth__rule-value">One in, one out</div>
+                    </div>
+                </div>
+                <div class="auth__motto">※ Honest hours · Honest rest ※</div>
+            </div>
+            <img src="/pics/profile-headers/mucha-3.png" alt="" class="auth__decor">
+        </div>
 
-        <div class="card auth-card">
+        <div class="auth__form-side">
+            <div class="auth__masthead-num auth__office-tag">The Office</div>
+            <h2 id="auth-form-title" class="auth__form-title">Return to your post</h2>
+            <p id="auth-form-sub" class="auth__form-sub">The whistle blows soon. Sign in to clock the day.</p>
 
-            <div class="auth-tabs">
-                <button id="login-tab" class="tab-button active" type="button">
-                    Sign In
-                </button>
-                <button id="register-tab" class="tab-button" type="button">
-                    Create Account
-                </button>
+            <div class="auth__tabs">
+                <button id="login-tab" class="auth__tab is-active" type="button">Sign In</button>
+                <button id="register-tab" class="auth__tab" type="button">Create Account</button>
             </div>
 
             <div id="error-message" class="error-message" hidden></div>
             <div id="success-message" class="success-message" hidden></div>
 
-            <!-- LOGIN FORM -->
-            <form id="login-form" class="auth-form">
-                <div class="form-group">
-                    <label for="login-email">Email</label>
-                    <input type="email" id="login-email" name="email" required
+            <form id="login-form">
+                <div class="field">
+                    <label class="field__label" for="login-email">Email</label>
+                    <input class="field__input" type="email" id="login-email" name="email" required
                            autocomplete="email" placeholder="you@example.com">
                 </div>
-                <div class="form-group">
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" name="password" required
+                <div class="field">
+                    <label class="field__label" for="login-password">Password</label>
+                    <input class="field__input" type="password" id="login-password" name="password" required
                            autocomplete="current-password" placeholder="Your password">
                 </div>
-                <button type="submit" class="button button-primary">Sign In</button>
+                <button type="submit" class="btn btn--accent" style="width:100%;padding:14px;margin-top:8px;">Sign In to Whistle</button>
             </form>
 
-            <!-- REGISTER FORM -->
-            <form id="register-form" class="auth-form" hidden>
-                <div class="form-group">
-                    <label for="register-name">Full Name</label>
-                    <input type="text" id="register-name" name="name" required
+            <form id="register-form" hidden>
+                <div class="field">
+                    <label class="field__label" for="register-name">Full Name</label>
+                    <input class="field__input" type="text" id="register-name" name="name" required
                            autocomplete="name" placeholder="Your real name">
                 </div>
-                <div class="form-group">
-                    <label for="register-email">Email</label>
-                    <input type="email" id="register-email" name="email" required
+                <div class="field">
+                    <label class="field__label" for="register-email">Email</label>
+                    <input class="field__input" type="email" id="register-email" name="email" required
                            autocomplete="email" placeholder="you@example.com">
                 </div>
-                <div class="form-group">
-                    <label for="register-password">Password</label>
-                    <input type="password" id="register-password" name="password" required
+                <div class="field">
+                    <label class="field__label" for="register-password">Password</label>
+                    <input class="field__input" type="password" id="register-password" name="password" required
                            autocomplete="new-password" minlength="8"
                            placeholder="At least 8 characters">
                 </div>
-                <div class="form-group">
-                    <label for="register-shift-length">Shift Length</label>
-                    <select id="register-shift-length" name="shift_length">
+                <div class="field">
+                    <label class="field__label" for="register-shift-length">Shift Length</label>
+                    <select class="field__select" id="register-shift-length" name="shift_length">
                         <option value="4">4 hours</option>
                         <option value="5">5 hours</option>
                         <option value="6">6 hours</option>
@@ -74,22 +97,20 @@
                         <option value="10">10 hours</option>
                     </select>
                 </div>
-                <button type="submit" class="button button-primary">Create Account</button>
+                <button type="submit" class="btn btn--accent" style="width:100%;padding:14px;margin-top:8px;">Open Ledger</button>
             </form>
 
-            <p class="forgot-password">
-                Forgot your password? Contact <a href="mailto:ben@benparry.ca">ben@benparry.ca</a>
+            <p class="auth__alt">
+                <span id="auth-alt-text">Forgot your password?</span>
+                <a id="auth-alt-link" href="mailto:ben@benparry.ca">Contact ben@benparry.ca</a>
             </p>
 
-            <p class="about-link" style="text-align: center; margin-top: 16px; font-size: 14px;">
-                <a href="/about.html">About Whistle</a>
-            </p>
+            <p class="auth__alt"><a href="/about.html">About Whistle</a></p>
 
+            <div class="auth__footer">
+                <a href="/about.html"><img src="/pics/footer.png" alt=""></a>
+            </div>
         </div>
-
-        <footer class="auth-footer">
-            <a href="/about.html"><img src="/pics/footer.png" alt="" class="footer-illustration"></a>
-        </footer>
 
     </div>
 

@@ -26,22 +26,44 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Tab switching
-    loginTab.addEventListener('click', function() {
+    const formTitle = document.getElementById('auth-form-title');
+    const formSub = document.getElementById('auth-form-sub');
+    const altText = document.getElementById('auth-alt-text');
+    const altLink = document.getElementById('auth-alt-link');
+
+    function showSignIn() {
         loginForm.hidden = false;
         registerForm.hidden = true;
-        loginTab.classList.add('active');
-        registerTab.classList.remove('active');
+        loginTab.classList.add('is-active');
+        registerTab.classList.remove('is-active');
+        if (formTitle) formTitle.textContent = 'Return to your post';
+        if (formSub) formSub.textContent = 'The whistle blows soon. Sign in to clock the day.';
+        if (altText) altText.textContent = 'Forgot your password? ';
+        if (altLink) {
+            altLink.textContent = 'Contact ben@benparry.ca';
+            altLink.href = 'mailto:ben@benparry.ca';
+        }
         hideMessages();
-    });
+    }
 
-    registerTab.addEventListener('click', function() {
+    function showRegister() {
         loginForm.hidden = true;
         registerForm.hidden = false;
-        loginTab.classList.remove('active');
-        registerTab.classList.add('active');
+        loginTab.classList.remove('is-active');
+        registerTab.classList.add('is-active');
+        if (formTitle) formTitle.textContent = 'Open your ledger';
+        if (formSub) formSub.textContent = 'Tell us your name and the kind of day you keep.';
+        if (altText) altText.textContent = 'Already keep a ledger? ';
+        if (altLink) {
+            altLink.textContent = 'Sign in instead';
+            altLink.href = '#';
+            altLink.onclick = function(e) { e.preventDefault(); showSignIn(); };
+        }
         hideMessages();
-    });
+    }
+
+    loginTab.addEventListener('click', showSignIn);
+    registerTab.addEventListener('click', showRegister);
 
     // Login
     loginForm.addEventListener('submit', async function(event) {

@@ -3,67 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Whistle - Punch Clock</title>
-
+    <title>Whistle — Punch Clock</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="container app-container">
+    <div class="app">
 
-        <header class="app-header">
-            <a href="/app.html" class="logo">Whistle</a>
-            <nav class="app-nav">
-                <a href="/leaderboard.html" class="nav-link">Factory Floor</a>
-                <a href="/about.html" class="nav-link">About</a>
-                <a href="/profile.html" class="nav-link">Profile</a>
-                <button id="logout-button" class="nav-link button-link">Sign Out</button>
-            </nav>
+        <header class="masthead">
+            <div class="masthead__date" id="masthead-date"></div>
+            <a href="/app.html" class="masthead__title">
+                Whistle.
+                <small>Est. 2026</small>
+            </a>
+            <div class="masthead__motto"></div>
         </header>
 
-        <!-- PUNCH CLOCK SECTION -->
-        <section class="punch-section">
-            <div id="status-display" class="status-display">
-                <p id="status-text" class="status-text">Loading...</p>
-                <p id="elapsed-time" class="elapsed-time" hidden>00:00:00</p>
-            <div id="shift-progress-wrapper" class="shift-progress-wrapper" hidden>
-                <div class="shift-progress-container">
-                    <div class="shift-progress-bar" id="shift-progress-bar"></div>
+        <nav class="nav">
+            <div class="nav__items">
+                <a href="/app.html" class="nav__item is-active"><span class="nav__num">01</span>Punch Clock</a>
+                <a href="/leaderboard.html" class="nav__item"><span class="nav__num">02</span>Factory Floor</a>
+                <a href="/profile.html" class="nav__item"><span class="nav__num">03</span>Set Up</a>
+                <a href="/about.html" class="nav__item"><span class="nav__num">04</span>About</a>
+            </div>
+            <div class="nav__user">
+                <button id="logout-button" type="button">Sign Out</button>
+            </div>
+        </nav>
+
+        <!-- PUNCH CLOCK -->
+        <section id="punch-section" class="punch" data-state="loading">
+            <div class="punch__display">
+                <div>
+                    <div class="punch__heading">
+                        <div>
+                            <div class="punch__day" id="punch-day">&nbsp;</div>
+                            <div class="punch__date punch__sub-date" id="punch-date">&nbsp;</div>
+                        </div>
+                        <div class="punch__date punch__date--right">
+                            NEXT SHIFT<br>
+                            <span id="punch-shift-num">№ —</span>
+                        </div>
+                    </div>
+
+                    <div id="punch-status" class="punch__status">
+                        <span class="dot"></span>
+                        <span id="punch-status-text">Loading</span>
+                    </div>
+
+                    <div id="punch-elapsed-ready" class="punch__elapsed-ready">— : —</div>
+                    <div id="punch-elapsed" class="punch__elapsed" hidden>00:00:00</div>
+                    <div id="punch-blocked-msg" class="punch__blocked-msg" hidden></div>
                 </div>
-                <span id="shift-progress-label" class="shift-progress-label-inline"></span>
+
+                <div>
+                    <div class="punch__times">
+                        <div class="punch__time">
+                            <span class="punch__time-label">Clocked In</span>
+                            <span id="punch-in-time" class="punch__time-value punch__time-value--empty">— : —</span>
+                        </div>
+                        <div class="punch__time">
+                            <span class="punch__time-label">Clocked Out</span>
+                            <span id="punch-out-time" class="punch__time-value punch__time-value--empty">— : —</span>
+                        </div>
+                    </div>
+
+                    <div class="punch__shift-progress">
+                        <div class="punch__shift-bar">
+                            <div id="shift-bar-fill" class="punch__shift-bar-fill"></div>
+                            <div id="shift-ticks" class="punch__shift-ticks"></div>
+                        </div>
+                        <div class="punch__shift-meta">
+                            <span>0h</span>
+                            <span class="punch__shift-meta-right">
+                                <span id="shift-target-text">Target 8h</span>
+                                <a href="/profile.html#profile" class="punch__info-btn" title="Change shift length in Set Up">i</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <div class="punch__machine">
+                <button id="punch-button" class="punch-btn" type="button" disabled data-label="Loading">
+                    <span class="punch-btn__corner" id="punch-corner-day">№ —</span>
+                    <span id="punch-button-text">Loading</span>
+                    <span class="punch-btn__corner punch-btn__corner--br" id="punch-corner-year"></span>
+                </button>
             </div>
-            <button id="punch-button" class="punch-button" hidden disabled>
-                <span id="punch-button-text">Loading...</span>
-            </button>
-            <div id="punch-timestamps" class="punch-timestamps" hidden></div>
-            <p id="shift-complete-text" class="shift-complete-text" hidden>Shift complete!</p>
-            <p id="punch-completed" class="punch-completed-message" hidden></p>
         </section>
 
-        <!-- YEAR TOTAL SECTION -->
-        <section class="stats-section">
-            <div class="stat-card">
-                <p class="stat-label">Hours worked in <span id="current-year">2026</span></p>
-                <p id="year-total" class="stat-value">0</p>
-                <div class="progress-wrapper">
-                    <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
-                    <a href="/about.html" class="info-icon" title="About Whistle">&#9432;</a>
+        <!-- SUNDAY (replaces punch-section on Sundays) -->
+        <section id="sunday-content" class="sunday" hidden>
+            <div class="sunday__quote">&ldquo;It is Sunday, let us seize the means of relaxation.&rdquo;</div>
+            <a href="https://lavitalenta.substack.com/" target="_blank" rel="noopener" class="sunday__link">lavitalenta.substack.com</a>
+            <img src="/pics/sunday.png" alt="" class="sunday__img">
+        </section>
+
+        <!-- YEAR PROGRESS -->
+        <section>
+            <div class="section-head">
+                <div class="section-head__left">
+                    <span class="section-head__num">№ 02</span>
+                    <h2>The Year</h2>
+                </div>
+                <div class="section-head__num">Goal: 2,333 hrs</div>
+            </div>
+            <div class="year">
+                <div class="year__top">
+                    <div>
+                        <div class="year__label">Hours worked, <span id="current-year">2026</span></div>
+                        <div class="year__hours">
+                            <span id="year-total">0</span><small>of 2,333</small>
+                        </div>
+                    </div>
+                    <div class="year__pace-cell">
+                        <div class="year__label">Pace</div>
+                        <div id="year-pace" class="year__pace">—</div>
+                    </div>
+                    <div class="year__right">
+                        <div id="year-pct" class="year__pct">0%</div>
+                        <div id="year-caption" class="year__caption">2,333 hrs to whistle</div>
+                    </div>
+                </div>
+                <div class="year__bar-wrap">
+                    <div id="progress-bar" class="year__bar-fill"></div>
+                </div>
+                <div class="year__bar-marks">
+                    <span>JAN</span><span>APR</span><span>JUL</span><span>OCT</span><span>DEC</span>
                 </div>
             </div>
         </section>
 
-        <section id="sunday-content" class="sunday-section" hidden>
-            <p class="sunday-quote">&ldquo;It is Sunday, let us seize the means of relaxation.&rdquo;</p>
-            <a href="https://lavitalenta.substack.com/" target="_blank" rel="noopener" class="sunday-link">lavitalenta.substack.com</a>
-            <img src="/pics/sunday.png" alt="Sunday" class="sunday-image">
+        <!-- HEATMAP -->
+        <section class="heatmap">
+            <div class="section-head">
+                <div class="section-head__left">
+                    <span class="section-head__num">№ 03</span>
+                    <h2>The Calendar</h2>
+                </div>
+            </div>
+            <div class="heatmap__panel">
+                <div class="heatmap__row">
+                    <div class="heatmap__days">
+                        <span></span><span>M</span><span></span><span>W</span>
+                        <span></span><span>F</span><span></span>
+                    </div>
+                    <div class="heatmap__scroll">
+                        <div id="app-heatmap-months" class="heatmap__months"></div>
+                        <div id="app-heatmap-grid" class="heatmap__grid"></div>
+                    </div>
+                </div>
+                <div class="heatmap__legend">
+                    <span>Less</span>
+                    <span class="heatmap__legend-box heatmap__cell--lvl0"></span>
+                    <span class="heatmap__legend-box heatmap__cell--lvl1"></span>
+                    <span class="heatmap__legend-box heatmap__cell--lvl2"></span>
+                    <span class="heatmap__legend-box heatmap__cell--lvl3"></span>
+                    <span class="heatmap__legend-box heatmap__cell--lvl4"></span>
+                    <span>More</span>
+                </div>
+                <div id="app-heatmap-hover" class="heatmap__hover">&nbsp;</div>
+            </div>
         </section>
 
-        <footer class="app-footer">
-            <a href="/about.html"><img src="/pics/footer.png" alt="" class="footer-illustration"></a>
+        <footer class="footer">
+            <a href="/about.html"><img src="/pics/footer.png" alt="" class="footer__img"></a>
         </footer>
 
     </div>
 
+    <script src="/js/heatmap.js"></script>
     <script src="/js/app.js"></script>
 </body>
 </html>

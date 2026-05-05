@@ -3,32 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About - Whistle</title>
+    <title>About — Whistle</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="container app-container">
+    <div class="app">
 
-        <header class="app-header">
-            <a href="/app.html" class="logo">Whistle</a>
-            <nav class="app-nav" id="nav-links"></nav>
+        <header class="masthead">
+            <div class="masthead__date" id="masthead-date"></div>
+            <a href="/app.html" class="masthead__title">
+                Whistle.
+                <small>Est. 2026</small>
+            </a>
+            <div class="masthead__motto"></div>
         </header>
 
-        <section class="about-section">
-            <h2 class="section-title">About Whistle</h2>
-            <div class="card about-card">
-                <div class="about-content" id="about-content">Loading...</div>
-            </div>
-        </section>
+        <nav class="nav">
+            <div class="nav__items" id="nav-items"></div>
+            <div class="nav__user" id="nav-user"></div>
+        </nav>
 
-        <footer class="app-footer">
-            <a href="/about.html"><img src="/pics/footer.png" alt="" class="footer-illustration"></a>
+        <div class="about-hero">
+            <div class="about-hero__num">№ 00</div>
+            <h1 class="about-hero__title">About Whistle.</h1>
+            <p class="about-hero__lead">
+                An opinionated punch clock for people who believe work has its hours, and rest has its own.
+            </p>
+        </div>
+
+        <div class="about-content" id="about-content">Loading…</div>
+
+        <footer class="footer">
+            <a href="/about.html"><img src="/pics/footer.png" alt="" class="footer__img"></a>
         </footer>
 
     </div>
 
     <script>
-        // Simple markdown to HTML (handles #, ##, ###, **, -, blank lines)
         function renderMarkdown(md) {
             var lines = md.split('\n');
             var html = '';
@@ -36,8 +47,6 @@
 
             for (var i = 0; i < lines.length; i++) {
                 var line = lines[i];
-
-                // Skip the first H1 (we already have the page title)
                 if (line.match(/^# /) && i < 3) continue;
 
                 if (line.match(/^### /)) {
@@ -62,46 +71,50 @@
             return html;
         }
 
-        document.addEventListener('DOMContentLoaded', async function() {
-            var navLinks = document.getElementById('nav-links');
+        function buildNav(signedIn) {
+            var navItems = document.getElementById('nav-items');
+            var navUser = document.getElementById('nav-user');
 
-            // Setup nav
+            if (signedIn) {
+                navItems.innerHTML =
+                    '<a href="/app.html" class="nav__item"><span class="nav__num">01</span>Punch Clock</a>' +
+                    '<a href="/leaderboard.html" class="nav__item"><span class="nav__num">02</span>Factory Floor</a>' +
+                    '<a href="/profile.html" class="nav__item"><span class="nav__num">03</span>Set Up</a>' +
+                    '<a href="/about.html" class="nav__item is-active"><span class="nav__num">04</span>About</a>';
+                navUser.innerHTML = '<button id="logout-btn" type="button">Sign Out</button>';
+
+                document.getElementById('logout-btn').addEventListener('click', async function() {
+                    try {
+                        var statusRes = await fetch('/api/time/status');
+                        var statusData = await statusRes.json();
+                        if (statusData.is_working) {
+                            if (!confirm('Signing out will clock you out. Continue?')) return;
+                        }
+                        await fetch('/api/auth/logout', { method: 'POST' });
+                    } catch (e) {}
+                    window.location.href = '/index.html';
+                });
+            } else {
+                navItems.innerHTML =
+                    '<a href="/leaderboard.html" class="nav__item"><span class="nav__num">02</span>Factory Floor</a>' +
+                    '<a href="/about.html" class="nav__item is-active"><span class="nav__num">04</span>About</a>';
+                navUser.innerHTML = '<a href="/index.html">Sign In</a>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            var today = new Date();
+            document.getElementById('masthead-date').textContent =
+                today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
             try {
                 var response = await fetch('/api/auth/me');
                 var data = await response.json();
-
-                if (data.user) {
-                    navLinks.innerHTML =
-                        '<a href="/leaderboard.html" class="nav-link">Factory Floor</a>' +
-                        '<a href="/about.html" class="nav-link">About</a>' +
-                        '<a href="/profile.html" class="nav-link">Profile</a>' +
-                        '<button id="logout-button" class="nav-link button-link">Sign Out</button>';
-
-                    document.getElementById('logout-button').addEventListener('click', async function() {
-                        try {
-                            var statusRes = await fetch('/api/time/status');
-                            var statusData = await statusRes.json();
-                            if (statusData.is_working) {
-                                if (!confirm('Signing out will clock you out. Continue?')) return;
-                            }
-                            await fetch('/api/auth/logout', { method: 'POST' });
-                        } catch (e) {}
-                        window.location.href = '/index.html';
-                    });
-                } else {
-                    navLinks.innerHTML =
-                        '<a href="/leaderboard.html" class="nav-link">Factory Floor</a>' +
-                        '<a href="/about.html" class="nav-link">About</a>' +
-                        '<a href="/index.html" class="nav-link">Sign In</a>';
-                }
+                buildNav(!!data.user);
             } catch (error) {
-                navLinks.innerHTML =
-                    '<a href="/leaderboard.html" class="nav-link">Factory Floor</a>' +
-                    '<a href="/about.html" class="nav-link">About</a>' +
-                    '<a href="/index.html" class="nav-link">Sign In</a>';
+                buildNav(false);
             }
 
-            // Load and render ABOUT.md
             try {
                 var mdResponse = await fetch('/ABOUT.md');
                 var md = await mdResponse.text();
